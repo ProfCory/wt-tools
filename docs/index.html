@@ -3,400 +3,348 @@
 
 <head>
 	<!--5ETOOLS_CMP-->
+	<!--5ETOOLS_ANALYTICS-->
+	<!--5ETOOLS_ADCODE-->
 	<meta charset="utf-8">
+	<meta name="description" content="Wanderer &amp; Torch table hub and 5e reference suite for players and Dungeon Masters.">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<meta name="description" content="A suite of tools for 5th Edition Dungeons &amp; Dragons players and Dungeon Masters.">
+	<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+	<meta name="mobile-web-app-capable" content="yes">
 
-	<title>5etools</title>
+	<title>W&amp;T Tools</title>
 
-	<link rel="stylesheet" href="css/fontawesome.css">
 	<link rel="stylesheet" href="css/bootstrap.css">
+	<link rel="stylesheet" href="css/fontawesome.css">
 	<link rel="stylesheet" href="css/main.css">
 	<link rel="stylesheet" href="css/index.css">
-<style>
-	/* ---- Wanderer & Torch facelift (home only) ---- */
-	.wt-hero { margin: 18px auto 0; }
-	.wt-hero__inner {
-		display: grid;
-		grid-template-columns: 1.6fr 1fr;
-		gap: 14px;
-		padding: 16px;
-		border-radius: 14px;
-		background: rgba(0,0,0,.18);
-		border: 1px solid rgba(255,255,255,.08);
-		backdrop-filter: blur(6px);
-	}
-	.wt-hero__kicker { opacity: .9; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
-	.wt-hero__title { margin: 6px 0 6px; font-size: 26px; }
-	.wt-hero__lead { margin: 0 0 12px; opacity: .9; max-width: 58ch; }
-	.wt-hero__cta { display: flex; flex-wrap: wrap; gap: 8px; }
-	.wt-hero__cta .ve-btn { display: inline-flex; align-items: center; gap: 8px; }
 
-	.wt-hero__panel {
-		padding: 12px;
-		border-radius: 12px;
-		background: rgba(0,0,0,.22);
-		border: 1px solid rgba(255,255,255,.08);
-	}
-	.wt-hero__panel-title { font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
-	.wt-hero__list { margin: 0; padding-left: 18px; }
-	.wt-hero__list li { margin: 6px 0; }
-	.wt-hero__note { margin-top: 10px; opacity: .85; font-size: 12px; }
-
-	.wt-resources { margin: 18px 0 12px; }
-	.wt-resources__grid {
-		display: grid;
-		grid-template-columns: repeat(4, minmax(0, 1fr));
-		gap: 12px;
-	}
-	.wt-card {
-		padding: 12px;
-		border-radius: 12px;
-		background: rgba(0,0,0,.18);
-		border: 1px solid rgba(255,255,255,.08);
-	}
-	.wt-card__title { font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
-	.wt-card__list { margin: 0; padding-left: 18px; }
-	.wt-card__list li { margin: 6px 0; }
-
-	.wt-compliance {
-		margin-top: 12px;
-		padding: 10px 12px;
-		border-radius: 10px;
-		background: rgba(0,0,0,.16);
-		border: 1px dashed rgba(255,255,255,.16);
-	}
-	.wt-compliance__title { font-weight: 700; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
-	.wt-compliance__body { opacity: .9; font-size: 12px; }
-
-	.wt-5etools-mini {
-		margin-top: 10px;
-		padding: 10px 12px;
-		border-radius: 10px;
-		background: rgba(0,0,0,.14);
-		border: 1px solid rgba(255,255,255,.08);
-		max-width: 720px;
-	}
-	.wt-5etools-mini__title { font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; opacity: .9; }
-	.wt-5etools-mini__body { margin-top: 6px; font-size: 12px; opacity: .9; }
-
-	@media (max-width: 991px) {
-		.wt-hero__inner { grid-template-columns: 1fr; }
-		.wt-resources__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-	}
-	@media (max-width: 520px) {
-		.wt-resources__grid { grid-template-columns: 1fr; }
-	}
-</style>
-
+	<!-- Favicons -->
 	<link rel="icon" type="image/svg+xml" href="favicon.svg">
 	<link rel="icon" type="image/png" sizes="256x256" href="favicon-256x256.png">
 	<link rel="icon" type="image/png" sizes="144x144" href="favicon-144x144.png">
+	<link rel="icon" type="image/png" sizes="128x128" href="favicon-128x128.png">
 	<link rel="icon" type="image/png" sizes="64x64" href="favicon-64x64.png">
+	<link rel="icon" type="image/png" sizes="48x48" href="favicon-48x48.png">
 	<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
 	<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
 
-	<script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js");</script>
+	<!-- Chrome Web App Icons -->
+	<link rel="manifest" href="manifest.webmanifest">
+	<meta name="application-name" content="5etools">
+	<meta name="theme-color" content="#006bc4">
 
-	<script>window.SW_CMP = {init: () => {}}</script>
+	<!-- Windows Start Menu tiles -->
+	<meta name="msapplication-config" content="browserconfig.xml"/>
+	<meta name="msapplication-TileColor" content="#006bc4">
+
+	<!-- Apple Touch Icons -->
+	<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon-180x180.png">
+	<link rel="apple-touch-icon" sizes="360x360" href="apple-touch-icon-360x360.png">
+	<link rel="apple-touch-icon" sizes="167x167" href="apple-touch-icon-167x167.png">
+	<link rel="apple-touch-icon" sizes="152x152" href="apple-touch-icon-152x152.png">
+	<link rel="apple-touch-icon" sizes="120x120" href="apple-touch-icon-120x120.png">
+	<meta name="apple-mobile-web-app-title" content="5etools">
+
+	<!-- macOS Safari Pinned Tab and Touch Bar -->
+	<link rel="mask-icon" href="safari-pinned-tab.svg" color="#006bc4">
+
+	<!-- OpenSearch -->
+	<link rel="search" href="open-search.xml" title="Search W&amp;T Tools" type="application/opensearchdescription+xml">
+
+	<script type="text/javascript" src="sw-injector.js"></script>
+
+	<script blocking="render" type="module" src="js/styleswitch.js"></script>
+	<script type="text/javascript" src="js/navigation.js"></script>
+	<script type="module" src="js/browsercheck.js"></script>
 </head>
 
 <body>
+
+<div class="overlay-noise no-print"></div>
+
 <header class="hidden-xs hidden-sm page__header">
-	<div class="container">
-		<h1 class="page__title">5etools</h1>
-		<p class="page__subtitle">A suite of tools for 5th Edition Dungeons &amp; Dragons players and Dungeon Masters.</p>
+	<div class="container ve-flex-v-baseline">
+		<h1 class="page__title no-wrap my-0 page__title--home" id="page__title">W&amp;T <span>Tools</span></h1>
+		<p class="page__subtitle no-wrap my-0" id="page__subtitle">Wanderer &amp; Torch table hub + 5e reference suite for players and DMs.</p>
 	</div>
 </header>
 
 <nav class="container page__nav" id="navigation">
 	<ul class="nav nav-pills page__nav-inner" id="navbar"></ul>
 </nav>
-<section class="container wt-hero no-print" id="wt-hero">
-	<div class="wt-hero__inner">
-		<div class="wt-hero__brand">
-			<div class="wt-hero__kicker">Nevos • Wanderer &amp; Torch</div>
-			<h2 class="wt-hero__title">Your table’s home base</h2>
-			<p class="wt-hero__lead">
-				Quick links for players and DMs, plus the 5etools reference suite underneath.
-			</p>
-
-			<div class="wt-hero__cta">
-				<a class="ve-btn ve-btn-default" href="DM%20Index.html">
-					<span class="fal fa-map"></span> DM Index
-				</a>
-				<a class="ve-btn ve-btn-default" href="timeline.html">
-					<span class="fal fa-hourglass"></span> Timeline
-				</a>
-				<a class="ve-btn ve-btn-default" href="zodiacal%20Regions.html">
-					<span class="fal fa-moon-stars"></span> Zodiacal Regions
-				</a>
-				<a class="ve-btn ve-btn-default" href="species.html">
-					<span class="fal fa-users"></span> Species Hub
-				</a>
-			</div>
-		</div>
-
-		<div class="wt-hero__panel">
-			<div class="wt-hero__panel-title"><span class="fal fa-moon"></span> Session Quick Start</div>
-			<ul class="wt-hero__list">
-				<li><a href="calendar.html">Calendar / Schedule</a></li>
-				<li><a href="house%20rules.html">House Rules</a></li>
-				<li><a href="player%20handouts.html">Player Handouts</a></li>
-				<li><a href="discord.html">Discord</a></li>
-			</ul>
-			<div class="wt-hero__note">
-				Keep it simple: links you actually click mid-session.
-			</div>
-		</div>
-	</div>
-</section>
 
 <div class="container">
 	<!--GITHUB_DISCLAIMER-->
-	<div id="div-github"></div>
-	<script>
-		(() => {
-			function addDisclaimer () {
-				const ele = document.getElementById("div-github");
-				ele.innerHTML = `<hr class="hr-4"><div class="alert alert-danger"><p>This is a fork of the 5etools suite, which is <b>not</b> maintained by the 5etools team.</p><p>For an up-to-date version, please visit <a href="https://5etools-mirror-3.github.io/index.html">5etools-mirror-3.github.io</a>.</p></div>`;
-			}
+	<!--	<div class="alert alert-warning">-->
+	<!--		<p><strong>Discord update:</strong> A recent bot-hijack resulted in many accounts being banned from our Discord server, along with a general server reset. Besides bans, no user accounts were affected, and the server has largely been restored to its former state. <a class="alert-link" href="https://discord.gg/5etools" target="_blank" rel="noopener noreferrer">You can rejoin here.</a></p>-->
+	<!--	</div>-->
+</div>
 
-			// local testing, e.g. file://
-			if (window.location.hostname === "") return addDisclaimer();
+<div class="cancer__wrp-sidebar cancer__wrp-sidebar-lhs cancer__wrp-sidebar-lhs--scrolling-page cancer__anchor"><div class="cancer__disp-cancer"></div><div class="cancer__sidebar-inner cancer__sidebar-inner--top cancer__wrp-interactive"><!--5ETOOLS_AD_LEFT_1--></div><div class="cancer__sidebar-inner cancer__sidebar-inner--bottom cancer__wrp-interactive"><!--5ETOOLS_AD_LEFT_2--></div></div>
+<div class="cancer__wrp-sidebar cancer__wrp-sidebar-rhs cancer__wrp-sidebar-rhs--scrolling-page cancer__anchor"><div class="cancer__disp-cancer"></div><div class="cancer__sidebar-inner cancer__sidebar-inner--top cancer__wrp-interactive"><!--5ETOOLS_AD_RIGHT_1--></div><div class="cancer__sidebar-inner cancer__sidebar-inner--bottom cancer__wrp-interactive"><!--5ETOOLS_AD_RIGHT_2--></div></div>
 
-			fetch(`https://api.github.com/repos/5etools-mirror-3/5etools-src`)
-				.then(resp => resp.json())
-				.then(json => {
-					if (json.message != null && json.message.toLowerCase().includes("api rate limit exceeded")) return addDisclaimer();
+<div class="home__stripe">
+	<div class="home__split relative">
+		<div class="home__stripe-header ve-text-right home__h-player"><div class="w-100 ve-text-left mobile-sm__text-center">Players</div></div>
+		<div class="ve-flex ve-flex-wrap relative home__split-spaced home__split-spaced--gutter home__split-spaced--no-header home__wrp-buttons">
+			<a class="home__btn-page ve-btn ve-btn-default mr-3 home__btn-player" href="races.html">
+				<div class="fal fa-users home__icn-page"></div>
+				<h4 class="ve-text-center home__lbl-page">Species</h4>
+			</a>
+			<a class="home__btn-page ve-btn ve-btn-default mr-3 home__btn-player" href="classes.html" title="Quickly browse the official classes, and their associated subclasses.
+Unearthed Arcana content can be accessed by cycling the &quot;All Sources&quot; button.">
+				<div class="fal fa-hat-wizard home__icn-page"></div>
+				<h4 class="ve-text-center home__lbl-page">Classes</h4>
+			</a>
+			<a class="home__btn-page ve-btn ve-btn-default mr-3 home__btn-player" href="feats.html">
+				<div class="fal fa-award home__icn-page"></div>
+				<h4 class="ve-text-center home__lbl-page">Feats</h4>
+			</a>
+			<a class="home__btn-page ve-btn ve-btn-default home__btn-player" href="optionalfeatures.html" title="A searchable, filterable list of feature choices, including Eldritch Invocations for the Warlock Class, and Maneuvers for the Fighter's Battle Master subclass.">
+				<div class="fal fa-drafting-compass home__icn-page"></div>
+				<h4 class="ve-text-center home__lbl-page">Options<br>&amp; Features</h4>
+			</a>
 
-					const owner = json.owner?.login;
-					const repo = json.name;
+			<!-- mobile only -->
+			<a class="home__btn-page ve-btn ve-btn-default home__narrow-visible home__btn-player" href="backgrounds.html">
+				<div class="fal fa-portrait home__icn-page"></div>
+				<h4 class="ve-text-center home__lbl-page">Backgrounds</h4>
+			</a>
+			<a class="home__btn-page ve-btn ve-btn-default home__narrow-visible home__btn-player" href="items.html">
+				<div class="fal fa-helmet-battle home__icn-page"></div>
+				<h4 class="ve-text-center home__lbl-page">Items</h4>
+			</a>
+			<a class="home__btn-page ve-btn ve-btn-default home__narrow-visible home__btn-player" href="spells.html">
+				<div class="fal fa-book-spells home__icn-page"></div>
+				<h4 class="ve-text-center home__lbl-page">Spells</h4>
+			</a>
+			<a class="home__btn-page ve-btn ve-btn-default home__narrow-visible home__btn-player" href="statgen.html">
+				<div class="fal fa-tally home__icn-page"></div>
+				<h4 class="ve-text-center home__lbl-page">Stat<br>Generator</h4>
+			</a>
+		</div>
 
-					if (!owner || !repo) return addDisclaimer();
-					if (`${owner}/${repo}` !== `5etools-mirror-3/5etools-src`) return addDisclaimer();
-				});
-		})();
-	</script>
+		<div class="ve-flex ve-flex-wrap home__wrp-buttons home__narrow-hidden">
+			<a class="home__btn-page ve-btn ve-btn-default mr-3 home__btn-player" href="backgrounds.html">
+				<div class="fal fa-portrait home__icn-page"></div>
+				<h4 class="ve-text-center home__lbl-page">Backgrounds</h4>
+			</a>
+			<a class="home__btn-page ve-btn ve-btn-default mr-3 home__btn-player" href="items.html">
+				<div class="fal fa-helmet-battle home__icn-page"></div>
+				<h4 class="ve-text-center home__lbl-page">Items</h4>
+			</a>
+			<a class="home__btn-page ve-btn ve-btn-default mr-3 home__btn-player" href="spells.html">
+				<div class="fal fa-book-spells home__icn-page"></div>
+				<h4 class="ve-text-center home__lbl-page">Spells</h4>
+			</a>
+			<a class="home__btn-page ve-btn ve-btn-default home__btn-player" href="statgen.html">
+				<div class="fal fa-tally home__icn-page"></div>
+				<h4 class="ve-text-center home__lbl-page">Stat<br>Generator</h4>
+			</a>
+		</div>
+	</div>
+
+	<div class="my-4 home__mobile-hidden home__narrow-hidden"></div>
+	<div class="my-4 home__mobile-hidden home__narrow-visible"></div>
+	<div class="my-4 home__mobile-hidden"></div>
+
+	<div class="home__split">
+		<div class="ve-flex ve-flex-wrap relative home__split-spaced home__split-spaced--gutter home__wrp-buttons">
+			<div class="home__stripe-header home__h-rule"><div class="w-100 ve-text-left mobile-sm__text-center">Rules</div></div>
+			<a class="home__btn-page ve-btn ve-btn-default mr-3 home__btn-rule" href="adventures.html" title="All the official adventures published by Wizards of the Coast.">
+				<div class="fal fa-dungeon home__icn-page"></div>
+				<h4 class="ve-text-center home__lbl-page">Adventures</h4>
+			</a>
+			<a class="home__btn-page ve-btn ve-btn-default mr-3 home__btn-rule" href="books.html" title="All the official sources published by Wizards of the Coast.">
+				<div class="fal fa-books home__icn-page"></div>
+				<h4 class="ve-text-center home__lbl-page">Books</h4>
+			</a>
+			<a class="home__btn-page ve-btn ve-btn-default mr-3 home__btn-rule" href="variantrules.html" title="A searchable selection of commonly used rules and tables.">
+				<div class="fal fa-info-square home__icn-page"></div>
+				<h4 class="ve-text-center home__lbl-page">Rules<br>Glossary</h4>
+			</a>
+			<a class="home__btn-page ve-btn ve-btn-default home__btn-rule" href="conditionsdiseases.html" title="A searchable, filterable list of the conditions found in the Player's Handbook, and various diseases found in the Dungeon Master's Guide and beyond.">
+				<div class="fal fa-skull-crossbones home__icn-page"></div>
+				<h4 class="ve-text-center home__lbl-page">Conditions</h4>
+			</a>
+		</div>
+
+		<div class="my-4 home__mobile-visible"></div>
+
+		<div class="ve-flex ve-flex-wrap relative home__wrp-buttons">
+			<div class="home__stripe-header home__h-dm"><div class="w-100 ve-text-left mobile-sm__text-center">Dungeon Masters</div></div>
+			<a class="home__btn-page ve-btn ve-btn-default mr-3 home__btn-dm" href="bestiary.html" title="A searchable, filterable list of the more than 1,000 stat blocks in D&amp;D 5e. An encounter builder is included, and creature Challenge Rating can be scaled according to the &quot;Creating Quick Monster Stats&quot; table in the Dungeon Master's Guide.">
+				<div class="fal fa-dragon home__icn-page"></div>
+				<h4 class="ve-text-center home__lbl-page">Bestiary</h4>
+			</a>
+			<a class="home__btn-page ve-btn ve-btn-default mr-3 home__btn-dm" href="dmscreen.html" title="A fully-customizable Dungeon Master's screen, featuring an initiative tracker; a unit converter, embedded images, videos, and sites; and the majority of 5etools' content.">
+				<div class="fal fa-map home__icn-page"></div>
+				<h4 class="ve-text-center home__lbl-page">DM Screen</h4>
+			</a>
+			<a class="home__btn-page ve-btn ve-btn-default mr-3 home__btn-dm" href="lootgen.html" title="A random loot generator for both individual and hoards of treasure.">
+				<div class="fal fa-treasure-chest home__icn-page"></div>
+				<h4 class="ve-text-center home__lbl-page">Loot<br>Generator</h4>
+			</a>
+			<a class="home__btn-page ve-btn ve-btn-default home__btn-dm" href="crcalculator.html" title="A verbose, in-depth Challenge Rating calculator, for determining the CR of homebrew creatures.">
+				<div class="fal fa-abacus home__icn-page"></div>
+				<h4 class="ve-text-center home__lbl-page">CR<br>Calculator</h4>
+			</a>
+		</div>
+	</div>
+
+	<div class="my-4"></div>
+
+	<hr class="no-shrink w-100 my-0">
 </div>
 
 <main class="container">
-
-	<!--GIT_AD-->
-	<div class="container">
-		<div class="alert alert-info" id="top-animated">
-			<div class="media">
-				<div class="media-left">
-					<img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub Logo" class="media-object" style="width:48px">
-				</div>
-				<div class="media-body">
-					<p><b>You are viewing an offline/local copy of 5etools.</b></p>
-					<p>If you downloaded this as a zip, the site may not behave correctly due to browser security restrictions. Please instead use a local server. See the <a href="https://wiki.tercept.net/en/5eTools/InstallGuide" target="_blank" rel="noopener noreferrer">tercept install guide</a>.</p>
-				</div>
-			</div>
-		</div>
-	</div>
-
-	<div class="home__btn-page-group">
-		<div class="ve-btn-group ve-flex-col home__btn-page-group-col">
-			<div class="ve-btn-group ve-flex-col home__btn-page-group-col">
-				<a class="ve-btn ve-btn-default" href="books.html"><span class="glyphicon glyphicon-book"></span> Books</a>
-				<a class="ve-btn ve-btn-default" href="quickreference.html"><span class="glyphicon glyphicon-fast-forward"></span> Quick Reference</a>
-				<a class="ve-btn ve-btn-default" href="adventure.html"><span class="glyphicon glyphicon-book"></span> Adventures</a>
-				<a class="ve-btn ve-btn-default" href="dmscreen.html"><span class="glyphicon glyphicon-blackboard"></span> DM Screen</a>
-				<a class="ve-btn ve-btn-default" href="initiativetracker.html"><span class="glyphicon glyphicon-time"></span> Initiative Tracker</a>
-			</div>
-			<div class="ve-btn-group ve-flex-col home__btn-page-group-col">
-				<a class="ve-btn ve-btn-default" href="backgrounds.html"><span class="glyphicon glyphicon-user"></span> Backgrounds</a>
-				<a class="ve-btn ve-btn-default" href="items.html"><span class="glyphicon glyphicon-glass"></span> Items</a>
-				<a class="ve-btn ve-btn-default" href="spells.html"><span class="glyphicon glyphicon-certificate"></span> Spells</a>
-				<a class="ve-btn ve-btn-default" href="classes.html"><span class="glyphicon glyphicon-hdd"></span> Classes</a>
-				<a class="ve-btn ve-btn-default" href="bestiary.html"><span class="glyphicon glyphicon-knight"></span> Bestiary</a>
-			</div>
-			<div class="ve-btn-group ve-flex-col home__btn-page-group-col">
-				<a class="ve-btn ve-btn-default" href="feats.html"><span class="glyphicon glyphicon-screenshot"></span> Feats</a>
-				<a class="ve-btn ve-btn-default" href="races.html"><span class="glyphicon glyphicon-equalizer"></span> Races</a>
-				<a class="ve-btn ve-btn-default" href="optionalfeatures.html"><span class="glyphicon glyphicon-th-list"></span> Optional Features</a>
-				<a class="ve-btn ve-btn-default" href="rewards.html"><span class="glyphicon glyphicon-star"></span> Rewards</a>
-				<a class="ve-btn ve-btn-default" href="psionics.html"><span class="glyphicon glyphicon-headphones"></span> Psionics</a>
-			</div>
-			<div class="ve-btn-group ve-flex-col home__btn-page-group-col">
-				<a class="ve-btn ve-btn-default" href="decks.html"><span class="glyphicon glyphicon-list-alt"></span> Decks</a>
-				<a class="ve-btn ve-btn-default" href="names.html"><span class="glyphicon glyphicon-font"></span> Names</a>
-				<a class="ve-btn ve-btn-default" href="conditionsdiseases.html"><span class="glyphicon glyphicon-eye-open"></span> Conditions &amp; Diseases</a>
-				<a class="ve-btn ve-btn-default" href="variantrules.html"><span class="glyphicon glyphicon-align-left"></span> Variant Rules</a>
-				<a class="ve-btn ve-btn-default" href="tables.html"><span class="glyphicon glyphicon-th"></span> Tables</a>
-			</div>
-			<div class="ve-btn-group ve-flex-col home__btn-page-group-col">
-				<a class="ve-btn ve-btn-default" href="encountergen.html"><span class="glyphicon glyphicon-fire"></span> Encounter Generator</a>
-				<a class="ve-btn ve-btn-default" href="lootgen.html"><span class="glyphicon glyphicon-gift"></span> Loot Generator</a>
-				<a class="ve-btn ve-btn-default" href="crcalculator.html"><span class="glyphicon glyphicon-ok"></span> CR Calculator</a>
-				<a class="ve-btn ve-btn-default" href="statgen.html"><span class="glyphicon glyphicon-cog"></span> Stat Generator</a>
-				<a class="ve-btn ve-btn-default" href="converter.html"><span class="glyphicon glyphicon-transfer"></span> Converter</a>
-			</div>
-		</div>
-
-		<div class="home__btn-page-group">
-			<div class="ve-btn-group ve-flex-col home__btn-page-group-col">
-				<a class="ve-btn ve-btn-default" href="makebrew.html"><span class="glyphicon glyphicon-plus"></span> Homebrew Builder</a>
-				<a class="ve-btn ve-btn-default" href="managebrew.html"><span class="glyphicon glyphicon-pencil"></span> Homebrew Manager</a>
-				<a class="ve-btn ve-btn-default" href="makecards.html"><span class="glyphicon glyphicon-credit-card"></span> Card Creator</a>
-				<a class="ve-btn ve-btn-default" href="plutonium.html"><span class="glyphicon glyphicon-random"></span> Plutonium (Foundry)</a>
-				<a class="ve-btn ve-btn-default" href="blacklist.html"><span class="glyphicon glyphicon-ban-circle"></span> Blacklist</a>
-			</div>
-
-			<div class="ve-btn-group ve-flex-col home__btn-page-group-col">
-				<a class="ve-btn ve-btn-default" href="renders.html"><span class="glyphicon glyphicon-picture"></span> Renders</a>
-				<a class="ve-btn ve-btn-default" href="homebrew.html"><span class="glyphicon glyphicon-wrench"></span> Homebrew</a>
-				<a class="ve-btn ve-btn-default" href="search.html"><span class="glyphicon glyphicon-search"></span> Search</a>
-				<a class="ve-btn ve-btn-default" href="inittrackerplayerview.html"><span class="glyphicon glyphicon-user"></span> Initiative Tracker Player View</a>
-			</div>
-
-			<div class="ve-btn-group ve-flex-col home__btn-page-group-col">
-				<a class="ve-btn ve-btn-default" href="changelog.html"><span class="glyphicon glyphicon-inbox"></span> Changelog</a>
-				<a class="ve-btn ve-btn-default" href="privacy-policy.html"><span class="glyphicon glyphicon-lock"></span> Privacy Policy</a>
-				<a class="ve-btn ve-btn-default" href="styles.html"><span class="glyphicon glyphicon-tint"></span> Styles</a>
-				<a class="ve-btn ve-btn-default" href="traits.html"><span class="glyphicon glyphicon-tags"></span> Traits</a>
-			</div>
-
-			<div class="ve-btn-group ve-flex-col home__btn-page-group-col">
-				<a class="ve-btn ve-btn-default" href="recorder.html"><span class="glyphicon glyphicon-record"></span> Recorder</a>
-				<a class="ve-btn ve-btn-default" href="vehicles.html"><span class="glyphicon glyphicon-road"></span> Vehicles</a>
-				<a class="ve-btn ve-btn-default" href="charbuilder.html"><span class="glyphicon glyphicon-user"></span> Character Builder</a>
-				<a class="ve-btn ve-btn-default" href="languages.html"><span class="glyphicon glyphicon-globe"></span> Languages</a>
-			</div>
-
-			<div class="ve-btn-group ve-flex-col home__btn-page-group-col">
-				<a class="ve-btn ve-btn-default" href="dnd-statblock.html"><span class="glyphicon glyphicon-file"></span> Statblock Renderer</a>
-				<a class="ve-btn ve-btn-default" href="dnd-spellblock.html"><span class="glyphicon glyphicon-file"></span> Spellblock Renderer</a>
-				<a class="ve-btn ve-btn-default" href="dnd-roll.html"><span class="glyphicon glyphicon-file"></span> Rollbox Renderer</a>
-				<a class="ve-btn ve-btn-default" href="dnd-story.html"><span class="glyphicon glyphicon-file"></span> Homebrew Renderer</a>
-			</div>
-		</div>
-	</div>
-
-	<hr class="hr-4">
-
-	<div class="home__row-wrp">
-		<div class="home__split">
-			<div class="home__split-spaced">
-				<div class="bold">Current Data Version:</div>
-				<div id="current-data__ver" class="home__current-data__ver">Loading...</div>
-			</div>
-
-			<div class="home__split-spaced">
-				<div class="bold">Next Data Version:</div>
-				<div id="next-data__ver" class="home__next-data__ver">Loading...</div>
-			</div>
-		</div>
-
-		<div class="home__split home__split--border">
-			<div class="home__split-spaced home__split-spaced--pr-4">
-				<div class="bold">Number of Files:</div>
-				<div id="current-data__count" class="home__current-data__count">Loading...</div>
-			</div>
-
-			<div class="home__split-spaced home__split-spaced--pl-4">
-				<div class="bold">Total Size:</div>
-				<div id="current-data__size" class="home__current-data__size">Loading...</div>
-			</div>
-		</div>
-	</div>
-
-	<hr class="hr-4">
+	<div class="cancer__wrp-leaderboard cancer__anchor"><div class="cancer__disp-cancer"></div><div class="cancer__wrp-leaderboard-inner cancer__wrp-interactive"><!--5ETOOLS_AD_LEADERBOARD--></div></div>
 
 	<div class="w-100">
 		<div class="mb-2" id="wrp-patreon"></div>
-		<section class="wt-resources" id="wt-resources">
-			<div class="wt-resources__grid">
-				<div class="wt-card">
-					<div class="wt-card__title"><span class="fal fa-dice-d20"></span> Campaign</div>
-					<ul class="wt-card__list">
-						<li><a href="campaigns.html">Campaigns Hub</a></li>
-						<li><a href="session%20recaps.html">Session Recaps</a></li>
-						<li><a href="safety.html">Safety / Table Tools</a></li>
-						<li><a href="character%20creation.html">Character Creation</a></li>
-					</ul>
-				</div>
 
-				<div class="wt-card">
-					<div class="wt-card__title"><span class="fal fa-compass"></span> Lore</div>
-					<ul class="wt-card__list">
-						<li><a href="cosmology.html">Cosmology</a></li>
-						<li><a href="pantheon.html">Pantheon</a></li>
-						<li><a href="regions.html">Regions</a></li>
-						<li><a href="factions.html">Factions</a></li>
-					</ul>
-				</div>
+		<hr class="hr-4">
 
-				<div class="wt-card">
-					<div class="wt-card__title"><span class="fal fa-scroll"></span> Handouts</div>
-					<ul class="wt-card__list">
-						<li><a href="maps.html">Maps</a></li>
-						<li><a href="items%20nevos.html">Nevos Items</a></li>
-						<li><a href="downtime.html">Downtime</a></li>
-						<li><a href="index%20of%20names.html">NPC/Name Index</a></li>
-					</ul>
-				</div>
+		<h3>Wanderer &amp; Torch Links</h3>
+		<p>Quick launch points for Nevos campaign play, lore, and DM utilities.</p>
 
-				<div class="wt-card">
-					<div class="wt-card__title"><span class="fal fa-tools"></span> DM Toolkit</div>
-					<ul class="wt-card__list">
-						<li><a href="DM%20Screen%20Monday%20Torchbearers.html">DM Screen (Monday)</a></li>
-						<li><a href="DM%20Screen%20Friday%20Reclaiming%20the%20Scarred%20Stand.html">DM Screen (Friday)</a></li>
-						<li><a href="encounters.html">Encounters</a></li>
-						<li><a href="generators.html">Generators</a></li>
-					</ul>
+		<div class="row">
+			<div class="col-sm-6 col-md-3">
+				<div class="panel panel-default">
+					<div class="panel-heading"><span class="glyphicon glyphicon-user"></span> Players</div>
+					<div class="panel-body">
+						<ul class="list-unstyled mb-0">
+							<li><a href="campaigns.html">Campaigns Hub</a></li>
+							<li><a href="calendar.html">Calendar / Schedule</a></li>
+							<li><a href="player%20handouts.html">Player Handouts</a></li>
+							<li><a href="house%20rules.html">House Rules</a></li>
+						</ul>
+					</div>
 				</div>
 			</div>
 
-			<div class="wt-compliance" id="wt-compliance">
-				<div class="wt-compliance__title"><span class="fal fa-badge-check"></span> Compliance / Use Notes</div>
-				<div class="wt-compliance__body">
-					This site is a table utility and reference for material you already own or are licensed to use.
-					Keep your use aligned with your local laws and your group’s agreements.
+			<div class="col-sm-6 col-md-3">
+				<div class="panel panel-default">
+					<div class="panel-heading"><span class="glyphicon glyphicon-book"></span> Lore</div>
+					<div class="panel-body">
+						<ul class="list-unstyled mb-0">
+							<li><a href="timeline.html">Timeline</a></li>
+							<li><a href="cosmology.html">Cosmology</a></li>
+							<li><a href="pantheon.html">Pantheon</a></li>
+							<li><a href="zodiacal%20Regions.html">Zodiacal Regions</a></li>
+						</ul>
+					</div>
 				</div>
 			</div>
-		</section>
 
-		<h3>Use Discord?</h3>
-		<p>Join our Discord server <a href="https://discord.gg/5etools" target="_blank" rel="noopener noreferrer">here</a>.</p>
-
-		<h3>Use Foundry?</h3>
-		<p>Check out the Foundry module <a href="https://foundryvtt.com/packages/plutonium" target="_blank" rel="noopener noreferrer">here</a>.</p>
-
-		<h3>Use Roll20?</h3>
-		<p>Use the <a href="https://chrome.google.com/webstore/detail/beyond20/ahmncglnceoealhgoplnibomfnhmppfn" target="_blank" rel="noopener noreferrer">Beyond20 extension</a> to link D&amp;D Beyond and Roll20 together.</p>
-
-		<h3>Frequently Asked Questions</h3>
-		<p>Check out our FAQ <a href="https://wiki.tercept.net/en/5eTools/FAQ" target="_blank" rel="noopener noreferrer">here</a>.</p>
-
-		<h3>Want to contribute?</h3>
-		<p>See the <a href="https://wiki.tercept.net/en/5eTools/Contributing" target="_blank" rel="noopener noreferrer">contributing guide</a>.</p>
-
-		<h3>Need help?</h3>
-		<p>See the <a href="https://wiki.tercept.net/en/5eTools/InstallGuide" target="_blank" rel="noopener noreferrer">installation guide</a>.</p>
-
-		<div class="wt-5etools-mini">
-			<div class="wt-5etools-mini__title">5etools disclaimer</div>
-			<div class="wt-5etools-mini__body">
-				5etools is intended as an easily-accessible digital reference for products you already own.
-				Please ensure you only access content in accordance with your local laws.
+			<div class="col-sm-6 col-md-3">
+				<div class="panel panel-default">
+					<div class="panel-heading"><span class="glyphicon glyphicon-blackboard"></span> DM</div>
+					<div class="panel-body">
+						<ul class="list-unstyled mb-0">
+							<li><a href="DM%20Index.html">DM Index</a></li>
+							<li><a href="DM%20Screen%20Monday%20Torchbearers.html">DM Screen (Monday)</a></li>
+							<li><a href="DM%20Screen%20Friday%20Reclaiming%20the%20Scarred%20Stand.html">DM Screen (Friday)</a></li>
+							<li><a href="generators.html">Generators</a></li>
+						</ul>
+					</div>
+				</div>
 			</div>
+
+			<div class="col-sm-6 col-md-3">
+				<div class="panel panel-default">
+					<div class="panel-heading"><span class="glyphicon glyphicon-link"></span> Community</div>
+					<div class="panel-body">
+						<ul class="list-unstyled mb-0">
+							<li><a href="discord.html">Discord</a></li>
+							<li><a href="startplaying.html">StartPlaying</a></li>
+							<li><a href="resources.html">Resources</a></li>
+							<li><a href="contact.html">Contact</a></li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="alert alert-warning small" role="alert">
+			<strong>Compliance / Use Notes:</strong>
+			This site is a table utility and reference for material you already own or are licensed to use.
+			Please ensure you access content in accordance with your local laws.
 		</div>
 
 		<hr class="hr-4">
 
-		<p class="small">Icons made by <a href="https://www.flaticon.com/authors/freepik" title="Freepik" target="_blank" rel="noopener noreferrer">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon" target="_blank" rel="noopener noreferrer">www.flaticon.com</a>.</p>
+
+		<h3>Use Discord?</h3>
+		<p>Join the <a href="https://discord.gg/5etools" target="_blank" rel="noopener noreferrer">fan server</a> for announcements, updates, and feature voting.</p>
+
+		<h3>Use <a href="https://foundryvtt.com/" rel="noopener">Foundry</a>?</h3>
+		<p>No? <span class="help" title="Please note that Foundry Gaming, LLC. and The Norr Group Ltd. are in no way affiliated, and that Foundry Gaming, LLC. does not condone the use of their software in violation of your local laws.">Well, you should!</span> Foundry is a modernized, better-than replacement for Roll20, which prioritizes modding support. It is the 5etools platform of choice for VTT integrations.</p>
+		<p>To install the <a href="plutonium.html">Plutonium</a> module, and start using all of 5etools' content in your game, paste the manifest URL<sup class="ve-small">[<a title="Plutonium manifest URL for most recent supported Foundry version" href="https://raw.githubusercontent.com/TheGiddyLimit/plutonium-next/master/module.json" target="_blank" rel="noopener noreferrer">current</a>/<a title="Plutonium manifest URL for Foundry v13" href="https://raw.githubusercontent.com/TheGiddyLimit/plutonium-next/master/module-foundry13.json" target="_blank" rel="noopener noreferrer">v13</a>/<a title="Plutonium manifest URL for Foundry v12" href="https://raw.githubusercontent.com/TheGiddyLimit/plutonium-next/master/module-foundry12.json" target="_blank" rel="noopener noreferrer">v12</a>]</sup> into your Foundry server's module installer. See the <a href="plutonium.html">Plutonium Features</a> page for an overview of the functionality the module provides.</p>
+		<p>You can also install the <a href="plutonium.html#rivet-browser-extension">Rivet</a> browser extension (<a rel="noopener noreferrer" href="https://chrome.google.com/webstore/detail/rivet/igmilfmbmkmpkjjgoabaagaoohhhbjde">Chrome</a>/<a rel="noopener noreferrer" href="https://addons.mozilla.org/en-GB/firefox/addon/rivet/">Firefox</a>) to import content from the site with a single click.</p>
+
+		<h3>Use Roll20?</h3>
+		<p>Install Tampermonkey (<a
+			href="https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo" rel="noopener noreferrer">Chrome</a>/<a
+			href="https://addons.mozilla.org/firefox/addon/tampermonkey/" rel="noopener noreferrer">Firefox</a>), and the betteR20 script<sup class="ve-small">[<a data-link-type="better20" rel="noopener noreferrer" href="https://raw.githubusercontent.com/DeathStalker471/betterR20/refs/heads/dev-beta-death/dist/betteR20-5et2014.user.js">2014</a>/<a data-link-type="better20" rel="noopener noreferrer" href="https://raw.githubusercontent.com/DeathStalker471/betterR20/refs/heads/dev-beta-death/dist/betteR20-5etools.user.js">2024</a>/<a data-link-type="better20" rel="noopener noreferrer" href="https://github.com/DeathStalker471/betterR20/raw/refs/heads/Jumpgate-Importer/dist/betteR20-5et2014.user.js">Jumpgate 2014</a> (experimental)/<a data-link-type="better20" rel="noopener noreferrer" href="https://github.com/DeathStalker471/betterR20/raw/refs/heads/Jumpgate-Importer/dist/betteR20-5etools.user.js">Jumpgate 2024</a> (experimental)]</sup>, all of which require the <a rel="noopener noreferrer" href="https://wiki.roll20.net/images/f/f0/5E_OGL_Sheet_Core_v2.6.png">D&D 5E by Roll20</a> sheet. Only one script should be active at a time.</p>
+		<p>Check the <a href="https://wiki.tercept.net/en/betteR20" rel="noopener noreferrer">wiki</a> for an installation guide, and for information on how to use the script.</p>
+
+		<h3>FAQ</h3>
+		<p><b>Is there a wiki?</b> <a href="https://wiki.tercept.net/" rel="noopener noreferrer">Here.</a> Contributions are welcome.</p>
+		<p><b>Is it free?</b> Yes! You can even <a href="https://github.com/5etools-mirror-3/5etools-src/releases/latest" rel="noopener noreferrer">download the source code</a><sup class="ve-small">[<a href="https://github.com/5etools-mirror-3/5etools-src/releases/latest" rel="noopener noreferrer">current</a>/<a href="https://github.com/5etools-mirror-3/5etools-2014-src/releases/latest" rel="noopener noreferrer">2014</a>]</sup>. See the <code>README</code> or the <a href="https://wiki.tercept.net/en/5eTools/InstallGuide" rel="noopener noreferrer">wiki</a> for help.</p>
+		<p><b>Can I contribute?</b> The source is available on <a href="https://github.com/5etools-mirror-3/5etools-src/" rel="noopener noreferrer">GitHub</a><sup class="ve-small">[<a href="https://github.com/5etools-mirror-3/5etools-src/" rel="noopener noreferrer">current</a>/<a href="https://github.com/5etools-mirror-3/5etools-2014-src/" rel="noopener noreferrer">2014</a>]</sup>. See the <a href="https://github.com/5etools-mirror-3/5etools-src/blob/main/CONTRIBUTING.md" rel="noopener noreferrer">Contributing</a> guidance.</p>
+		<p><b>Browser and device support?</b> The latest desktop versions of Chrome and Firefox.</p>
+		<p><b>Where's my stuff?</b> There's no account system. Everything is stored in cookies. If you wipe those, or close your incognito window, it's gone forever. You can download your data for safekeeping via the Settings menu.</p>
+		<p><b>Other versions?</b> A <a href="https://2014.5e.tools/" rel="noopener noreferrer">&quot;2014&quot; version</a> is available, as well as an <a href="https://get.5e.tools/" rel="noopener noreferrer">archive of releases</a>.</p>
+		<p><b>Anything else I should know?</b> Hold <kbd>SHIFT</kbd> when hovering to lock a window in place. Everything has tooltips. You will forever be a DM.</p>
+
+		<h3>Self-Hosting</h3>
+		<p>You can host a copy of 5etools on anything that can run a basic webserver&mdash;examples include <a href="https://developer.mozilla.org/en-US/docs/Learn/Common_questions/set_up_a_local_testing_server" rel="noopener noreferrer">your computer</a>, <a href="https://play.google.com/store/apps/details?id=com.sylkat.apache" rel="noopener noreferrer">your phone</a>, a <a href="https://www.raspberrypi.org/products/" rel="noopener noreferrer">Raspberry Pi</a>, or a free <a href="https://aws.amazon.com/free" rel="noopener noreferrer">EC2</a>/<a href="https://cloud.google.com/free" rel="noopener noreferrer">Compute Engine</a> instance. <a href="https://github.com/5etools-mirror-3/5etools-src/releases/latest" rel="noopener noreferrer">Download the files</a> and <a href="https://github.com/5etools-mirror-3/5etools-img/releases/latest" rel="noopener noreferrer">images</a>, <a href="https://wiki.tercept.net/en/5eTools/InstallGuide" rel="noopener noreferrer">copy them into your server's root directory</a>, and enjoy!</p>
+		<div class="alert alert-info small" role="alert">
+			<strong>5etools disclaimer:</strong> 5etools is intended as an easily-accessible digital reference for products you already own. Please ensure you only access content in accordance with your local laws.
+		</div>
+
 	</div>
-
 </main>
+<footer class="container">
+	<div class="ve-text-center">
+		<div>
+			Version
+			<a id="version_number" href="#">?</a>
+			| <span style="text-decoration: red line-through">&nbsp;&copy;&nbsp;</span><span id="current_year">2025</span> 5etools
+			| <a href="privacy-policy.html">Privacy Policy</a>
+			<div id=consent-box style=display:none>| <button onclick='window.__cmp("showModal")' class="ve-btn ve-btn-default ve-btn-xs">Update Cookie Preferences</button></div><script>if (window["nitroAds"] && window["nitroAds"].loaded) { document.getElementById("consent-box").style.display = window["__tcfapi"] ? "inline-block" : "none"; } else { document.addEventListener( "nitroAds.loaded", () => (document.getElementById("consent-box").style.display = window["__tcfapi"] ? "inline-block" : "none") ); }</script>
+			<span data-ccpa-link="1"></span>
+		</div>
+		<div class="mt-2">
+			<i>5etools&reg; is a Registered Trademark of The Norr Group Ltd. All rights reserved.</i>
+		</div>
+	</div>
+</footer>
+<div class="cancer__footer-pad"></div>
 
-<script src="js/bundle.js"></script>
-<script src="js/omnidexer.js"></script>
-<script src="js/render.js"></script>
-<script src="js/index.js"></script>
+<!--5ETOOLS_SCRIPT_ANCHOR-->
+<!--5ETOOLS_AD_ADHESION-->
+
+<script type="text/javascript" defer src="lib/jquery.js"></script>
+<script type="text/javascript" defer src="js/parser.js"></script>
+<script type="text/javascript" defer src="js/utils.js"></script>
+<script type="text/javascript" defer src="js/utils-ui.js"></script>
+<script type="text/javascript" defer src="lib/localforage.js"></script>
+<script type="module" defer src="js/omnidexer.js"></script>
+<script type="module" src="js/omnisearch.js"></script>
+<script type="module" src="js/filter.js"></script>
+<script type="text/javascript" defer src="js/utils-dataloader.js"></script>
+<script type="module" src="js/utils-font.js"></script>
+<script type="module" src="js/utils-brew.js"></script>
+<script type="module" src="js/utils-config.js"></script>
+<script type="text/javascript" defer src="js/render.js"></script>
+<script type="text/javascript" defer src="js/render-dice.js"></script>
+<script type="module" src="js/shim-esmodules.js"></script>
+<script type="text/javascript" defer src="js/hist.js"></script>
+<script type="module" src="js/index.js"></script>
+<script type="text/javascript" defer src="js/list2.js"></script>
+<script type="text/javascript" defer src="lib/elasticlunr.js"></script>
+
 </body>
-
 </html>
