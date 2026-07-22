@@ -1,0 +1,21 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"https://profcory.github.io/wt-tools/data/block.schema.json",
+  "title":"WT Tools Rule Block",
+  "type":"object",
+  "required":["id","entity_type","name","source","tags","rules_text"],
+  "properties":{
+    "id":{"type":"string","minLength":3},
+    "entity_type":{"type":"string","enum":["rule","condition","spell","item","feature","feat","species","class","monster","background"]},
+    "name":{"type":"string","minLength":1},
+    "source":{"type":"object","required":["system","rules_version","content_type"],"properties":{"system":{"type":"string"},"rules_version":{"type":"string"},"content_type":{"type":"string"}},"additionalProperties":true},
+    "tags":{"type":"array","items":{"type":"string","pattern":"^[a-z0-9-]+:[a-z0-9-]+$"},"uniqueItems":true},
+    "rules_text":{"type":"string","minLength":1},
+    "relationships":{"type":"array"},
+    "requirements":{"type":"array"},
+    "grants":{"type":"array"},
+    "modifiers":{"type":"array"},
+    "effects":{"type":"array"}
+  },
+  "additionalProperties":true
+}

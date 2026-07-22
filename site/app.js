@@ -1,0 +1,36 @@
+const abilityNames=['Strength','Dexterity','Constitution','Intelligence','Wisdom','Charisma'];
+const state={role:null,slot:null,blocks:[],customBlocks:[],characters:{},dm:{initiative:'',notes:''}};
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const key='wt-tools-state-v0.1';
+function load(){const raw=localStorage.getItem(key);if(raw)Object.assign(state,JSON.parse(raw));}
+function save(){localStorage.setItem(key,JSON.stringify(state));}
+function currentId(){return state.role==='player'?`player-${state.slot}`:'dm-preview';}
+function emptyCharacter(){return{name:'',classLevel:'',ac:10,hp:10,tempHp:0,speed:30,passives:{perception:10,investigation:10,insight:10},abilities:Object.fromEntries(abilityNames.map(a=>[a,10])),notes:'',zones:{actions:[],features:[],spells:[],inventory:[],conditions:[]}};}
+function character(){const id=currentId();return state.characters[id]??=(emptyCharacter());}
+async function init(){load();state.blocks=await fetch('data/blocks.json').then(r=>r.json());renderAbilities();bind();if(state.role)enterWorkspace();renderLibrary();}
+function bind(){
+  $$('[data-role]').forEach(b=>b.onclick=()=>{state.role=b.dataset.role;state.slot=b.dataset.slot||null;save();enterWorkspace();});
+  $('#switchRole').onclick=()=>{state.role=null;state.slot=null;save();$('#workspace').hidden=true;$('#roleGate').hidden=false;$('#roleBadge').textContent='No role selected';};
+  $$('.tab[data-tab]').forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
+  ['characterName','classLevel','ac','hp','tempHp','speed','passivePerception','passiveInvestigation','passiveInsight','notes'].forEach(id=>$('#'+id).addEventListener('input',syncForm));
+  $('#initiative').addEventListener('input',()=>{state.dm.initiative=$('#initiative').value;save();});
+  $('#dmNotes').addEventListener('input',()=>{state.dm.notes=$('#dmNotes').value;save();});
+  $('#search').addEventListener('input',renderLibrary);$('#typeFilter').addEventListener('change',renderLibrary);
+  $('#newCustom').onclick=()=>$('#customDialog').showModal();
+  $('#saveCustom').onclick=e=>{e.preventDefault();const block={id:`custom:${crypto.randomUUID()}`,entity_type:$('#customType').value,name:$('#customName').value.trim(),source:{system:'dnd-5e',rules_version:'custom',content_type:'custom'},tags:$('#customTags').value.split(',').map(x=>x.trim()).filter(Boolean),rules_text:$('#customText').value.trim()};if(!block.name||!block.rules_text)return;state.customBlocks.push(block);save();$('#customForm').reset();$('#customDialog').close();renderLibrary();};
+  $$('.drop-zone').forEach(z=>{z.ondragover=e=>{e.preventDefault();z.classList.add('drag-over')};z.ondragleave=()=>z.classList.remove('drag-over');z.ondrop=e=>{e.preventDefault();z.classList.remove('drag-over');const id=e.dataTransfer.getData('text/plain'),zone=z.dataset.zone,c=character();if(!c.zones[zone].includes(id))c.zones[zone].push(id);save();renderZones();};});
+}
+function enterWorkspace(){$('#roleGate').hidden=true;$('#workspace').hidden=false;$('#roleBadge').textContent=state.role==='dm'?'DM SCREEN':`PLAYER SLOT ${state.slot}`;$$('.dm-only').forEach(x=>x.hidden=state.role!=='dm');showTab('dashboard');loadForm();renderZones();renderParty();renderRules();}
+function showTab(id){if(id==='dm'&&state.role!=='dm')return;$$('.tab-page').forEach(p=>p.classList.toggle('active',p.id===id));$$('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===id));if(id==='dm')renderParty();}
+function renderAbilities(){const root=$('#abilities');root.innerHTML='';abilityNames.forEach(a=>{const l=document.createElement('label');l.textContent=a;l.innerHTML+=`<input type="number" data-ability="${a}" value="10">`;l.querySelector('input').addEventListener('input',e=>{character().abilities[a]=Number(e.target.value);save();});root.append(l);});}
+function loadForm(){const c=character();$('#characterName').value=c.name;$('#classLevel').value=c.classLevel;$('#ac').value=c.ac;$('#hp').value=c.hp;$('#tempHp').value=c.tempHp;$('#speed').value=c.speed;$('#passivePerception').value=c.passives.perception;$('#passiveInvestigation').value=c.passives.investigation;$('#passiveInsight').value=c.passives.insight;$('#notes').value=c.notes;$$('[data-ability]').forEach(i=>i.value=c.abilities[i.dataset.ability]);$('#initiative').value=state.dm.initiative;$('#dmNotes').value=state.dm.notes;}
+function syncForm(){const c=character();c.name=$('#characterName').value;c.classLevel=$('#classLevel').value;c.ac=Number($('#ac').value);c.hp=Number($('#hp').value);c.tempHp=Number($('#tempHp').value);c.speed=Number($('#speed').value);c.passives={perception:Number($('#passivePerception').value),investigation:Number($('#passiveInvestigation').value),insight:Number($('#passiveInsight').value)};c.notes=$('#notes').value;save();}
+function allBlocks(){return[...state.blocks,...state.customBlocks];}
+function blockById(id){return allBlocks().find(b=>b.id===id);}
+function card(block,removable=false,zone=''){const d=document.createElement('article');d.className='block-card';d.draggable=!removable;d.innerHTML=`${removable?'<button class="remove" aria-label="Remove">×</button>':''}<h3>${escapeHtml(block.name)}</h3><div class="block-meta">${escapeHtml(block.entity_type)} · ${escapeHtml(block.source.content_type)}</div><p>${escapeHtml(block.rules_text)}</p><div>${block.tags.map(t=>`<span class="tag">${escapeHtml(t)}</span>`).join('')}</div>`;if(!removable)d.ondragstart=e=>e.dataTransfer.setData('text/plain',block.id);else d.querySelector('.remove').onclick=()=>{character().zones[zone]=character().zones[zone].filter(id=>id!==block.id);save();renderZones();};return d;}
+function renderLibrary(){const types=[...new Set(allBlocks().map(b=>b.entity_type))].sort(),sel=$('#typeFilter'),prior=sel.value;sel.innerHTML='<option value="">All types</option>'+types.map(t=>`<option>${t}</option>`).join('');sel.value=prior;const q=$('#search').value.toLowerCase(),type=sel.value,list=allBlocks().filter(b=>(!type||b.entity_type===type)&&(!q||[b.name,b.rules_text,...b.tags].join(' ').toLowerCase().includes(q))),root=$('#libraryList');root.innerHTML='';list.forEach(b=>root.append(card(b)));}
+function renderZones(){$$('.drop-zone').forEach(z=>{const zone=z.dataset.zone,root=z.querySelector('.zone-items');root.innerHTML='';character().zones[zone].map(blockById).filter(Boolean).forEach(b=>root.append(card(b,true,zone)));});}
+function renderParty(){const players=[1,2,3,4,5].map(i=>state.characters[`player-${i}`]??emptyCharacter());$('#partyOverview').innerHTML=`<table class="party-table"><thead><tr><th>Slot</th><th>Name</th><th>AC</th><th>HP</th><th>PP</th><th>PI</th><th>Insight</th></tr></thead><tbody>${players.map((c,i)=>`<tr><td>${i+1}</td><td>${escapeHtml(c.name||'—')}</td><td>${c.ac}</td><td>${c.hp}</td><td>${c.passives.perception}</td><td>${c.passives.investigation}</td><td>${c.passives.insight}</td></tr>`).join('')}</tbody></table>`;}
+function renderRules(){const root=$('#rulesReference');root.innerHTML='';allBlocks().filter(b=>b.entity_type==='rule'||b.entity_type==='condition').forEach(b=>root.append(card(b)));}
+function escapeHtml(s=''){return s.replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
+init();
