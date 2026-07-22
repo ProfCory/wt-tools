@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>WT Tools — D&D Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div><strong>WT Tools</strong><span class="subtitle">SRD-connected campaign dashboard</span></div>
+    <div id="roleBadge" class="role-badge">No role selected</div>
+  </header>
+  <main>
+    <section id="roleGate" class="panel gate">
+      <h1>Choose a table role</h1>
+      <p>No passwords during playtesting. Select the role you are using on this device.</p>
+      <div class="role-grid">
+        <button data-role="dm">DM Screen</button>
+        <button data-role="player" data-slot="1">Player 1</button><button data-role="player" data-slot="2">Player 2</button><button data-role="player" data-slot="3">Player 3</button><button data-role="player" data-slot="4">Player 4</button><button data-role="player" data-slot="5">Player 5</button>
+      </div>
+    </section>
+    <section id="workspace" hidden>
+      <nav class="tabs"><button class="tab active" data-tab="dashboard">Dashboard</button><button class="tab" data-tab="library">Block Library</button><button class="tab dm-only" data-tab="dm">DM Screen</button><button class="tab" id="switchRole">Switch Role</button></nav>
+      <section id="dashboard" class="tab-page active">
+        <div class="sheet-head panel"><div><label>Character name<input id="characterName" placeholder="Unnamed character"></label><label>Class / level<input id="classLevel" placeholder="Wizard 1"></label></div><div class="vitals"><label>AC<input id="ac" type="number" value="10"></label><label>HP<input id="hp" type="number" value="10"></label><label>Temp HP<input id="tempHp" type="number" value="0"></label><label>Speed<input id="speed" type="number" value="30"></label></div></div>
+        <div class="sheet-grid">
+          <section class="panel"><h2>Abilities</h2><div id="abilities" class="ability-grid"></div></section>
+          <section class="panel"><h2>Passives</h2><div class="passives"><label>Perception<input id="passivePerception" type="number" value="10"></label><label>Investigation<input id="passiveInvestigation" type="number" value="10"></label><label>Insight<input id="passiveInsight" type="number" value="10"></label></div></section>
+          <section class="panel drop-zone" data-zone="actions"><h2>Actions</h2><div class="zone-items"></div></section>
+          <section class="panel drop-zone" data-zone="features"><h2>Features & Feats</h2><div class="zone-items"></div></section>
+          <section class="panel drop-zone" data-zone="spells"><h2>Spells</h2><div class="zone-items"></div></section>
+          <section class="panel drop-zone" data-zone="inventory"><h2>Inventory</h2><div class="zone-items"></div></section>
+          <section class="panel drop-zone" data-zone="conditions"><h2>Conditions</h2><div class="zone-items"></div></section>
+          <section class="panel"><h2>Notes</h2><textarea id="notes" rows="8" placeholder="Session notes, backstory, reminders..."></textarea></section>
+        </div>
+      </section>
+      <section id="library" class="tab-page"><div class="panel library-controls"><input id="search" type="search" placeholder="Search blocks, tags, rules..."><select id="typeFilter"><option value="">All types</option></select><button id="newCustom">New custom block</button></div><div id="libraryList" class="library-list"></div></section>
+      <section id="dm" class="tab-page"><div class="dm-grid"><section class="panel"><h2>Party Overview</h2><div id="partyOverview"></div></section><section class="panel"><h2>Initiative</h2><textarea id="initiative" rows="10" placeholder="20 Goblin A\n17 Gil\n..."></textarea></section><section class="panel"><h2>DM Notes</h2><textarea id="dmNotes" rows="12" placeholder="Private session notes..."></textarea></section><section class="panel"><h2>Rules Quick Reference</h2><div id="rulesReference"></div></section></div></section>
+    </section>
+  </main>
+  <dialog id="customDialog"><form method="dialog" id="customForm"><h2>Create custom block</h2><label>Name<input id="customName" required></label><label>Type<select id="customType"><option>feature</option><option>spell</option><option>item</option><option>condition</option><option>rule</option></select></label><label>Tags<input id="customTags" placeholder="action:bonus-action, resource:charge"></label><label>Rules text<textarea id="customText" rows="8" required></textarea></label><menu><button value="cancel">Cancel</button><button value="default" id="saveCustom">Save block</button></menu></form></dialog>
+  <script src="app.js" type="module"></script>
+</body>
+</html>
