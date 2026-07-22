@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>wt-tools Dashboard</title>
+	<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+	<header class="site-header">
+		<h1>wt-tools Campaign Dashboard</h1>
+		<p class="tagline">DM/Player session dashboard — synced peer-to-peer, no account required.</p>
+	</header>
+
+	<main>
+		<section id="role-chooser">
+			<h2>Start a session</h2>
+			<p>Hosting a game? Start a session and share the link with your players.</p>
+			<button id="btn-host" type="button">Start Hosting</button>
+			<p class="hint">Players: use the link a DM shares with you to join automatically.</p>
+		</section>
+
+		<section id="dm-panel" hidden>
+			<h2>DM Session</h2>
+			<p>Share this link with your players:</p>
+			<div class="room-link-row">
+				<input id="room-link" type="text" readonly />
+				<span>Room code: <strong id="room-code">—</strong></span>
+			</div>
+
+			<h3>Players</h3>
+			<ul id="waiting-list" class="waiting-list"></ul>
+		</section>
+
+		<section id="player-panel" hidden>
+			<h2>Player Session</h2>
+			<p id="player-status">Connecting…</p>
+		</section>
+
+		<section id="test-panel">
+			<h3>Connection test</h3>
+			<div id="ping-target-wrap" hidden>
+				<label for="ping-target">Send to:</label>
+				<select id="ping-target"></select>
+			</div>
+			<button id="btn-ping" type="button" disabled>Send Ping</button>
+			<div id="event-log" class="event-log" aria-live="polite"></div>
+		</section>
+	</main>
+
+	<script src="vendor/peerjs.min.js"></script>
+	<script src="js/room.js"></script>
+	<script src="js/main.js"></script>
+</body>
+</html>
