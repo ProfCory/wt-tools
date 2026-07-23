@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>5etools Homebrew Importer & Scraper — WT Tools</title>
+<style>
+  :root{
+    --bg:#f6f4ef; --panel:#fffdf8; --ink:#241f18; --muted:#6b6256;
+    --line:#e2dbcd; --accent:#7a3b2e; --accent-soft:#f0e3dd; --chip:#efe9dd;
+    --ok:#3f7d3f; --warn:#b5751f; --err:#9d2f2f;
+    --radius:10px; --shadow:0 1px 2px rgba(0,0,0,.06),0 4px 14px rgba(0,0,0,.05);
+  }
+  @media (prefers-color-scheme:dark){
+    :root{--bg:#161310;--panel:#211d18;--ink:#efe8dc;--muted:#a99e8c;--line:#352f27;
+      --accent:#d78b6f;--accent-soft:#2c231e;--chip:#2c261f;
+      --ok:#7fbe7f;--warn:#e0a44e;--err:#e07070;
+      --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 18px rgba(0,0,0,.35);}
+  }
+  :root[data-theme="dark"]{--bg:#161310;--panel:#211d18;--ink:#efe8dc;--muted:#a99e8c;--line:#352f27;
+    --accent:#d78b6f;--accent-soft:#2c231e;--chip:#2c261f;--ok:#7fbe7f;--warn:#e0a44e;--err:#e07070;}
+  :root[data-theme="light"]{--bg:#f6f4ef;--panel:#fffdf8;--ink:#241f18;--muted:#6b6256;--line:#e2dbcd;
+    --accent:#7a3b2e;--accent-soft:#f0e3dd;--chip:#efe9dd;--ok:#3f7d3f;--warn:#b5751f;--err:#9d2f2f;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:16px/1.5 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+  header.top{display:flex;flex-wrap:wrap;gap:.5rem 1rem;align-items:baseline;justify-content:space-between;
+    padding:1.1rem clamp(1rem,4vw,2.5rem);border-bottom:1px solid var(--line);background:var(--panel)}
+  header.top h1{font-size:1.25rem;margin:0}
+  header.top .sub{color:var(--muted);font-size:.85rem}
+  header.top a.back{color:var(--accent);text-decoration:none;font-size:.85rem}
+  header.top a.back:hover{text-decoration:underline}
+  .theme-btn{background:var(--chip);border:1px solid var(--line);color:var(--ink);border-radius:999px;padding:.3rem .7rem;font-size:.8rem;cursor:pointer}
+  main{max-width:1120px;margin:0 auto;padding:clamp(1rem,4vw,2rem)}
+  .lead{color:var(--muted);max-width:70ch;margin:0 0 1.4rem}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:1.1rem 1.2rem;box-shadow:var(--shadow);margin-bottom:1.25rem}
+  .panel h2{margin:.1rem 0 .8rem;font-size:.78rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted)}
+  .drop{border:2px dashed var(--line);border-radius:var(--radius);padding:2rem 1rem;text-align:center;color:var(--muted);
+    transition:.15s;cursor:pointer;background:var(--bg)}
+  .drop.over{border-color:var(--accent);color:var(--ink);background:var(--accent-soft)}
+  .drop strong{color:var(--ink)}
+  .row{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center}
+  .btn{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:.55rem .9rem;font:inherit;font-weight:600;cursor:pointer}
+  .btn.ghost{background:var(--chip);color:var(--ink);border:1px solid var(--line)}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .btn:active{transform:translateY(1px)}
+  textarea,input[type=text]{width:100%;padding:.5rem .6rem;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
+  textarea.mono{font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  label.f{display:block;font-size:.82rem;font-weight:600;margin:0 0 .7rem}
+  label.f small{display:block;font-weight:400;color:var(--muted)}
+  .metagrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.7rem}
+  .filelist{list-style:none;margin:.8rem 0 0;padding:0;display:flex;flex-direction:column;gap:.4rem}
+  .filelist li{display:flex;gap:.6rem;align-items:center;justify-content:space-between;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:.45rem .7rem;font-size:.88rem}
+  .filelist .meta{color:var(--muted);font-size:.78rem}
+  .badge{display:inline-block;border-radius:999px;padding:.1rem .5rem;font-size:.72rem;font-weight:700}
+  .b-ok{background:color-mix(in srgb,var(--ok) 18%,transparent);color:var(--ok)}
+  .b-warn{background:color-mix(in srgb,var(--warn) 20%,transparent);color:var(--warn)}
+  .b-err{background:color-mix(in srgb,var(--err) 18%,transparent);color:var(--err)}
+  .x{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.1rem;line-height:1}
+  table{width:100%;border-collapse:collapse;font-size:.9rem}
+  th,td{text-align:left;padding:.4rem .5rem;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+  td.num{font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+  .issue{display:flex;gap:.5rem;padding:.35rem 0;border-bottom:1px solid var(--line);font-size:.88rem}
+  .issue:last-child{border-bottom:none}
+  .issue .tag{flex:0 0 auto;font-weight:700;font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;padding-top:.1rem}
+  .issue.err .tag{color:var(--err)} .issue.warn .tag{color:var(--warn)} .issue.info .tag{color:var(--muted)}
+  .issue .where{color:var(--muted);font-size:.8rem}
+  pre.out{white-space:pre;overflow:auto;max-height:420px;background:var(--bg);border:1px solid var(--line);border-radius:8px;
+    padding:.8rem;font:12.5px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--ink);tab-size:2}
+  .pills{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.5rem}
+  .pill{background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:.12rem .55rem;font-size:.75rem}
+  .muted{color:var(--muted)} .small{font-size:.82rem}
+  .foot{color:var(--muted);font-size:.8rem;margin-top:1.5rem;border-top:1px solid var(--line);padding-top:1rem}
+  details summary{cursor:pointer;font-weight:600}
+  .grid2{display:grid;grid-template-columns:1fr;gap:1.25rem}
+  @media(min-width:900px){.grid2{grid-template-columns:1fr 1fr}}
+  code{background:var(--chip);border-radius:4px;padding:.05rem .3rem;font-size:.85em}
+  .hidden{display:none}
+</style>
+</head>
+<body>
+<header class="top">
+  <div>
+    <h1>5etools Homebrew Importer &amp; Scraper</h1>
+    <div class="sub">Drop files → scrape embedded JSON → validate against the 5etools brew shape → merge &amp; export.</div>
+  </div>
+  <div style="display:flex;gap:.7rem;align-items:center">
+    <a class="back" href="../index.html">← WT Tools dashboard</a>
+    <button class="theme-btn" id="themeBtn" type="button">◐ Theme</button>
+  </div>
+</header>
+
+<main>
+  <p class="lead">
+    Feed it <code>.json</code>, <code>.txt</code>, <code>.md</code>, or <code>.csv</code> files (or paste text). It pulls out every JSON
+    object it can find — whole files <em>and</em> fenced <code>```json</code> blocks buried in notes — parses them, checks them
+    against the 5etools homebrew structure (<code>_meta.sources</code> + content arrays), lints the <code>{@tag}</code> syntax, then
+    merges everything into one clean, downloadable homebrew file. 100% in-browser: no upload, no server, works offline on your
+    local game network. PDFs aren't parsed here — extract their text first (that's the reliable path anyway).
+  </p>
+
+  <!-- INTAKE -->
+  <section class="panel">
+    <h2>1 · Intake</h2>
+    <div class="drop" id="drop" tabindex="0" role="button" aria-label="Drop files or click to choose">
+      <p style="margin:.2rem 0"><strong>Drop files here</strong> or click to choose</p>
+      <p class="small muted" style="margin:.2rem 0">.json · .txt · .md · .csv — multiple files OK</p>
+    </div>
+    <input type="file" id="fileInput" multiple accept=".json,.txt,.md,.markdown,.csv,application/json,text/plain,text/markdown" class="hidden">
+    <details style="margin-top:.9rem">
+      <summary class="small">…or paste text / JSON</summary>
+      <textarea id="paste" class="mono" rows="6" placeholder='Paste a JSON file, or notes containing ```json ... ``` blocks' style="margin-top:.6rem"></textarea>
+      <div class="row" style="margin-top:.6rem"><button class="btn ghost" id="addPaste" type="button">Scrape pasted text</button></div>
+    </details>
+    <ul class="filelist" id="fileList"></ul>
+  </section>
+
+  <div class="grid2">
+    <!-- VALIDATION -->
+    <section class="panel">
+      <h2>2 · Scrape &amp; validate report</h2>
+      <div id="summary" class="muted small">No input yet.</div>
+      <div id="counts" style="margin-top:.7rem"></div>
+      <div id="issues" style="margin-top:.8rem"></div>
+      <details id="tagbox" style="margin-top:.9rem" class="hidden">
+        <summary class="small">{@tag} usage</summary>
+        <div class="pills" id="tagPills"></div>
+      </details>
+    </section>
+
+    <!-- BUILD META -->
+    <section class="panel">
+      <h2>3 · Output source (_meta)</h2>
+      <p class="small muted" style="margin-top:0">Sets the <code>_meta.sources[0]</code> on the merged file. Entities keep their own <code>source</code>; use “Restamp” to force them all onto this source.</p>
+      <div class="metagrid">
+        <label class="f">Source id (json)<input type="text" id="mJson" placeholder="MyCustomSetting"></label>
+        <label class="f">Abbreviation<input type="text" id="mAbbr" placeholder="MCS"></label>
+        <label class="f" style="grid-column:1/-1">Full title<input type="text" id="mFull" placeholder="My Custom Setting Core Rulebook"></label>
+        <label class="f">Author<input type="text" id="mAuthor" placeholder="Your Name"></label>
+        <label class="f">Version<input type="text" id="mVer" placeholder="1.0"></label>
+        <label class="f" style="grid-column:1/-1">Repo URL<input type="text" id="mUrl" placeholder="https://github.com/you/your-homebrew-repo"></label>
+      </div>
+      <div class="row" style="margin-top:.6rem">
+        <label class="small"><input type="checkbox" id="restamp"> Restamp all entities to this source id</label>
+      </div>
+      <div class="row" style="margin-top:.9rem">
+        <button class="btn ghost" id="tmplBtn" type="button">Insert starter template</button>
+      </div>
+    </section>
+  </div>
+
+  <!-- OUTPUT -->
+  <section class="panel">
+    <h2>4 · Merged homebrew file</h2>
+    <div class="row" style="margin-bottom:.7rem">
+      <button class="btn" id="buildBtn" type="button">Build / refresh</button>
+      <button class="btn ghost" id="copyBtn" type="button" disabled>Copy JSON</button>
+      <button class="btn ghost" id="dlBtn" type="button" disabled>Download .json</button>
+      <button class="btn ghost" id="dlReport" type="button" disabled>Download report .md</button>
+      <span class="small muted" id="buildMsg"></span>
+    </div>
+    <pre class="out" id="output">// Build output appears here.</pre>
+  </section>
+
+  <p class="foot">
+    Recognizes the common 5etools brew content keys (monster, item, spell, race/subrace, background, feat, optionalfeature,
+    class/subclass + features, deity, object, vehicle, trap, hazard, condition, disease, status, action, table, variantrule,
+    reward, psionic, language, charoption, recipe, deck, card, and their <code>*Fluff</code> pairs). Shape-checking is a lint,
+    not the official schema — validate against 5etools before a session to avoid white-screen parse errors.
+  </p>
+</main>
+
+<script>
+"use strict";
+const $ = s => document.querySelector(s);
+const KEY = "wt-homebrew-importer-v1";
+
+// ---- recognized 5etools brew content arrays ----
+const CONTENT_KEYS = new Set([
+  "monster","monsterFluff","legendaryGroup","item","itemGroup","baseitem","itemFluff","itemProperty","itemType",
+  "spell","spellFluff","race","subrace","raceFluff","background","backgroundFluff","feat","featFluff","optionalfeature",
+  "class","subclass","classFeature","subclassFeature","deity","object","objectFluff","vehicle","vehicleFluff","vehicleUpgrade",
+  "trap","hazard","cult","boon","condition","disease","status","action","skill","sense","table","tableGroup","variantrule",
+  "reward","rewardFluff","psionic","language","languageFluff","charoption","charoptionFluff","recipe","recipeFluff","deck",
+  "card","encounter","name","adventure","adventureData","book","bookData","facility","bastion","trapFluff","hazardFluff",
+  "conditionFluff","diseaseFluff"
+]);
+// tags that are valid after {@
+const KNOWN_TAGS = new Set(["atk","hit","h","damage","dice","spell","item","creature","condition","skill","sense","action",
+  "dc","chance","recharge","scaledice","scaledamage","hitYourSpellAttack","status","quickref","note","b","i","u","s","color",
+  "highlight","area","actSave","actSaveFail","actSaveSuccess","actTrigger","actResponse","hazard","trap","disease","race",
+  "feat","background","class","subclass","optfeature","deity","object","vehicle","reward","cult","boon","table","variantrule",
+  "book","adventure","filter","link","5etools","footnote","comic","comicH1","comicH2","comicH3","comicNote","style","font",
+  "language","psionic","card","deck","legroup","classFeature","subclassFeature","itemMastery","variantRule"]);
+
+// ---- state ----
+let sources = [];  // {id, name, size, kind, objects:[{obj,label}], errors:[], text}
+try{ const s = JSON.parse(localStorage.getItem(KEY)||"{}"); ["mJson","mAbbr","mFull","mAuthor","mVer","mUrl"].forEach(k=>{ if(s[k]!=null) $("#"+k).value=s[k]; }); if(s.restamp) $("#restamp").checked=true; }catch(e){}
+
+// ---- JSON extraction ----
+function stripJsonComments(t){ return t; } // keep simple; comments rare in brew
+function findFencedJson(text){
+  const out=[]; const re=/```(?:json|json5)?\s*([\s\S]*?)```/gi; let m;
+  while((m=re.exec(text))) out.push(m[1]);
+  return out;
+}
+// balanced-brace object scanner that respects strings
+function scanObjects(text){
+  const out=[]; let depth=0,start=-1,inStr=false,esc=false;
+  for(let i=0;i<text.length;i++){
+    const c=text[i];
+    if(inStr){ if(esc)esc=false; else if(c==='\\')esc=true; else if(c==='"')inStr=false; continue; }
+    if(c==='"'){inStr=true;continue;}
+    if(c==='{'){ if(depth===0)start=i; depth++; }
+    else if(c==='}'){ depth--; if(depth===0&&start>=0){ out.push(text.slice(start,i+1)); start=-1; } else if(depth<0){depth=0;} }
+  }
+  return out;
+}
+function tryParse(str){ try{ return {ok:true,val:JSON.parse(str)}; }catch(e){ return {ok:false,err:e.message}; } }
+
+function extract(name, text){
+  const objects=[], errors=[];
+  // 1) whole file as JSON
+  const whole=tryParse(text.trim());
+  if(whole.ok){ objects.push({obj:whole.val,label:name}); return {objects,errors}; }
+  // 2) fenced ```json blocks
+  const fenced=findFencedJson(text);
+  let found=0;
+  fenced.forEach((blk,i)=>{ const p=tryParse(blk.trim()); if(p.ok){objects.push({obj:p.val,label:name+" ¶fenced#"+(i+1)});found++;}
+    else errors.push("Fenced block #"+(i+1)+": "+p.err); });
+  // 3) bare balanced objects (only if nothing fenced parsed) — pick ones that look like brew
+  if(found===0){
+    scanObjects(text).forEach((blk,i)=>{ const p=tryParse(blk); if(p.ok){
+      const o=p.val; if(o && typeof o==='object' && (o._meta || Object.keys(o).some(k=>CONTENT_KEYS.has(k)))){
+        objects.push({obj:o,label:name+" ¶obj#"+(i+1)});found++; }
+    }});
+  }
+  if(found===0 && !whole.ok) errors.push("No parseable JSON found. Parser said: "+whole.err);
+  return {objects,errors};
+}
+
+// ---- add files ----
+function addSource(name,text){
+  const {objects,errors}=extract(name,text);
+  sources.push({id:crypto.randomUUID(),name,size:text.length,objects,errors,text});
+  renderFiles(); analyze();
+}
+function readFiles(fileList){
+  [...fileList].forEach(f=>{ const r=new FileReader(); r.onload=()=>addSource(f.name,String(r.result||"")); r.readAsText(f); });
+}
+function renderFiles(){
+  const ul=$("#fileList"); ul.innerHTML="";
+  sources.forEach(s=>{
+    const nObj=s.objects.length, nErr=s.errors.length;
+    const badge = nErr? '<span class="badge b-err">'+nErr+' parse issue'+(nErr>1?'s':'')+'</span>'
+      : nObj? '<span class="badge b-ok">'+nObj+' JSON block'+(nObj>1?'s':'')+'</span>'
+      : '<span class="badge b-warn">no JSON</span>';
+    const li=document.createElement("li");
+    li.innerHTML='<span><strong>'+esc(s.name)+'</strong> <span class="meta">'+(s.size)+' chars</span></span>'+
+      '<span class="row" style="gap:.5rem">'+badge+'<button class="x" title="Remove" data-id="'+s.id+'">×</button></span>';
+    ul.append(li);
+  });
+  ul.querySelectorAll(".x").forEach(b=>b.onclick=()=>{ sources=sources.filter(s=>s.id!==b.dataset.id); renderFiles(); analyze(); });
+}
+
+// ---- collect + validate ----
+function allObjects(){ return sources.flatMap(s=>s.objects); }
+
+function collectSourcesFromMeta(objs){
+  const decl=new Set();
+  objs.forEach(({obj})=>{ const ms=obj && obj._meta && obj._meta.sources; if(Array.isArray(ms)) ms.forEach(x=>{ if(x&&x.json) decl.add(x.json); }); });
+  return decl;
+}
+
+function analyze(){
+  const objs=allObjects();
+  const sum=$("#summary");
+  if(!objs.length){ sum.textContent="No parseable JSON yet — drop files or paste text above."; $("#counts").innerHTML=""; $("#issues").innerHTML=""; $("#tagbox").classList.add("hidden"); lastReport=null; return; }
+
+  const counts={}, issues=[], declared=collectSourcesFromMeta(objs);
+  let totalEntities=0, hasMeta=false, tagUse={}, malformedTags=0;
+
+  objs.forEach(({obj,label})=>{
+    if(!obj || typeof obj!=='object'){ issues.push(["err","Top-level value is not an object",label]); return; }
+    if(obj._meta){ hasMeta=true;
+      const ms=obj._meta.sources;
+      if(!Array.isArray(ms)||!ms.length) issues.push(["err","_meta present but _meta.sources[] missing/empty",label]);
+      else ms.forEach((s,i)=>{ ["json","abbreviation","full"].forEach(f=>{ if(!s||!s[f]) issues.push(["err","_meta.sources["+i+"] missing required '"+f+"'",label]); });
+        ["authors","version"].forEach(f=>{ if(s&&s[f]==null) issues.push(["warn","_meta.sources["+i+"] missing recommended '"+f+"'",label]); }); });
+    }
+    Object.keys(obj).forEach(k=>{
+      if(k==="_meta"||k==="_test") return;
+      if(!CONTENT_KEYS.has(k)){ issues.push(["warn","Unrecognized top-level key '"+k+"' (not a known 5etools content array)",label]); return; }
+      const arr=obj[k];
+      if(!Array.isArray(arr)){ issues.push(["err","'"+k+"' should be an array",label]); return; }
+      counts[k]=(counts[k]||0)+arr.length; totalEntities+=arr.length;
+      arr.forEach((e,i)=>{
+        if(!e||typeof e!=='object') return;
+        if(k!=="name" && e.name==null) issues.push(["err","'"+k+"["+i+"]' missing 'name'",label]);
+        if(("monster item spell race subrace background feat deity object vehicle class subclass optionalfeature".split(" ").includes(k)) && e.source==null)
+          issues.push(["warn","'"+k+"["+i+"]' ("+(e.name||"?")+") missing 'source'",label]);
+        else if(e.source!=null && declared.size && !declared.has(e.source))
+          issues.push(["warn","'"+(e.name||k+"["+i+"]")+"' source '"+e.source+"' is not declared in any _meta.sources",label]);
+        // tag scan
+        scanTags(JSON.stringify(e.entries!=null?e.entries:e), tagUse, ()=>malformedTags++);
+      });
+    });
+  });
+
+  if(!hasMeta) issues.push(["warn","No _meta block found in any file — a brew file needs _meta.sources to register in 5etools",""]);
+
+  // summary line
+  const kinds=Object.keys(counts).length;
+  sum.innerHTML='<strong>'+totalEntities+'</strong> entit'+(totalEntities===1?'y':'ies')+' across <strong>'+kinds+'</strong> content type'+(kinds===1?'':'s')+
+    ' · '+objs.length+' JSON block'+(objs.length===1?'':'s')+' · '+
+    (declared.size?('sources declared: '+[...declared].map(esc).join(", ")):'<span style="color:var(--warn)">no _meta source declared</span>');
+
+  // counts table
+  $("#counts").innerHTML = kinds? '<table><thead><tr><th>Content type</th><th class="num">Count</th></tr></thead><tbody>'+
+    Object.entries(counts).sort((a,b)=>b[1]-a[1]).map(([k,v])=>'<tr><td>'+esc(k)+'</td><td class="num">'+v+'</td></tr>').join("")+
+    '</tbody></table>' : '<p class="small muted">No recognized content arrays found.</p>';
+
+  // issues
+  const order={err:0,warn:1,info:2};
+  issues.sort((a,b)=>order[a[0]]-order[b[0]]);
+  const nErr=issues.filter(i=>i[0]==="err").length, nWarn=issues.filter(i=>i[0]==="warn").length;
+  $("#issues").innerHTML = '<div class="row" style="margin-bottom:.5rem">'+
+      '<span class="badge '+(nErr?'b-err':'b-ok')+'">'+nErr+' error'+(nErr===1?'':'s')+'</span>'+
+      '<span class="badge '+(nWarn?'b-warn':'b-ok')+'">'+nWarn+' warning'+(nWarn===1?'':'s')+'</span>'+
+      (malformedTags?'<span class="badge b-warn">'+malformedTags+' malformed {@tag}</span>':'')+'</div>'+
+    (issues.length? issues.slice(0,80).map(([lvl,msg,where])=>
+      '<div class="issue '+lvl+'"><span class="tag">'+lvl+'</span><span>'+esc(msg)+
+      (where?' <span class="where">— '+esc(where)+'</span>':'')+'</span></div>').join("")+
+      (issues.length>80?'<p class="small muted">…and '+(issues.length-80)+' more.</p>':'')
+      : '<p class="small" style="color:var(--ok)">No issues — shape looks clean.</p>');
+
+  // tag pills
+  const tags=Object.entries(tagUse).sort((a,b)=>b[1]-a[1]);
+  if(tags.length){ $("#tagbox").classList.remove("hidden");
+    $("#tagPills").innerHTML = tags.map(([t,n])=>{ const bad=!KNOWN_TAGS.has(t); return '<span class="pill" '+(bad?'style="border-color:var(--warn);color:var(--warn)"':'')+' title="'+(bad?'unknown tag':'')+'">@'+esc(t)+' ×'+n+'</span>'; }).join("");
+  } else $("#tagbox").classList.add("hidden");
+
+  lastReport = {totalEntities,kinds,counts,issues,declared:[...declared],tagUse,nErr,nWarn,malformedTags,blocks:objs.length};
+}
+
+function scanTags(str, use, onBad){
+  if(typeof str!=='string') return;
+  // count {@ openings
+  const opens=(str.match(/\{@/g)||[]).length;
+  const re=/\{@(\w+)(?:\s[^{}]*)?\}/g; let m,matched=0;
+  while((m=re.exec(str))){ matched++; const t=m[1]; use[t]=(use[t]||0)+1; }
+  if(opens>matched) for(let i=0;i<opens-matched;i++) onBad();
+}
+
+// ---- build merged file ----
+let lastBuilt=null, lastReport=null;
+function buildMeta(){
+  const now=Math.floor(Date.now()/1000);
+  const src={ json:$("#mJson").value.trim()||"MyHomebrew", abbreviation:$("#mAbbr").value.trim()||"HB",
+    full:$("#mFull").value.trim()||"My Homebrew", version:$("#mVer").value.trim()||"1.0", targetSchema:"1.0.0" };
+  const auth=$("#mAuthor").value.trim(); if(auth) src.authors=[auth];
+  const url=$("#mUrl").value.trim(); if(url) src.url=url;
+  return { _meta:{ sources:[src], dateAdded:now, dateLastModified:now }, __srcId:src.json };
+}
+function build(){
+  const objs=allObjects();
+  if(!objs.length){ $("#buildMsg").textContent="Nothing to build — add input first."; return; }
+  const meta=buildMeta(); const srcId=meta.__srcId; delete meta.__srcId;
+  const out={ _meta:meta._meta }; const restamp=$("#restamp").checked;
+  let moved=0;
+  objs.forEach(({obj})=>{
+    Object.keys(obj).forEach(k=>{
+      if(k==="_meta") return; if(!CONTENT_KEYS.has(k)) return;
+      const arr=Array.isArray(obj[k])?obj[k]:[obj[k]];
+      out[k]=out[k]||[];
+      arr.forEach(e=>{ if(restamp && e && typeof e==='object' && "source" in e){ if(e.source!==srcId){e.source=srcId;moved++;} }
+        else if(restamp && e && typeof e==='object' && e.name!=null){ e.source=srcId; }
+        out[k].push(e); });
+    });
+  });
+  lastBuilt=out;
+  $("#output").textContent=JSON.stringify(out,null,2);
+  $("#copyBtn").disabled=$("#dlBtn").disabled=$("#dlReport").disabled=false;
+  const n=Object.keys(out).filter(k=>k!=="_meta").reduce((a,k)=>a+out[k].length,0);
+  $("#buildMsg").textContent="Built "+n+" entit"+(n===1?"y":"ies")+(restamp?(" · restamped "+moved+" source"+(moved===1?"":"s")):"")+".";
+  persist();
+}
+function persist(){ localStorage.setItem(KEY, JSON.stringify({mJson:$("#mJson").value,mAbbr:$("#mAbbr").value,mFull:$("#mFull").value,mAuthor:$("#mAuthor").value,mVer:$("#mVer").value,mUrl:$("#mUrl").value,restamp:$("#restamp").checked})); }
+
+function reportMd(){
+  if(!lastReport) return "# Homebrew import report\n\n_No data analyzed._\n";
+  const r=lastReport; let s="# Homebrew import report\n\n";
+  s+="- Generated: "+new Date().toISOString().slice(0,10)+"\n- JSON blocks: "+r.blocks+"\n- Entities: "+r.totalEntities+" across "+r.kinds+" content types\n";
+  s+="- Sources declared: "+(r.declared.length?r.declared.join(", "):"(none)")+"\n- Errors: "+r.nErr+" · Warnings: "+r.nWarn+" · Malformed {@tag}: "+r.malformedTags+"\n\n";
+  s+="## Content counts\n\n| Type | Count |\n|---|---|\n"+Object.entries(r.counts).sort((a,b)=>b[1]-a[1]).map(([k,v])=>"| "+k+" | "+v+" |").join("\n")+"\n\n";
+  s+="## Issues\n\n"+(r.issues.length? r.issues.map(([l,m,w])=>"- **"+l.toUpperCase()+"** "+m+(w?" _("+w+")_":"")).join("\n") : "_None._")+"\n\n";
+  const tags=Object.entries(r.tagUse).sort((a,b)=>b[1]-a[1]);
+  s+="## {@tag} usage\n\n"+(tags.length? tags.map(([t,n])=>"- `@"+t+"` ×"+n+(KNOWN_TAGS.has(t)?"":" ⚠ unknown")).join("\n"):"_None._")+"\n";
+  return s;
+}
+function download(name,text,type){ const b=new Blob([text],{type:type||"application/json"}); const u=URL.createObjectURL(b);
+  const a=document.createElement("a"); a.href=u; a.download=name; a.click(); setTimeout(()=>URL.revokeObjectURL(u),1500); }
+
+// ---- template ----
+const TEMPLATE={ _meta:{sources:[{json:"MyCustomSetting",abbreviation:"MCS",full:"My Custom Setting Core Rulebook",authors:["Your Name"],version:"1.0",url:"https://github.com/your-username/your-homebrew-repo",targetSchema:"1.0.0"}],dateAdded:1690000000,dateLastModified:1690000000},
+  monster:[{name:"Custom Goblin",source:"MyCustomSetting",page:1,size:"S",type:"humanoid",alignment:["N","E"],ac:[{ac:15,from:["leather armor","shield"]}],hp:{average:7,formula:"2d6"},speed:{walk:30},str:8,dex:14,con:10,int:10,wis:8,cha:8,passive:9,cr:"1/4",trait:[{name:"Nimble Escape",entries:["The goblin can take the Disengage or Hide action as a bonus action on each of its turns."]}],action:[{name:"Scimitar",entries:["{@atk mw} {@hit 4} to hit, reach 5 ft., one target. {@h}5 ({@damage 1d6 + 2}) slashing damage."]}]}],
+  item:[{name:"Sword of the Setting",source:"MyCustomSetting",page:2,type:"M",rarity:"rare",weight:3,weaponCategory:"martial",property:["F"],dmg1:"1d8",dmgType:"S",entries:["You gain a +1 bonus to attack and damage rolls made with this magic weapon. It casts a faint light reminiscent of {@spell dancing lights}."]}]};
+
+// ---- events ----
+const drop=$("#drop"), fi=$("#fileInput");
+drop.onclick=()=>fi.click();
+drop.onkeydown=e=>{ if(e.key==="Enter"||e.key===" "){e.preventDefault();fi.click();} };
+drop.ondragover=e=>{e.preventDefault();drop.classList.add("over");};
+drop.ondragleave=()=>drop.classList.remove("over");
+drop.ondrop=e=>{e.preventDefault();drop.classList.remove("over"); if(e.dataTransfer.files.length) readFiles(e.dataTransfer.files);};
+fi.onchange=()=>{ if(fi.files.length) readFiles(fi.files); fi.value=""; };
+$("#addPaste").onclick=()=>{ const t=$("#paste").value; if(t.trim()){ addSource("(pasted "+new Date().toLocaleTimeString()+")",t); $("#paste").value=""; } };
+$("#buildBtn").onclick=build;
+$("#copyBtn").onclick=async()=>{ try{ await navigator.clipboard.writeText($("#output").textContent); $("#buildMsg").textContent="Copied ✓"; }catch(e){ $("#buildMsg").textContent="Select the text to copy."; } };
+$("#dlBtn").onclick=()=>{ if(lastBuilt) download(($("#mJson").value.trim()||"homebrew")+".json", JSON.stringify(lastBuilt,null,2)); };
+$("#dlReport").onclick=()=>download("homebrew-import-report.md", reportMd(), "text/markdown");
+$("#tmplBtn").onclick=()=>{ addSource("(starter template)", JSON.stringify(TEMPLATE,null,2)); if(!$("#mJson").value)$("#mJson").value="MyCustomSetting"; if(!$("#mAbbr").value)$("#mAbbr").value="MCS"; if(!$("#mFull").value)$("#mFull").value="My Custom Setting Core Rulebook"; persist(); };
+["mJson","mAbbr","mFull","mAuthor","mVer","mUrl"].forEach(id=>$("#"+id).addEventListener("input",persist));
+$("#restamp").addEventListener("change",persist);
+
+// theme
+const modes=["auto","light","dark"]; let mi=0;
+$("#themeBtn").onclick=()=>{ mi=(mi+1)%modes.length; const m=modes[mi]; if(m==="auto")document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme",m); $("#themeBtn").textContent="◐ "+m[0].toUpperCase()+m.slice(1); };
+
+function esc(s=""){ return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+analyze();
+</script>
+</body>
+</html>

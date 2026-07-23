@@ -24,6 +24,12 @@ Standalone, dependency-free helpers that live alongside the dashboard:
   role slider, split the damage into a multiattack routine, and copy a ready-to-run
   monster draft. Backed by the matrix in
   [`docs/monster-drafting-matrix.md`](docs/monster-drafting-matrix.md).
+- **5etools Homebrew Importer &amp; Scraper** — [`site/tools/homebrew-importer.html`](site/tools/homebrew-importer.html).
+  Drop `.json`/`.txt`/`.md`/`.csv` files (or paste text); it scrapes embedded JSON
+  — whole files and fenced ` ```json ` blocks alike — validates it against the
+  5etools homebrew shape (`_meta.sources` + content arrays), lints the `{@tag}`
+  syntax, and merges everything into one downloadable homebrew file. Fully
+  client-side; works offline on a local game network.
 
 Design/balance and setup audits for this material live in
 [`docs/reviews/`](docs/reviews/).
