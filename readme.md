@@ -33,13 +33,15 @@ Standalone, dependency-free helpers that live alongside the dashboard:
 
 ### Homebrew conversion workflow
 
-Turning raw statblock/item/spell text into loadable 5etools brew JSON is a
+Turning raw statblock/item/spell/class text into loadable 5etools brew JSON is a
 two-step, **extract → tag → validate** pipeline:
 
-1. The **[`homebrew-converter`](.claude/agents/homebrew-converter.md)**
-   agent applies the tagging rules to produce `{@tag}`-tagged JSON, following
-   [`docs/5etools-homebrew-conversion-guide.md`](docs/5etools-homebrew-conversion-guide.md)
-   (schema template, `{@tag}` table, 5.5e/2024 conventions).
+1. The installable **[`5etools-homebrew`](.claude/skills/5etools-homebrew/)**
+   skill does the semantic conversion — PDF text extraction, segmenting content,
+   applying the `{@tag}` syntax and 5.5e/2024 conventions, and handling the hard
+   cases (full classes with level tables and subclass/feature references). The
+   human-readable version of its rules lives in
+   [`docs/5etools-homebrew-conversion-guide.md`](docs/5etools-homebrew-conversion-guide.md).
 2. The **Homebrew Importer & Scraper** page validates and merges that JSON into a
    clean, downloadable brew file before it ever touches the live site.
 
