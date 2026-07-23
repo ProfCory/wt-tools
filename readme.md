@@ -31,6 +31,18 @@ Standalone, dependency-free helpers that live alongside the dashboard:
   syntax, and merges everything into one downloadable homebrew file. Fully
   client-side; works offline on a local game network.
 
+### Homebrew conversion workflow
+
+Turning raw statblock/item/spell text into loadable 5etools brew JSON is a
+two-step, **extract → tag → validate** pipeline:
+
+1. The **[`homebrew-converter`](.claude/agents/homebrew-converter.md)**
+   agent applies the tagging rules to produce `{@tag}`-tagged JSON, following
+   [`docs/5etools-homebrew-conversion-guide.md`](docs/5etools-homebrew-conversion-guide.md)
+   (schema template, `{@tag}` table, 5.5e/2024 conventions).
+2. The **Homebrew Importer & Scraper** page validates and merges that JSON into a
+   clean, downloadable brew file before it ever touches the live site.
+
 Design/balance and setup audits for this material live in
 [`docs/reviews/`](docs/reviews/).
 
