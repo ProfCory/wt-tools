@@ -1,0 +1,436 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Severity Damage Expander — WT Tools</title>
+<style>
+  :root{
+    --bg:#f6f4ef; --panel:#fffdf8; --ink:#241f18; --muted:#6b6256;
+    --line:#e2dbcd; --accent:#7a3b2e; --accent-soft:#f0e3dd;
+    --setback:#4a7a4a; --dangerous:#b5751f; --deadly:#9d2f2f;
+    --chip:#efe9dd;
+    --radius:10px; --shadow:0 1px 2px rgba(0,0,0,.06),0 4px 14px rgba(0,0,0,.05);
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --bg:#161310; --panel:#211d18; --ink:#efe8dc; --muted:#a99e8c;
+      --line:#352f27; --accent:#d78b6f; --accent-soft:#2c231e;
+      --setback:#7fbe7f; --dangerous:#e0a44e; --deadly:#e07070;
+      --chip:#2c261f;
+      --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 18px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#161310; --panel:#211d18; --ink:#efe8dc; --muted:#a99e8c;
+    --line:#352f27; --accent:#d78b6f; --accent-soft:#2c231e;
+    --setback:#7fbe7f; --dangerous:#e0a44e; --deadly:#e07070; --chip:#2c261f;
+  }
+  :root[data-theme="light"]{
+    --bg:#f6f4ef; --panel:#fffdf8; --ink:#241f18; --muted:#6b6256;
+    --line:#e2dbcd; --accent:#7a3b2e; --accent-soft:#f0e3dd;
+    --setback:#4a7a4a; --dangerous:#b5751f; --deadly:#9d2f2f; --chip:#efe9dd;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:16px/1.5 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased}
+  header.top{display:flex;flex-wrap:wrap;gap:.5rem 1rem;align-items:baseline;justify-content:space-between;
+    padding:1.1rem clamp(1rem,4vw,2.5rem);border-bottom:1px solid var(--line);background:var(--panel)}
+  header.top h1{font-size:1.25rem;margin:0;letter-spacing:.2px}
+  header.top .sub{color:var(--muted);font-size:.85rem}
+  header.top a.back{color:var(--accent);text-decoration:none;font-size:.85rem}
+  header.top a.back:hover{text-decoration:underline}
+  .theme-btn{background:var(--chip);border:1px solid var(--line);color:var(--ink);border-radius:999px;
+    padding:.3rem .7rem;font-size:.8rem;cursor:pointer}
+  main{max-width:1080px;margin:0 auto;padding:clamp(1rem,4vw,2rem)}
+  .lead{color:var(--muted);max-width:64ch;margin:0 0 1.5rem}
+  .grid{display:grid;grid-template-columns:1fr;gap:1.25rem}
+  @media(min-width:820px){.grid{grid-template-columns:340px 1fr}}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    padding:1.1rem 1.2rem;box-shadow:var(--shadow)}
+  .panel h2{margin:.1rem 0 .9rem;font-size:.78rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted)}
+  label.field{display:block;margin:0 0 1rem;font-size:.9rem;font-weight:600}
+  label.field small{display:block;font-weight:400;color:var(--muted);margin-top:.15rem}
+  input[type=number],select{width:100%;margin-top:.35rem;padding:.5rem .6rem;border:1px solid var(--line);
+    border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
+  input[type=range]{width:100%;margin-top:.5rem;accent-color:var(--accent)}
+  .sev-toggle{display:flex;gap:.4rem;margin-top:.4rem}
+  .sev-toggle button{flex:1;padding:.55rem .3rem;border:1px solid var(--line);background:var(--bg);color:var(--ink);
+    border-radius:8px;cursor:pointer;font:inherit;font-size:.82rem;font-weight:600}
+  .sev-toggle button[aria-pressed=true]{border-color:currentColor;box-shadow:inset 0 0 0 1px currentColor}
+  .sev-toggle button.s-setback[aria-pressed=true]{color:var(--setback)}
+  .sev-toggle button.s-dangerous[aria-pressed=true]{color:var(--dangerous)}
+  .sev-toggle button.s-deadly[aria-pressed=true]{color:var(--deadly)}
+  .tierbadge{display:inline-block;background:var(--accent-soft);color:var(--accent);border-radius:999px;
+    padding:.2rem .7rem;font-size:.78rem;font-weight:700;margin-top:.2rem}
+  .statline{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:.6rem;margin:.2rem 0 1rem}
+  .stat{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:.6rem .7rem}
+  .stat .k{font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+  .stat .v{font-size:1.4rem;font-weight:700;line-height:1.1;margin-top:.15rem}
+  .stat .v small{font-size:.8rem;font-weight:500;color:var(--muted)}
+  .sevword{font-weight:800}
+  .sevword.setback{color:var(--setback)} .sevword.dangerous{color:var(--dangerous)} .sevword.deadly{color:var(--deadly)}
+  table{width:100%;border-collapse:collapse;font-size:.9rem;margin:.3rem 0 .2rem}
+  th,td{text-align:left;padding:.45rem .5rem;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700}
+  td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+  .rowctl{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center;margin:.2rem 0 .8rem}
+  .rowctl label{font-size:.85rem;font-weight:600}
+  .pill{display:inline-block;background:var(--chip);border:1px solid var(--line);border-radius:999px;
+    padding:.15rem .55rem;font-size:.75rem;font-variant-numeric:tabular-nums}
+  .btn{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:.55rem .9rem;font:inherit;
+    font-weight:600;cursor:pointer}
+  .btn.ghost{background:var(--chip);color:var(--ink);border:1px solid var(--line)}
+  .btn:active{transform:translateY(1px)}
+  .rollout{font-variant-numeric:tabular-nums;font-weight:700;margin-left:.5rem}
+  details{border-top:1px solid var(--line);padding:.7rem 0 .2rem;margin-top:.4rem}
+  details summary{cursor:pointer;font-weight:600;font-size:.9rem}
+  details p,details li{color:var(--muted);font-size:.88rem}
+  .draft{white-space:pre-wrap;background:var(--bg);border:1px solid var(--line);border-radius:8px;
+    padding:.8rem;font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--ink);
+    max-height:280px;overflow:auto}
+  .foot{color:var(--muted);font-size:.8rem;margin-top:2rem;border-top:1px solid var(--line);padding-top:1rem}
+  .note{font-size:.82rem;color:var(--muted);margin:.4rem 0 0}
+  .warn{color:var(--deadly)}
+</style>
+</head>
+<body>
+<header class="top">
+  <div>
+    <h1>Severity Damage Expander</h1>
+    <div class="sub">Expands the DMG 2024 “Damage Severity by Level” core chart into a draftable stat line.</div>
+  </div>
+  <div style="display:flex;gap:.7rem;align-items:center">
+    <a class="back" href="../index.html">← WT Tools dashboard</a>
+    <button class="theme-btn" id="themeBtn" type="button">◐ Theme</button>
+  </div>
+</header>
+
+<main>
+  <p class="lead">
+    Pick a party level and a threat severity. The tool resolves the level tier, hands you the
+    damage / DC / AC / HP core line, then <strong>expands</strong> it: place a concrete AC & HP inside the
+    band with the role slider, break the damage into a multiattack routine, and copy a ready-to-run draft.
+    Numbers trace to the core matrix in <code>docs/monster-drafting-matrix.md</code>.
+  </p>
+
+  <div class="grid">
+    <!-- CONTROLS -->
+    <section class="panel" aria-label="Inputs">
+      <h2>Draft inputs</h2>
+
+      <label class="field">Party level
+        <input type="number" id="level" min="1" max="20" value="6">
+        <small>Resolves to a level tier <span class="tierbadge" id="tierBadge">5th–10th</span></small>
+      </label>
+
+      <label class="field" style="margin-bottom:.4rem">Severity</label>
+      <div class="sev-toggle" role="group" aria-label="Severity">
+        <button type="button" class="s-setback"  data-sev="setback">Setback</button>
+        <button type="button" class="s-dangerous" data-sev="dangerous" aria-pressed="true">Dangerous</button>
+        <button type="button" class="s-deadly"   data-sev="deadly">Deadly</button>
+      </div>
+      <p class="note" id="sevBlurb"></p>
+
+      <label class="field" style="margin-top:1.1rem">Role / build
+        <input type="range" id="role" min="0" max="100" value="50">
+        <small><span id="roleLabel">Balanced</span> — slides AC & HP within the tier band.</small>
+      </label>
+      <div class="rowctl">
+        <label><input type="checkbox" id="invert" checked> Glass-cannon coupling
+          <small style="font-weight:400;display:inline;color:var(--muted)">(high AC ↔ low HP)</small>
+        </label>
+      </div>
+    </section>
+
+    <!-- OUTPUT -->
+    <section class="panel" aria-label="Expanded stat line">
+      <h2>Core line — <span id="tierText">5th–10th</span> · <span class="sevword" id="sevText">Dangerous</span></h2>
+      <div class="statline">
+        <div class="stat"><div class="k">Damage / round</div><div class="v" id="dmgV">—</div></div>
+        <div class="stat"><div class="k">Save DC</div><div class="v" id="dcV">—</div></div>
+        <div class="stat"><div class="k">Armor Class</div><div class="v" id="acV">—</div></div>
+        <div class="stat"><div class="k">Hit Points</div><div class="v" id="hpV">—</div></div>
+      </div>
+      <div class="rowctl">
+        <button class="btn ghost" id="rollBtn" type="button">🎲 Roll the damage</button>
+        <span class="rollout" id="rollOut"></span>
+      </div>
+
+      <h2 style="margin-top:1.3rem">Attack-routine expander</h2>
+      <div class="rowctl">
+        <label for="atk"># of attacks per round</label>
+        <select id="atk" style="width:auto">
+          <option>1</option><option selected>2</option><option>3</option><option>4</option>
+        </select>
+        <span class="pill" id="atkAgg"></span>
+      </div>
+      <table>
+        <thead><tr><th>Hit</th><th>Damage expression</th><th class="num">Avg</th><th>Design note</th></tr></thead>
+        <tbody id="atkRows"></tbody>
+      </table>
+      <p class="note" id="atkNote"></p>
+
+      <h2 style="margin-top:1.3rem">Severity ladder (this tier)</h2>
+      <table>
+        <thead><tr><th>Severity</th><th>Dice</th><th class="num">Avg</th><th>Use for</th></tr></thead>
+        <tbody id="ladderRows"></tbody>
+      </table>
+
+      <h2 style="margin-top:1.3rem">Derived budgets</h2>
+      <table>
+        <tbody id="derivedRows"></tbody>
+      </table>
+
+      <details>
+        <summary>Standard actions for this severity (from the matrix)</summary>
+        <div id="actionsBox"></div>
+      </details>
+
+      <h2 style="margin-top:1.3rem">Copyable draft</h2>
+      <div class="rowctl">
+        <button class="btn" id="copyBtn" type="button">Copy draft</button>
+        <span class="note" id="copyMsg"></span>
+      </div>
+      <pre class="draft" id="draft"></pre>
+    </section>
+  </div>
+
+  <p class="foot">
+    Self-contained, no network calls, no dependencies. Core damage / DC / AC / HP values are the
+    matrix’s DMG-2024-sourced numbers; the <em>expansions</em> (role placement, multiattack split,
+    legendary/minion budgets) are derived heuristics — sanity-check total damage-per-round against
+    real party HP before a Deadly fight.
+  </p>
+</main>
+
+<script>
+"use strict";
+
+// ---- Core matrix data (mirrors docs/monster-drafting-matrix.md Core Table) ----
+const TIERS = [
+  {label:"1st–4th",  min:1,  max:4,  dc:[12,13], ac:[12,14], hp:[15,60],
+    sev:{setback:{dice:"1d10", n:1, avg:5},  dangerous:{dice:"2d10", n:2, avg:11}, deadly:{dice:"4d10", n:4, avg:22}}},
+  {label:"5th–10th", min:5,  max:10, dc:[14,16], ac:[14,17], hp:[60,150],
+    sev:{setback:{dice:"2d10", n:2, avg:11}, dangerous:{dice:"4d10", n:4, avg:22}, deadly:{dice:"10d10",n:10,avg:55}}},
+  {label:"11th–16th",min:11, max:16, dc:[16,18], ac:[16,19], hp:[150,250],
+    sev:{setback:{dice:"4d10", n:4, avg:22}, dangerous:{dice:"10d10",n:10,avg:55}, deadly:{dice:"18d10",n:18,avg:99}}},
+  {label:"17th–20th",min:17, max:20, dc:[18,20], ac:[18,21], hp:[250,400],
+    sev:{setback:{dice:"10d10",n:10,avg:55}, dangerous:{dice:"18d10",n:18,avg:99}, deadly:{dice:"24d10",n:24,avg:132}}},
+];
+const SEV_ORDER = ["setback","dangerous","deadly"];
+const SEV_USE = {
+  setback:"Minions, swarm fodder, a “tax” encounter. Costs resources, shouldn’t threaten a down.",
+  dangerous:"Your default real fight. Can drop an already-hurt PC or force hard choices.",
+  deadly:"Bosses & set-pieces. A genuine threat of death — use sparingly."
+};
+const ACTIONS = {
+  setback:[
+    ["Single strike","One attack roll, Setback damage on hit."],
+    ["Minor debuff","On hit: target has Disadvantage on its next roll of a stated type, no save."],
+    ["Area nuisance","Setback damage in a small area (5–10 ft.), DC save for half."],
+    ["Reposition","No damage; forces movement, Prone, or Grappled (escape DC = Save DC)."],
+    ["Warning shot","Telegraphed action resolving next round — a chance to react before Dangerous lands."],
+  ],
+  dangerous:[
+    ["Multiattack (2)","Two attack rolls, each Setback damage (aggregate ≈ Dangerous)."],
+    ["Single heavy strike","One attack roll, Dangerous damage on hit."],
+    ["Save-or-suffer","DC save; on fail, Dangerous damage AND a condition until end of target’s next turn."],
+    ["Area burst","Dangerous damage in a 15–20 ft. cone/radius, DC save for half."],
+    ["Recharge burst","As above but locked behind a recharge (5–6 on d6)."],
+  ],
+  deadly:[
+    ["Multiattack (3)","Three attack rolls, mix of Setback/Dangerous totalling Deadly-ish."],
+    ["Signature strike","One attack roll, Deadly damage — a boss’s big swing; telegraph it."],
+    ["Save-or-die-adjacent","DC save; fail = Deadly damage and a severe condition. Use rarely."],
+    ["Battlefield burst","Deadly damage in a 30+ ft. area, DC save for half. Once per fight."],
+    ["Escalation trigger","Severity steps up as the monster crosses HP thresholds."],
+  ]
+};
+
+// ---- helpers ----
+const $ = s => document.querySelector(s);
+const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
+const lerp = (a,b,t)=>Math.round(a+(b-a)*t);
+
+// Express an average (of d10-based damage) as a tidy dice string.
+function diceFor(avg){
+  if(avg<=0) return "—";
+  let n = Math.floor(avg/5.5);
+  let flat = Math.round(avg - n*5.5);
+  if(n===0){ // small: use a single die + flat
+    if(avg>=4) return "1d6"+(avg>3.5?"+"+Math.round(avg-3.5):"");
+    return Math.round(avg)+"";
+  }
+  return n+"d10"+(flat>0?"+"+flat:"");
+}
+function rollDice(n,die,flat){let t=0;for(let i=0;i<n;i++)t+=1+Math.floor(Math.random()*die);return t+flat;}
+
+function tierForLevel(lv){ return TIERS.find(t=>lv>=t.min&&lv<=t.max) || TIERS[TIERS.length-1]; }
+
+// ---- state ----
+let sev = "dangerous";
+
+function currentModel(){
+  const lv = clamp(parseInt($("#level").value||"1",10),1,20);
+  $("#level").value = lv;
+  const tier = tierForLevel(lv);
+  const roleT = parseInt($("#role").value,10)/100;
+  const invert = $("#invert").checked;
+  const ac = lerp(tier.ac[0], tier.ac[1], roleT);
+  const hp = invert ? lerp(tier.hp[1], tier.hp[0], roleT)   // high AC ↔ low HP
+                    : lerp(tier.hp[0], tier.hp[1], roleT);
+  const dc = lerp(tier.dc[0], tier.dc[1], roleT);
+  return {lv,tier,roleT,invert,ac,hp,dc,cell:tier.sev[sev]};
+}
+
+function roleLabel(t){
+  if(t<0.2) return "Bruiser (low AC, high HP)";
+  if(t<0.45) return "Sturdy";
+  if(t<=0.55) return "Balanced";
+  if(t<0.8) return "Skirmisher";
+  return "Glass cannon (high AC, low HP)";
+}
+
+function render(){
+  const m = currentModel();
+  // tier + severity labels
+  $("#tierBadge").textContent = m.tier.label;
+  $("#tierText").textContent = m.tier.label;
+  $("#sevText").textContent = sev[0].toUpperCase()+sev.slice(1);
+  $("#sevText").className = "sevword "+sev;
+  $("#sevBlurb").textContent = SEV_USE[sev];
+  $("#roleLabel").textContent = roleLabel(m.roleT);
+
+  // core stats
+  $("#dmgV").innerHTML = m.cell.dice+' <small>(avg '+m.cell.avg+')</small>';
+  $("#dcV").textContent = m.dc;
+  $("#acV").textContent = m.ac;
+  $("#hpV").textContent = m.hp;
+  $("#rollOut").textContent = "";
+
+  // severity ladder
+  $("#ladderRows").innerHTML = SEV_ORDER.map(s=>{
+    const c = m.tier.sev[s];
+    const on = s===sev ? ' style="font-weight:700"' : '';
+    return '<tr'+on+'><td><span class="sevword '+s+'">'+s[0].toUpperCase()+s.slice(1)+'</span></td>'+
+      '<td class="num">'+c.dice+'</td><td class="num">'+c.avg+'</td><td>'+SEV_USE[s].split(".")[0]+'</td></tr>';
+  }).join("");
+
+  renderAttacks(m);
+  renderDerived(m);
+  renderActions();
+  renderDraft(m);
+}
+
+function renderAttacks(m){
+  const atk = parseInt($("#atk").value,10);
+  const total = m.cell.avg;
+  const rows = [];
+  // Even split across N attacks, each rendered as a dice expression.
+  const per = total/atk;
+  let running=0;
+  for(let i=0;i<atk;i++){
+    // give any rounding remainder to the last hit so the aggregate matches
+    let a = (i===atk-1) ? Math.round(total-running) : Math.round(per);
+    running += a;
+    const below = i<atk-1 ? "" : "";
+    rows.push('<tr><td class="num">'+(i+1)+'</td><td class="num">'+diceFor(a)+'</td>'+
+      '<td class="num">'+a+'</td><td>'+(atk===1?"Single strike — full severity in one hit."
+        :"≈1/"+atk+" of the round’s damage")+'</td></tr>');
+  }
+  $("#atkRows").innerHTML = rows.join("");
+  $("#atkAgg").textContent = "aggregate ≈ "+total+" ("+m.cell.dice+")";
+  // design note: per-hit maps to which severity band?
+  if(atk>1){
+    const perHit = total/atk;
+    let nearest = SEV_ORDER.map(s=>({s,d:Math.abs(m.tier.sev[s].avg-perHit)})).sort((a,b)=>a.d-b.d)[0];
+    $("#atkNote").innerHTML = "Design intent: a "+atk+"-attack routine of per-hit ≈ "+Math.round(perHit)+
+      " reads roughly as <span class='sevword "+nearest.s+"'>"+nearest.s+"</span>-tier strikes aggregating to "+
+      "<span class='sevword "+sev+"'>"+sev+"</span>. Keep any single hit at or below the monster’s own severity.";
+  } else {
+    $("#atkNote").innerHTML = "Reserve a single big hit for a boss’s telegraphed “big swing.”";
+  }
+}
+
+function renderDerived(m){
+  const sb = m.tier.sev.setback, dg = m.tier.sev.dangerous;
+  const rows = [
+    ["Legendary action pool", "3 points/round — e.g. Minor strike (1pt, "+sb.dice+") ×3, or Heavy strike (2pt, "+dg.dice+") + Reposition (1pt)."],
+    ["Legendary per-point cap", "Never let legendary actions alone deal Deadly-tier ("+m.tier.sev.deadly.avg+") — that’s the real turn’s job."],
+    ["Minion (single-hit)", "1 HP effectively; one "+sb.dice+" ("+sb.avg+") Setback attack; dies to any damage."],
+    ["Minion (mob, tracked)", "HP ≈ ¼ of single-target band → "+Math.round(m.hp/4)+" HP each; same Setback attack."],
+    ["Swarm HP pool", "Dangerous-tier HP for the cluster; auto "+sb.dice+" to anyone starting in its space."],
+    ["Lair action pulse", "Setback→Dangerous ("+sb.avg+"–"+dg.avg+") in a zone on initiative 20, DC "+m.dc+" save for half."],
+    ["Mythic “second wind”", "On 0 HP, regain ≈ Deadly value ("+m.tier.sev.deadly.avg+" HP) and gain one new trait."],
+  ];
+  $("#derivedRows").innerHTML = rows.map(r=>'<tr><td style="font-weight:600;white-space:nowrap">'+r[0]+
+    '</td><td>'+r[1]+'</td></tr>').join("");
+}
+
+function renderActions(){
+  $("#actionsBox").innerHTML = '<table><thead><tr><th>Action shape</th><th>Template</th></tr></thead><tbody>'+
+    ACTIONS[sev].map(a=>'<tr><td style="font-weight:600;white-space:nowrap">'+a[0]+'</td><td>'+a[1]+'</td></tr>').join("")+
+    '</tbody></table>';
+}
+
+function renderDraft(m){
+  const atk = parseInt($("#atk").value,10);
+  const per = Math.round(m.cell.avg/atk);
+  const routine = atk===1 ? "Single strike: "+m.cell.dice+" ("+m.cell.avg+")"
+    : "Multiattack ("+atk+"): "+atk+" × "+diceFor(per)+" ≈ "+m.cell.avg+" total";
+  const txt =
+`── MONSTER DRAFT ──────────────────────
+Party level : ${m.lv}   (tier ${m.tier.label})
+Severity    : ${sev.toUpperCase()}  — ${SEV_USE[sev]}
+AC / HP     : AC ${m.ac}  ·  HP ${m.hp}   [${roleLabel(m.roleT)}]
+Save DC     : ${m.dc}
+Damage/round: ${m.cell.dice}  (avg ${m.cell.avg})
+Attack      : ${routine}
+
+Legendary   : 3 pts/round (Minor ${m.tier.sev.setback.dice} =1pt · Heavy ${m.tier.sev.dangerous.dice} =2pt)
+Minion      : ${m.tier.sev.setback.dice} Setback attack, dies to any hit
+Reminder    : sanity-check ${m.cell.avg}/round vs. party HP before committing.
+───────────────────────────────────────`;
+  $("#draft").textContent = txt;
+}
+
+// ---- events ----
+document.querySelectorAll(".sev-toggle button").forEach(b=>{
+  b.addEventListener("click",()=>{
+    sev = b.dataset.sev;
+    document.querySelectorAll(".sev-toggle button").forEach(x=>x.setAttribute("aria-pressed", x===b));
+    render();
+  });
+});
+["level","role","atk"].forEach(id=>$("#"+id).addEventListener("input",render));
+$("#invert").addEventListener("change",render);
+
+$("#rollBtn").addEventListener("click",()=>{
+  const m = currentModel();
+  const n = m.cell.n;
+  const r = rollDice(n,10,0);
+  $("#rollOut").innerHTML = "🎲 "+n+"d10 → <strong>"+r+"</strong> damage";
+});
+
+$("#copyBtn").addEventListener("click",async()=>{
+  try{ await navigator.clipboard.writeText($("#draft").textContent);
+    $("#copyMsg").textContent = "Copied ✓"; }
+  catch(e){ $("#copyMsg").textContent = "Select the text below to copy."; }
+  setTimeout(()=>$("#copyMsg").textContent="",2200);
+});
+
+// theme toggle (cycles auto→light→dark)
+const modes=["auto","light","dark"]; let mi=0;
+$("#themeBtn").addEventListener("click",()=>{
+  mi=(mi+1)%modes.length; const mode=modes[mi];
+  if(mode==="auto") document.documentElement.removeAttribute("data-theme");
+  else document.documentElement.setAttribute("data-theme",mode);
+  $("#themeBtn").textContent = "◐ "+mode[0].toUpperCase()+mode.slice(1);
+});
+
+render();
+</script>
+</body>
+</html>

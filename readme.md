@@ -14,6 +14,20 @@ The app currently provides:
 - A DM screen with party overview, initiative, private notes, and quick rules.
 - Browser-local persistence with no server or account required.
 
+## DM tools
+
+Standalone, dependency-free helpers that live alongside the dashboard:
+
+- **Severity Damage Expander** — [`site/tools/severity-damage.html`](site/tools/severity-damage.html).
+  Expands the DMG 2024 "Damage Severity by Level" core chart into a draftable stat
+  line: pick party level + severity, place concrete AC/HP inside the tier band with a
+  role slider, split the damage into a multiattack routine, and copy a ready-to-run
+  monster draft. Backed by the matrix in
+  [`docs/monster-drafting-matrix.md`](docs/monster-drafting-matrix.md).
+
+Design/balance and setup audits for this material live in
+[`docs/reviews/`](docs/reviews/).
+
 ## Run locally
 
 Serve the repository root with any static server, then open `/site/`.
