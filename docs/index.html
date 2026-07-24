@@ -1,347 +1,174 @@
-<!DOCTYPE html>
-
+<!doctype html>
 <html lang="en">
 <head>
-<!--5ETOOLS_CMP-->
-<!--5ETOOLS_ANALYTICS-->
-<!--5ETOOLS_ADCODE-->
-<meta charset="utf-8"/>
-<meta content="W&amp;T Tools — Wanderer &amp; Torch campaign home base and 5e reference suite." name="description"/>
-<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
-<meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport"/>
-<meta content="yes" name="mobile-web-app-capable"/>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Wanderer & Torch campaign home base + 5e reference suite.">
+<meta name="theme-color" content="#081329">
 <title>W&amp;T Tools</title>
-<link href="css/bootstrap.css" rel="stylesheet"/>
-<link href="css/fontawesome.css" rel="stylesheet"/>
-<link href="css/main.css" rel="stylesheet"/>
-<link href="css/index.css" rel="stylesheet"/><style>/* ---- W&T Home facelift (keeps 5etools layout intact) ---- */
-#wrp-patreon{display:none!important;} /* remove patron button/embed */
-
-.wt-hero-title { font-family: inherit; letter-spacing: .04em; }
-.wt-accent-gold { color: #e0c040; }
-.wt-accent-blue { color: #6060e0; }
-
-.wt-links-sub { opacity: .85; margin-top: -6px; }
-
-.panel.wt-panel{
-	background: rgba(0,0,0,.18);
-	border-color: rgba(255,255,255,.10);
+<link href="css/bootstrap.css" rel="stylesheet">
+<link href="css/fontawesome.css" rel="stylesheet">
+<link href="css/main.css" rel="stylesheet">
+<link rel="preload" as="image" href="wt-tools-background.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="search" type="application/opensearchdescription+xml" href="open-search.xml" title="W&T Tools">
+<!-- 5ETOOLS_CMP -->
+<!-- 5ETOOLS_ANALYTICS -->
+<!-- 5ETOOLS_ADCODE -->
+<!-- GITHUB_DISCLAIMER -->
+<style>
+:root {
+  --night:#071126; --night-2:#0c1c34; --ink:#17120b; --paper:#efe1be;
+  --paper-2:#f8efd9; --gold:#d3a83d; --gold-2:#f4d477; --blue:#6aa7d4;
+  --teal:#4f9296; --orange:#bc641d; --cream:#fff1c8; --line:rgba(211,168,61,.68);
+  --shadow:0 18px 42px rgba(1,6,17,.26); --serif:Georgia,"Times New Roman",serif;
+  --sans:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
 }
-.panel.wt-panel .panel-heading{
-	background: rgba(0,0,0,.22);
-	border-color: rgba(255,255,255,.10);
-	font-weight: 700;
-}
-.panel.wt-panel .panel-body{ background: transparent; }
-
-.panel.wt-panel.wt-panel--gold .panel-heading{ border-left: 3px solid #e0c040; }
-.panel.wt-panel.wt-panel--blue .panel-heading{ border-left: 3px solid #6060e0; }
-.panel.wt-panel.wt-panel--orange .panel-heading{ border-left: 3px solid #e08000; }
-
-.wt-toggle{
-	display:flex;
-	align-items:center;
-	gap:8px;
-	cursor:pointer;
-	user-select:none;
-}
-.wt-toggle .glyphicon{ opacity:.9; }
-.wt-toggle small{ opacity:.75; font-weight:400; }
-
-.wt-mini-note{
-	margin-top:10px;
-	padding:8px 10px;
-	border-radius:6px;
-	background: rgba(0,0,0,.14);
-	border: 1px dashed rgba(255,255,255,.18);
-	font-size: 12px;
-	opacity: .92;
-}
-
-/* Better contrast if the page is in a light theme */
-@media (prefers-color-scheme: light){
-	.panel.wt-panel{
-		background: rgba(255,255,255,.86);
-		border-color: rgba(0,0,0,.12);
-	}
-	.panel.wt-panel .panel-heading{
-		background: rgba(255,255,255,.94);
-		border-color: rgba(0,0,0,.12);
-	}
-	.wt-mini-note{ background: rgba(255,255,255,.92); border-color: rgba(0,0,0,.18); }
-}
-
-.wt-toggle{margin:10px 0 6px;}
-.wt-toggle[aria-expanded="true"] .glyphicon{ transform: rotate(90deg); }
-.wt-toggle .glyphicon{ transition: transform .12s ease-in-out; }
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:#071126;color:var(--cream);font-family:var(--sans);line-height:1.5}
+a{color:inherit;text-decoration:none}
+button,a{-webkit-tap-highlight-color:transparent}
+.shell{width:min(1480px,100%);margin:auto;background-color:var(--paper);background-image:url("wt-tools-background.png");background-repeat:no-repeat;background-position:center top;background-size:100% auto;box-shadow:0 0 70px #000}
+.frame{border:1px solid var(--gold);box-shadow:inset 0 0 0 5px #071126,inset 0 0 0 6px var(--line)}
+.topbar{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:1rem;padding:.75rem clamp(1rem,3vw,2.2rem);background:rgba(5,13,31,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:.65rem;white-space:nowrap;font-family:var(--serif);font-weight:700;letter-spacing:.08em;color:var(--gold-2)}
+.mic{display:grid;place-items:center;width:40px;height:40px;border:1px solid var(--gold);border-radius:50%;font-size:1.25rem;box-shadow:inset 0 0 14px rgba(211,168,61,.25)}
+.nav{display:flex;gap:clamp(.75rem,2vw,2rem);margin-left:auto;font-family:var(--serif);text-transform:uppercase;font-size:.85rem;letter-spacing:.06em}
+.nav a{padding:.4rem 0;border-bottom:1px solid transparent}
+.nav a:hover,.nav a:focus-visible{color:var(--gold-2);border-color:var(--gold)}
+.menu{display:none;margin-left:auto;border:1px solid var(--gold);background:transparent;color:var(--gold-2);border-radius:4px;padding:.4rem .6rem}
+.hero{min-height:500px;display:flex;align-items:end;position:relative;overflow:hidden;background:linear-gradient(90deg,rgba(4,11,27,.88) 0%,rgba(4,11,27,.48) 35%,rgba(4,11,27,.04) 68%);border-bottom:0}
+.hero::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 55% 36%,transparent 0 11%,rgba(9,20,44,.08) 35%,rgba(3,9,22,.2) 100%);pointer-events:none}
+.hero-copy{position:relative;z-index:1;max-width:690px;padding:clamp(2rem,6vw,5.5rem)}
+.eyebrow{display:inline-flex;align-items:center;gap:.55rem;border:1px solid var(--gold);padding:.25rem .65rem;color:var(--gold-2);background:rgba(3,10,24,.72);font-size:.75rem;letter-spacing:.16em;text-transform:uppercase}
+.hero h1{font-family:var(--serif);font-size:clamp(3.5rem,9vw,7rem);line-height:.88;margin:.6rem 0 1rem;color:#f3d37b;text-shadow:0 3px 0 #4d2e08,0 10px 25px #000}
+.hero .tagline{font-family:var(--serif);font-size:clamp(1.1rem,2vw,1.55rem);max-width:580px}
+.hero .story{max-width:520px;color:#f7e9bd}
+.cta-row{display:flex;flex-wrap:wrap;gap:.75rem;margin-top:1.5rem}
+.cta{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:.7rem 1rem;border:1px solid var(--gold);background:#09172d;color:var(--cream);font-weight:700;box-shadow:inset 0 0 0 2px rgba(211,168,61,.14)}
+.cta.primary{background:linear-gradient(#d8942c,#9f4e10);color:#fff8dc;border-color:#f1c362}
+.section{padding:clamp(2rem,5vw,4rem);background:rgba(244,230,194,.16)}
+.section-title{text-align:center;color:#172039;font-family:var(--serif);font-size:clamp(2rem,4vw,3.2rem);text-transform:uppercase;letter-spacing:.05em;margin:0}
+.section-sub{text-align:center;color:#59482f;font-family:var(--serif);font-style:italic;margin:.15rem 0 2rem}
+.section-title::before,.section-title::after{content:" ✦ ";color:#98701e;font-size:.55em;vertical-align:middle}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:1.25rem}
+.panel{position:relative;min-width:0;padding:1.4rem;border:2px solid var(--accent);border-radius:18px;background:linear-gradient(155deg,rgba(255,255,255,.055),transparent 45%),var(--panel-bg);color:#f6e8bf;box-shadow:var(--shadow),inset 0 0 0 4px rgba(0,0,0,.34),inset 0 0 0 5px color-mix(in srgb,var(--accent) 55%,transparent)}
+.panel::before,.panel::after{content:"";position:absolute;width:42px;height:42px;border-color:var(--accent);opacity:.8}
+.panel::before{left:8px;top:8px;border-left:1px solid;border-top:1px solid;border-radius:12px 0 0}
+.panel::after{right:8px;bottom:8px;border-right:1px solid;border-bottom:1px solid;border-radius:0 0 12px}
+.panel h3{display:flex;align-items:center;gap:.6rem;margin:0 0 1rem;font-family:var(--serif);font-size:1.75rem;letter-spacing:.05em;color:color-mix(in srgb,var(--accent) 68%,white)}
+.panel ul{list-style:none;margin:0;padding:0;display:grid;gap:.65rem}
+.panel li a{display:flex;align-items:center;gap:.6rem;padding:.18rem .25rem;border-radius:6px}
+.panel li a::before{content:"◆";font-size:.72rem;color:var(--accent)}
+.panel li a:hover,.panel li a:focus-visible{background:rgba(255,255,255,.08);color:white}
+.gold{--accent:#d8af3b;--panel-bg:#16160c} .blue{--accent:#65a4ca;--panel-bg:#0d2638} .orange{--accent:#dc721e;--panel-bg:#421d0c}
+.reference{background:linear-gradient(rgba(255,255,255,.20),rgba(255,255,255,.08)),var(--paper-2);color:var(--ink);border-top:1px solid rgba(184,154,95,.65)}
+.ref-layout{display:grid;grid-template-columns:2fr 1fr;gap:1.35rem;align-items:start}
+.ref-grid{display:grid;grid-template-columns:1.45fr 1fr 1.15fr;gap:1rem}
+.ref-group{padding:1.2rem;border:1px solid #bba16b;background:rgba(255,255,255,.22)}
+.ref-group h3{font-family:var(--serif);text-align:center;text-transform:uppercase;letter-spacing:.08em;margin:.1rem 0 1rem;color:#23304a}
+.buttons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.55rem}
+.ref-btn{display:flex;align-items:center;justify-content:center;min-height:43px;padding:.55rem;border:1px solid #b28a3e;border-radius:5px;background:linear-gradient(#17335b,#0e2242);color:#f8e7b4;text-align:center;font-family:var(--serif);box-shadow:0 3px 7px rgba(30,15,2,.2)}
+.ref-btn:hover,.ref-btn:focus-visible{transform:translateY(-1px);filter:brightness(1.14)}
+.rules .ref-btn{background:linear-gradient(#25545b,#17383d)} .dm-ref .ref-btn{background:linear-gradient(#8a3d0d,#542105)}
+.compliance{padding:1.4rem;border:2px solid #a8833d;box-shadow:inset 0 0 0 4px rgba(168,131,61,.14);background:#f7eac9}
+.compliance h3{font-family:var(--serif);text-align:center;margin:.1rem 0 1rem;text-transform:uppercase}
+.compliance summary{cursor:pointer;font-weight:700;color:#7a4d11}
+.compliance p{font-family:var(--serif)}
+.footer{display:grid;grid-template-columns:1fr auto 1fr;gap:1rem;align-items:center;padding:1.25rem 2rem;background:#071126;color:#d9c08b;border-top:1px solid var(--gold)}
+.footer .sigil{font-size:2rem;color:var(--gold);text-align:center}
+.footer .legal{text-align:right;font-size:.78rem;color:#b9a77c}
+#consent-box{display:none}
+.cancer__wrp{display:none}
+@media(max-width:1050px){.cards{grid-template-columns:repeat(2,1fr)}.ref-layout{grid-template-columns:1fr}}
+@media(max-width:760px){.nav{display:none;position:absolute;top:64px;left:0;right:0;margin:0;padding:1rem 1.3rem;background:#071126;flex-direction:column;border-bottom:1px solid var(--gold)}.nav.open{display:flex}.menu{display:block}.hero{min-height:560px;background-image:linear-gradient(180deg,rgba(4,11,27,.12) 0%,rgba(4,11,27,.5) 42%,rgba(4,11,27,.92) 76%,rgba(4,11,27,.97) 100%),url("wt-tools-background.png");background-size:auto,cover;background-position:center,center 22%;background-repeat:no-repeat,no-repeat}.hero-copy{padding:3rem 1.25rem}.cards,.ref-grid{grid-template-columns:1fr}.footer{grid-template-columns:1fr;text-align:center}.footer .legal{text-align:center}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
 </style>
-<!-- Favicons -->
-<link href="favicon.svg" rel="icon" type="image/svg+xml"/>
-<link href="favicon-256x256.png" rel="icon" sizes="256x256" type="image/png"/>
-<link href="favicon-144x144.png" rel="icon" sizes="144x144" type="image/png"/>
-<link href="favicon-128x128.png" rel="icon" sizes="128x128" type="image/png"/>
-<link href="favicon-64x64.png" rel="icon" sizes="64x64" type="image/png"/>
-<link href="favicon-48x48.png" rel="icon" sizes="48x48" type="image/png"/>
-<link href="favicon-32x32.png" rel="icon" sizes="32x32" type="image/png"/>
-<link href="favicon-16x16.png" rel="icon" sizes="16x16" type="image/png"/>
-<!-- Chrome Web App Icons -->
-<link href="manifest.webmanifest" rel="manifest"/>
-<meta content="5etools" name="application-name"/>
-<meta content="#006bc4" name="theme-color"/>
-<!-- Windows Start Menu tiles -->
-<meta content="browserconfig.xml" name="msapplication-config">
-<meta content="#006bc4" name="msapplication-TileColor"/>
-<!-- Apple Touch Icons -->
-<link href="apple-touch-icon-180x180.png" rel="apple-touch-icon" sizes="180x180"/>
-<link href="apple-touch-icon-360x360.png" rel="apple-touch-icon" sizes="360x360"/>
-<link href="apple-touch-icon-167x167.png" rel="apple-touch-icon" sizes="167x167"/>
-<link href="apple-touch-icon-152x152.png" rel="apple-touch-icon" sizes="152x152"/>
-<link href="apple-touch-icon-120x120.png" rel="apple-touch-icon" sizes="120x120"/>
-<meta content="5etools" name="apple-mobile-web-app-title"/>
-<!-- macOS Safari Pinned Tab and Touch Bar -->
-<link color="#006bc4" href="safari-pinned-tab.svg" rel="mask-icon"/>
-<!-- OpenSearch -->
-<link href="open-search.xml" rel="search" title="Search W&amp;T Tools" type="application/opensearchdescription+xml"/>
 <script src="sw-injector.js" type="text/javascript"></script>
 <script blocking="render" src="js/styleswitch.js" type="module"></script>
 <script src="js/navigation.js" type="text/javascript"></script>
 <script src="js/browsercheck.js" type="module"></script>
-</meta></head>
+</head>
 <body>
-<div class="overlay-noise no-print"></div>
-<header class="hidden-xs hidden-sm page__header">
-<div class="container ve-flex-v-baseline">
-<h1 class="page__title no-wrap my-0 page__title--home" id="page__title">W&amp;T Tools</h1>
-<p class="page__subtitle no-wrap my-0" id="page__subtitle">Wanderer &amp; Torch campaign home base + 5e reference suite.</p>
-</div>
+<!-- AD_LEFT --><div class="cancer__wrp"></div>
+<!-- AD_RIGHT --><div class="cancer__wrp"></div>
+<!-- AD_LEADERBOARD --><div class="cancer__wrp"></div>
+<div class="shell frame">
+<header class="topbar">
+  <a class="brand" href="#top"><span class="mic">🎙</span><span>W&amp;T Tools</span></a>
+  <button class="menu" id="menuButton" aria-expanded="false" aria-controls="siteNav">Menu</button>
+  <nav class="nav" id="siteNav" aria-label="Primary navigation">
+    <a href="#top">Home</a><a href="#players">Players</a><a href="#dm">DM Tools</a><a href="#shops">Shops</a><a href="#reference">Reference</a><a href="#community">Community</a>
+  </nav>
+  <nav id="navigation" hidden><ul id="navbar"></ul></nav>
 </header>
-<nav class="container page__nav" id="navigation">
-<ul class="nav nav-pills page__nav-inner" id="navbar"></ul>
-</nav>
-<div class="container">
-<!--GITHUB_DISCLAIMER-->
-<!--	<div class="alert alert-warning">-->
-<!--		<p><strong>Discord update:</strong> A recent bot-hijack resulted in many accounts being banned from our Discord server, along with a general server reset. Besides bans, no user accounts were affected, and the server has largely been restored to its former state. <a class="alert-link" href="https://discord.gg/5etools" target="_blank" rel="noopener noreferrer">You can rejoin here.</a></p>-->
-<!--	</div>-->
-</div>
-<div class="cancer__wrp-sidebar cancer__wrp-sidebar-lhs cancer__wrp-sidebar-lhs--scrolling-page cancer__anchor"><div class="cancer__disp-cancer"></div><div class="cancer__sidebar-inner cancer__sidebar-inner--top cancer__wrp-interactive"><!--5ETOOLS_AD_LEFT_1--></div><div class="cancer__sidebar-inner cancer__sidebar-inner--bottom cancer__wrp-interactive"><!--5ETOOLS_AD_LEFT_2--></div></div>
-<div class="cancer__wrp-sidebar cancer__wrp-sidebar-rhs cancer__wrp-sidebar-rhs--scrolling-page cancer__anchor"><div class="cancer__disp-cancer"></div><div class="cancer__sidebar-inner cancer__sidebar-inner--top cancer__wrp-interactive"><!--5ETOOLS_AD_RIGHT_1--></div><div class="cancer__sidebar-inner cancer__sidebar-inner--bottom cancer__wrp-interactive"><!--5ETOOLS_AD_RIGHT_2--></div></div>
-<div class="home__stripe">
-<div class="home__split relative">
-<div class="home__stripe-header ve-text-right home__h-player"><div class="w-100 ve-text-left mobile-sm__text-center">Players</div></div>
-<div class="ve-flex ve-flex-wrap relative home__split-spaced home__split-spaced--gutter home__split-spaced--no-header home__wrp-buttons">
-<a class="home__btn-page ve-btn ve-btn-default mr-3 home__btn-player" href="races.html">
-<div class="fal fa-users home__icn-page"></div>
-<h4 class="ve-text-center home__lbl-page">Species</h4>
-</a>
-<a class="home__btn-page ve-btn ve-btn-default mr-3 home__btn-player" href="classes.html" title='Quickly browse the official classes, and their associated subclasses.
-Unearthed Arcana content can be accessed by cycling the "All Sources" button.'>
-<div class="fal fa-hat-wizard home__icn-page"></div>
-<h4 class="ve-text-center home__lbl-page">Classes</h4>
-</a>
-<a class="home__btn-page ve-btn ve-btn-default mr-3 home__btn-player" href="feats.html">
-<div class="fal fa-award home__icn-page"></div>
-<h4 class="ve-text-center home__lbl-page">Feats</h4>
-</a>
-<a class="home__btn-page ve-btn ve-btn-default home__btn-player" href="optionalfeatures.html" title="A searchable, filterable list of feature choices, including Eldritch Invocations for the Warlock Class, and Maneuvers for the Fighter's Battle Master subclass.">
-<div class="fal fa-drafting-compass home__icn-page"></div>
-<h4 class="ve-text-center home__lbl-page">Options<br/>&amp; Features</h4>
-</a>
-<!-- mobile only -->
-<a class="home__btn-page ve-btn ve-btn-default home__narrow-visible home__btn-player" href="backgrounds.html">
-<div class="fal fa-portrait home__icn-page"></div>
-<h4 class="ve-text-center home__lbl-page">Backgrounds</h4>
-</a>
-<a class="home__btn-page ve-btn ve-btn-default home__narrow-visible home__btn-player" href="items.html">
-<div class="fal fa-helmet-battle home__icn-page"></div>
-<h4 class="ve-text-center home__lbl-page">Items</h4>
-</a>
-<a class="home__btn-page ve-btn ve-btn-default home__narrow-visible home__btn-player" href="spells.html">
-<div class="fal fa-book-spells home__icn-page"></div>
-<h4 class="ve-text-center home__lbl-page">Spells</h4>
-</a>
-<a class="home__btn-page ve-btn ve-btn-default home__narrow-visible home__btn-player" href="statgen.html">
-<div class="fal fa-tally home__icn-page"></div>
-<h4 class="ve-text-center home__lbl-page">Stat<br/>Generator</h4>
-</a>
-</div>
-<div class="ve-flex ve-flex-wrap home__wrp-buttons home__narrow-hidden">
-<a class="home__btn-page ve-btn ve-btn-default mr-3 home__btn-player" href="backgrounds.html">
-<div class="fal fa-portrait home__icn-page"></div>
-<h4 class="ve-text-center home__lbl-page">Backgrounds</h4>
-</a>
-<a class="home__btn-page ve-btn ve-btn-default mr-3 home__btn-player" href="items.html">
-<div class="fal fa-helmet-battle home__icn-page"></div>
-<h4 class="ve-text-center home__lbl-page">Items</h4>
-</a>
-<a class="home__btn-page ve-btn ve-btn-default mr-3 home__btn-player" href="spells.html">
-<div class="fal fa-book-spells home__icn-page"></div>
-<h4 class="ve-text-center home__lbl-page">Spells</h4>
-</a>
-<a class="home__btn-page ve-btn ve-btn-default home__btn-player" href="statgen.html">
-<div class="fal fa-tally home__icn-page"></div>
-<h4 class="ve-text-center home__lbl-page">Stat<br/>Generator</h4>
-</a>
-</div>
-</div>
-<div class="my-4 home__mobile-hidden home__narrow-hidden"></div>
-<div class="my-4 home__mobile-hidden home__narrow-visible"></div>
-<div class="my-4 home__mobile-hidden"></div>
-<div class="home__split">
-<div class="ve-flex ve-flex-wrap relative home__split-spaced home__split-spaced--gutter home__wrp-buttons">
-<div class="home__stripe-header home__h-rule"><div class="w-100 ve-text-left mobile-sm__text-center">Rules</div></div>
-<a class="home__btn-page ve-btn ve-btn-default mr-3 home__btn-rule" href="adventures.html" title="All the official adventures published by Wizards of the Coast.">
-<div class="fal fa-dungeon home__icn-page"></div>
-<h4 class="ve-text-center home__lbl-page">Adventures</h4>
-</a>
-<a class="home__btn-page ve-btn ve-btn-default mr-3 home__btn-rule" href="books.html" title="All the official sources published by Wizards of the Coast.">
-<div class="fal fa-books home__icn-page"></div>
-<h4 class="ve-text-center home__lbl-page">Books</h4>
-</a>
-<a class="home__btn-page ve-btn ve-btn-default mr-3 home__btn-rule" href="variantrules.html" title="A searchable selection of commonly used rules and tables.">
-<div class="fal fa-info-square home__icn-page"></div>
-<h4 class="ve-text-center home__lbl-page">Rules<br/>Glossary</h4>
-</a>
-<a class="home__btn-page ve-btn ve-btn-default home__btn-rule" href="conditionsdiseases.html" title="A searchable, filterable list of the conditions found in the Player's Handbook, and various diseases found in the Dungeon Master's Guide and beyond.">
-<div class="fal fa-skull-crossbones home__icn-page"></div>
-<h4 class="ve-text-center home__lbl-page">Conditions</h4>
-</a>
-</div>
-<div class="my-4 home__mobile-visible"></div>
-<div class="ve-flex ve-flex-wrap relative home__wrp-buttons">
-<div class="home__stripe-header home__h-dm"><div class="w-100 ve-text-left mobile-sm__text-center">Dungeon Masters</div></div>
-<a class="home__btn-page ve-btn ve-btn-default mr-3 home__btn-dm" href="bestiary.html" title="A searchable, filterable list of the more than 1,000 stat blocks in D&amp;D 5e. An encounter builder is included, and creature Challenge Rating can be scaled according to the &quot;Creating Quick Monster Stats&quot; table in the Dungeon Master's Guide.">
-<div class="fal fa-dragon home__icn-page"></div>
-<h4 class="ve-text-center home__lbl-page">Bestiary</h4>
-</a>
-<a class="home__btn-page ve-btn ve-btn-default mr-3 home__btn-dm" href="dmscreen.html" title="A fully-customizable Dungeon Master's screen, featuring an initiative tracker; a unit converter, embedded images, videos, and sites; and the majority of 5etools' content.">
-<div class="fal fa-map home__icn-page"></div>
-<h4 class="ve-text-center home__lbl-page">DM Screen</h4>
-</a>
-<a class="home__btn-page ve-btn ve-btn-default mr-3 home__btn-dm" href="lootgen.html" title="A random loot generator for both individual and hoards of treasure.">
-<div class="fal fa-treasure-chest home__icn-page"></div>
-<h4 class="ve-text-center home__lbl-page">Loot<br/>Generator</h4>
-</a>
-<a class="home__btn-page ve-btn ve-btn-default home__btn-dm" href="crcalculator.html" title="A verbose, in-depth Challenge Rating calculator, for determining the CR of homebrew creatures.">
-<div class="fal fa-abacus home__icn-page"></div>
-<h4 class="ve-text-center home__lbl-page">CR<br/>Calculator</h4>
-</a>
-</div>
-</div>
-<div class="my-4"></div>
-<hr class="no-shrink w-100 my-0"/>
-</div>
-<main class="container">
-<div class="cancer__wrp-leaderboard cancer__anchor"><div class="cancer__disp-cancer"></div><div class="cancer__wrp-leaderboard-inner cancer__wrp-interactive"><!--5ETOOLS_AD_LEADERBOARD--></div></div>
-<div class="w-100">
-<div class="mb-2" id="wrp-patreon"></div>
-<hr class="hr-4"/>
-<h3>Wanderer &amp; Torch Links</h3>
-<p class="wt-links-sub">Quick launch points for Nevos campaign play, lore, and DM utilities.</p>
-<div class="row">
-<div class="col-sm-6 col-md-3">
-<div class="panel panel-default wt-panel wt-panel--gold">
-<div class="panel-heading"><span class="glyphicon glyphicon-user"></span> Players</div>
-<div class="panel-body">
-<ul class="list-unstyled mb-0">
-<li><a href="https://profcory.github.io/wanderer-torch-nevos/index.html">Campaigns Hub</a></li>
-<li><a href="https://profcory.github.io/wanderer-torch-nevos/calendar.html">Calendar</a></li>
-<li><a href="https://profcory.github.io/wanderer-torch-nevos/character-form.html">Player Form</a></li>
-<li><a href="https://profcory.github.io/wanderer-torch-nevos/Crafting%20and%20Harvesting.html">Crafting Rules</a></li>
-</ul>
-</div>
-</div>
-</div>
-<div class="col-sm-6 col-md-3">
-<div class="panel panel-default wt-panel wt-panel--blue">
-<div class="panel-heading"><span class="glyphicon glyphicon-book"></span> Shops</div>
-<div class="panel-body">
-<ul class="list-unstyled mb-0">
-<li><a href="https://profcory.github.io/wanderer-torch-nevos/SOL.html">The Drifting Compass</a></li>
-<li><a href="https://profcory.github.io/wanderer-torch-nevos/guildshop.html">The Deep Vaults</a></li>
-<li><a href="https://profcory.github.io/wanderer-torch-nevos/KING.html">The Guild's Price Ledger</a></li>
-<li><a href="https://profcory.github.io/wanderer-torch-nevos/The%20Fog%20%26%20the%20Feather.html">The Fog & Feather</a></li>
-<li><a href="https://profcory.github.io/wanderer-torch-nevos/crimson_horn_shop.html">The Crimson Horn</a></li>
-<li><a href="https://profcory.github.io/wanderer-torch-nevos/eaw.html">The Emporium of Arcane Wonders</a></li>
-</ul>
-</div>
-</div>
-</div>
-<div class="col-sm-6 col-md-3">
-<div class="panel panel-default wt-panel wt-panel--orange">
-<div class="panel-heading"><span class="glyphicon glyphicon-blackboard"></span> DM</div>
-<div class="panel-body">
-<ul class="list-unstyled mb-0">
-<li><a href="https://profcory.github.io/wanderer-torch-nevos/general.html">DM Index</a></li>
-<li><a href="https://profcory.github.io/wanderer-torch-nevos/DM%20Screen%20Monday%20Torchbearers.html">DM Screen (Monday)-TBD</a></li>
-<li><a href="https://profcory.github.io/wanderer-torch-nevos/DM%20Screen%20Friday%20Reclaiming%20the%20Scarred%20Stand.html">DM Screen (Friday)-TBD</a></li>
-<li><a href="https://chatgpt.com/g/g-68d1c70c0c0481918536f5a040de82be-downtime-forge">Downtime Generator</a></li>
-</ul>
-</div>
-</div>
-</div>
-<div class="col-sm-6 col-md-3">
-<div class="panel panel-default wt-panel wt-panel--blue">
-<div class="panel-heading"><span class="glyphicon glyphicon-link"></span> Community</div>
-<div class="panel-body">
-<ul class="list-unstyled mb-0">
-<li><a href="https://profcory.github.io/wanderer-torch-nevos/discord.html">Discord-TBD</a></li>
-<li><a href="https://startplaying.games/gm/1609884279199x791348377616252000">StartPlaying</a></li>
-<li><a href="https://profcory.github.io/wanderer-torch-nevos/resources.html">Resources-TBD</a></li>
-<li><a href="https://profcory.github.io/wanderer-torch-nevos/Enter%20the%20Chat.html">Down the Rabbit Hole</a></li>
-</ul>
-</div>
-</div>
-</div>
-</div><div aria-controls="wt-lower" aria-expanded="false" class="wt-toggle" data-target="#wt-lower" data-toggle="collapse"><span class="glyphicon glyphicon-chevron-right"></span><strong>Compliance / Use Notes</strong><small>(click to expand)</small></div><div class="collapse" id="wt-lower"><h3>Use Discord?</h3>
-<p>Join the <a href="https://discord.gg/5etools" rel="noopener noreferrer" target="_blank">fan server</a> for announcements, updates, and feature voting.</p>
-<h3>Use <a href="https://foundryvtt.com/" rel="noopener">Foundry</a>?</h3>
-<p>No? <span class="help" title="Please note that Foundry Gaming, LLC. and The Norr Group Ltd. are in no way affiliated, and that Foundry Gaming, LLC. does not condone the use of their software in violation of your local laws.">Well, you should!</span> Foundry is a modernized, better-than replacement for Roll20, which prioritizes modding support. It is the 5etools platform of choice for VTT integrations.</p>
-<p>To install the <a href="plutonium.html">Plutonium</a> module, and start using all of 5etools' content in your game, paste the manifest URL<sup class="ve-small">[<a href="https://raw.githubusercontent.com/TheGiddyLimit/plutonium-next/master/module.json" rel="noopener noreferrer" target="_blank" title="Plutonium manifest URL for most recent supported Foundry version">current</a>/<a href="https://raw.githubusercontent.com/TheGiddyLimit/plutonium-next/master/module-foundry13.json" rel="noopener noreferrer" target="_blank" title="Plutonium manifest URL for Foundry v13">v13</a>/<a href="https://raw.githubusercontent.com/TheGiddyLimit/plutonium-next/master/module-foundry12.json" rel="noopener noreferrer" target="_blank" title="Plutonium manifest URL for Foundry v12">v12</a>]</sup> into your Foundry server's module installer. See the <a href="plutonium.html">Plutonium Features</a> page for an overview of the functionality the module provides.</p>
-<p>You can also install the <a href="plutonium.html#rivet-browser-extension">Rivet</a> browser extension (<a href="https://chrome.google.com/webstore/detail/rivet/igmilfmbmkmpkjjgoabaagaoohhhbjde" rel="noopener noreferrer">Chrome</a>/<a href="https://addons.mozilla.org/en-GB/firefox/addon/rivet/" rel="noopener noreferrer">Firefox</a>) to import content from the site with a single click.</p>
-<h3>Use Roll20?</h3>
-<p>Install Tampermonkey (<a href="https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo" rel="noopener noreferrer">Chrome</a>/<a href="https://addons.mozilla.org/firefox/addon/tampermonkey/" rel="noopener noreferrer">Firefox</a>), and the betteR20 script<sup class="ve-small">[<a data-link-type="better20" href="https://raw.githubusercontent.com/DeathStalker471/betterR20/refs/heads/dev-beta-death/dist/betteR20-5et2014.user.js" rel="noopener noreferrer">2014</a>/<a data-link-type="better20" href="https://raw.githubusercontent.com/DeathStalker471/betterR20/refs/heads/dev-beta-death/dist/betteR20-5etools.user.js" rel="noopener noreferrer">2024</a>/<a data-link-type="better20" href="https://github.com/DeathStalker471/betterR20/raw/refs/heads/Jumpgate-Importer/dist/betteR20-5et2014.user.js" rel="noopener noreferrer">Jumpgate 2014</a> (experimental)/<a data-link-type="better20" href="https://github.com/DeathStalker471/betterR20/raw/refs/heads/Jumpgate-Importer/dist/betteR20-5etools.user.js" rel="noopener noreferrer">Jumpgate 2024</a> (experimental)]</sup>, all of which require the <a href="https://wiki.roll20.net/images/f/f0/5E_OGL_Sheet_Core_v2.6.png" rel="noopener noreferrer">D&amp;D 5E by Roll20</a> sheet. Only one script should be active at a time.</p>
-<p>Check the <a href="https://wiki.tercept.net/en/betteR20" rel="noopener noreferrer">wiki</a> for an installation guide, and for information on how to use the script.</p>
-<h3>FAQ</h3>
-<p><b>Is there a wiki?</b> <a href="https://wiki.tercept.net/" rel="noopener noreferrer">Here.</a> Contributions are welcome.</p>
-<p><b>Is it free?</b> Yes! You can even <a href="https://github.com/5etools-mirror-3/5etools-src/releases/latest" rel="noopener noreferrer">download the source code</a><sup class="ve-small">[<a href="https://github.com/5etools-mirror-3/5etools-src/releases/latest" rel="noopener noreferrer">current</a>/<a href="https://github.com/5etools-mirror-3/5etools-2014-src/releases/latest" rel="noopener noreferrer">2014</a>]</sup>. See the <code>README</code> or the <a href="https://wiki.tercept.net/en/5eTools/InstallGuide" rel="noopener noreferrer">wiki</a> for help.</p>
-<p><b>Can I contribute?</b> The source is available on <a href="https://github.com/5etools-mirror-3/5etools-src/" rel="noopener noreferrer">GitHub</a><sup class="ve-small">[<a href="https://github.com/5etools-mirror-3/5etools-src/" rel="noopener noreferrer">current</a>/<a href="https://github.com/5etools-mirror-3/5etools-2014-src/" rel="noopener noreferrer">2014</a>]</sup>. See the <a href="https://github.com/5etools-mirror-3/5etools-src/blob/main/CONTRIBUTING.md" rel="noopener noreferrer">Contributing</a> guidance.</p>
-<p><b>Browser and device support?</b> The latest desktop versions of Chrome and Firefox.</p>
-<p><b>Where's my stuff?</b> There's no account system. Everything is stored in cookies. If you wipe those, or close your incognito window, it's gone forever. You can download your data for safekeeping via the Settings menu.</p>
-<p><b>Other versions?</b> A <a href="https://2014.5e.tools/" rel="noopener noreferrer">"2014" version</a> is available, as well as an <a href="https://get.5e.tools/" rel="noopener noreferrer">archive of releases</a>.</p>
-<p><b>Anything else I should know?</b> Hold <kbd>SHIFT</kbd> when hovering to lock a window in place. Everything has tooltips. You will forever be a DM.</p>
-<h3>Self-Hosting</h3>
-<p>You can host a copy of 5etools on anything that can run a basic webserver—examples include <a href="https://developer.mozilla.org/en-US/docs/Learn/Common_questions/set_up_a_local_testing_server" rel="noopener noreferrer">your computer</a>, <a href="https://play.google.com/store/apps/details?id=com.sylkat.apache" rel="noopener noreferrer">your phone</a>, a <a href="https://www.raspberrypi.org/products/" rel="noopener noreferrer">Raspberry Pi</a>, or a free <a href="https://aws.amazon.com/free" rel="noopener noreferrer">EC2</a>/<a href="https://cloud.google.com/free" rel="noopener noreferrer">Compute Engine</a> instance. <a href="https://github.com/5etools-mirror-3/5etools-src/releases/latest" rel="noopener noreferrer">Download the files</a> and <a href="https://github.com/5etools-mirror-3/5etools-img/releases/latest" rel="noopener noreferrer">images</a>, <a href="https://wiki.tercept.net/en/5eTools/InstallGuide" rel="noopener noreferrer">copy them into your server's root directory</a>, and enjoy!</p>
-<div class="alert alert-info small" role="alert">
-<strong>5etools disclaimer:</strong> 5etools is intended as an easily-accessible digital reference for products you already own. Please ensure you only access content in accordance with your local laws.
-		</div>
-</div>
-<div class="alert alert-warning small" role="alert">
-<strong>Compliance / Use Notes:</strong>
-			This site is a table utility and reference for material you already own or are licensed to use.
-			Please ensure you access content in accordance with your local laws.
-		</div>
-<hr class="hr-4"/>
-</div>
+<main id="top">
+<section class="hero" aria-labelledby="hero-title">
+  <div class="hero-copy">
+    <span class="eyebrow">● On the Air · Never-Night Edition</span>
+    <h1 id="hero-title">W&amp;T Tools</h1>
+    <p class="tagline">Wanderer &amp; Torch campaign home base + 5e reference suite.</p>
+    <p class="story"><strong>Your story. Our tools.</strong><br>A world beneath a pendulum sun and twin moons, where twilight lingers, the road keeps talking, and adventure is always one broadcast away.</p>
+    <div class="cta-row"><a class="cta primary" href="#players">Enter the campaign hub</a><a class="cta" href="#reference">Open 5e reference</a></div>
+  </div>
+</section>
+<section class="section" aria-labelledby="links-title">
+  <h2 class="section-title" id="links-title">Wanderer &amp; Torch Links</h2>
+  <p class="section-sub">Jump to what you need—your campaign, your tools, your community.</p>
+  <div class="cards">
+    <article class="panel gold" id="players"><h3>✦ Players</h3><ul>
+      <li><a href="https://profcory.github.io/wanderer-torch-nevos/index.html">Campaigns Hub</a></li><li><a href="https://profcory.github.io/wanderer-torch-nevos/calendar.html">Calendar</a></li><li><a href="https://profcory.github.io/wanderer-torch-nevos/character-form.html">Player Form</a></li><li><a href="https://profcory.github.io/wanderer-torch-nevos/Crafting%20and%20Harvesting.html">Crafting Rules</a></li>
+    </ul></article>
+    <article class="panel blue" id="shops"><h3>⌖ Shops</h3><ul>
+      <li><a href="https://profcory.github.io/wanderer-torch-nevos/SOL.html">The Drifting Compass</a></li><li><a href="https://profcory.github.io/wanderer-torch-nevos/guildshop.html">The Deep Vaults</a></li><li><a href="https://profcory.github.io/wanderer-torch-nevos/KING.html">The Guild’s Price Ledger</a></li><li><a href="https://profcory.github.io/wanderer-torch-nevos/The%20Fog%20%26%20the%20Feather.html">The Fog &amp; Feather</a></li><li><a href="https://profcory.github.io/wanderer-torch-nevos/crimson_horn_shop.html">The Crimson Horn</a></li><li><a href="https://profcory.github.io/wanderer-torch-nevos/eaw.html">The Emporium of Arcane Wonders</a></li>
+    </ul></article>
+    <article class="panel orange" id="dm"><h3>⬡ DM</h3><ul>
+      <li><a href="https://profcory.github.io/wanderer-torch-nevos/general.html">DM Index</a></li><li><a href="#" data-tbd>DM Screen (Monday) · Coming Soon</a></li><li><a href="#" data-tbd>DM Screen (Friday) · Coming Soon</a></li><li><a href="https://chatgpt.com/g/g-68d1c70c0c0481918536f5a040de82be-downtime-forge" rel="noopener noreferrer">Downtime Generator ↗</a></li>
+    </ul></article>
+    <article class="panel blue" id="community"><h3>◉ Community</h3><ul>
+      <li><a href="#" data-tbd>Discord · Coming Soon</a></li><li><a href="https://startplaying.games/gm/1609884279199x791348377616252000" rel="noopener noreferrer">StartPlaying ↗</a></li><li><a href="#" data-tbd>Resources · Coming Soon</a></li><li><a href="https://profcory.github.io/wanderer-torch-nevos/Enter%20the%20Chat.html">Down the Rabbit Hole</a></li>
+    </ul></article>
+  </div>
+</section>
+<section class="section reference" id="reference" aria-labelledby="reference-title">
+  <h2 class="section-title" id="reference-title">5e Reference Suite</h2>
+  <p class="section-sub">Fast access to the rules beneath the radio static.</p>
+  <div class="ref-layout">
+    <div class="ref-grid">
+      <section class="ref-group"><h3>Players</h3><div class="buttons home__narrow-hidden home__narrow-visible">
+        <a class="ref-btn" href="races.html">Species</a><a class="ref-btn" href="classes.html">Classes</a><a class="ref-btn" href="feats.html">Feats</a><a class="ref-btn" href="optionalfeatures.html">Options &amp; Features</a><a class="ref-btn" href="backgrounds.html">Backgrounds</a><a class="ref-btn" href="items.html">Items</a><a class="ref-btn" href="spells.html">Spells</a><a class="ref-btn" href="statgen.html">Stat Generator</a>
+      </div></section>
+      <section class="ref-group rules"><h3>Rules</h3><div class="buttons">
+        <a class="ref-btn" href="adventures.html">Adventures</a><a class="ref-btn" href="books.html">Books</a><a class="ref-btn" href="variantrules.html">Rules Glossary</a><a class="ref-btn" href="conditionsdiseases.html">Conditions</a>
+      </div></section>
+      <section class="ref-group dm-ref"><h3>Dungeon Masters</h3><div class="buttons">
+        <a class="ref-btn" href="bestiary.html">Bestiary</a><a class="ref-btn" href="dmscreen.html">DM Screen</a><a class="ref-btn" href="lootgen.html">Loot Generator</a><a class="ref-btn" href="crcalculator.html">CR Calculator</a>
+      </div></section>
+    </div>
+    <aside class="compliance" aria-labelledby="compliance-title"><h3 id="compliance-title">Compliance / Use Notes</h3>
+      <details open><summary aria-expanded="true">Fan-resource notice</summary><p>This site is a fan-created resource for Wanderer &amp; Torch and the 5th Edition roleplaying game.</p><p>Not affiliated with Wizards of the Coast. Use at your table. Share with care. Support your local game stores.</p></details>
+    </aside>
+  </div>
+</section>
 </main>
-<footer class="container">
-<div class="ve-text-center">
-<div>
-			Version
-			<a href="#" id="version_number">?</a>
-			| <span style="text-decoration: red line-through"> © </span><span id="current_year">2025</span> 5etools
-			| <a href="privacy-policy.html">Privacy Policy</a>
-<div id="consent-box" style="display:none">| <button class="ve-btn ve-btn-default ve-btn-xs" onclick='window.__cmp("showModal")'>Update Cookie Preferences</button></div><script>if (window["nitroAds"] && window["nitroAds"].loaded) { document.getElementById("consent-box").style.display = window["__tcfapi"] ? "inline-block" : "none"; } else { document.addEventListener( "nitroAds.loaded", () => (document.getElementById("consent-box").style.display = window["__tcfapi"] ? "inline-block" : "none") ); }</script>
-<span data-ccpa-link="1"></span>
-</div>
-<div class="mt-2">
-<i>5etools® is a Registered Trademark of The Norr Group Ltd. All rights reserved.</i>
-</div>
-</div>
+<footer class="footer">
+  <div><strong>W&amp;T Tools v<span id="version_number">1.0.0</span></strong><br><small>Built for adventurers, by adventurers.</small></div>
+  <div class="sigil">✦</div>
+  <div class="legal"><a href="privacy-policy.html">Privacy Policy</a> · <button id="cookie-preferences" type="button">Cookie Preferences</button><br>© <span id="current_year"></span> W&amp;T. “5etools” and related upstream marks remain with their respective owners. D&amp;D and Wizards of the Coast are trademarks of Wizards of the Coast LLC. The Norr Group Ltd.</div>
 </footer>
-<div class="cancer__footer-pad"></div>
-<!--5ETOOLS_SCRIPT_ANCHOR-->
-<!--5ETOOLS_AD_ADHESION-->
+<div id="wrp-patreon" hidden></div><div id="consent-box"><span class="ccpa"></span></div>
+</div>
+<!-- AD_ADHESION --><div class="cancer__wrp"></div>
+<!-- 5ETOOLS_SCRIPT_ANCHOR -->
+<script>
+document.getElementById('current_year').textContent=new Date().getFullYear();
+const menu=document.getElementById('menuButton'),nav=document.getElementById('siteNav');
+menu.addEventListener('click',()=>{const open=nav.classList.toggle('open');menu.setAttribute('aria-expanded',String(open));});
+nav.addEventListener('click',()=>{nav.classList.remove('open');menu.setAttribute('aria-expanded','false');});
+document.querySelectorAll('[data-tbd]').forEach(a=>a.addEventListener('click',e=>e.preventDefault()));
+document.querySelectorAll('.compliance summary').forEach(s=>s.addEventListener('click',()=>requestAnimationFrame(()=>s.setAttribute('aria-expanded',String(s.parentElement.open)))));
+</script>
 <script defer="" src="lib/jquery.js" type="text/javascript"></script>
 <script defer="" src="js/parser.js" type="text/javascript"></script>
 <script defer="" src="js/utils.js" type="text/javascript"></script>
@@ -361,12 +188,5 @@ Unearthed Arcana content can be accessed by cycling the "All Sources" button.'>
 <script src="js/index.js" type="module"></script>
 <script defer="" src="js/list2.js" type="text/javascript"></script>
 <script defer="" src="lib/elasticlunr.js" type="text/javascript"></script>
-<script>(function(){
-  var t=document.querySelector('.wt-toggle');
-  if(!t) return;
-  t.addEventListener('click', function(){
-    var expanded = t.getAttribute('aria-expanded') === 'true';
-    t.setAttribute('aria-expanded', expanded ? 'false' : 'true');
-  });
-})();</script></body>
+</body>
 </html>
