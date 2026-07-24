@@ -1,0 +1,114 @@
+{
+  "generated_date": "2026-07-23",
+  "docs_data": {
+    "spells": {
+      "file_count": 30,
+      "total_bytes": 2110767
+    },
+    "bestiary": {
+      "file_count": 202,
+      "total_bytes": 17223781
+    },
+    "class": {
+      "file_count": 33,
+      "total_bytes": 2812891
+    },
+    "items": {
+      "file_count": 3,
+      "total_bytes": 3111558
+    },
+    "races_species": {
+      "file_count": 3,
+      "total_bytes": 1103467
+    },
+    "backgrounds": {
+      "file_count": 2,
+      "total_bytes": 1001682
+    },
+    "feats": {
+      "file_count": 3,
+      "total_bytes": 389860
+    },
+    "actions": {
+      "file_count": 2,
+      "total_bytes": 47836
+    },
+    "conditions": {
+      "file_count": 2,
+      "total_bytes": 66086
+    },
+    "optionalfeatures": {
+      "file_count": 3,
+      "total_bytes": 246264
+    },
+    "deities": {
+      "file_count": 1,
+      "total_bytes": 785626
+    },
+    "objects": {
+      "file_count": 2,
+      "total_bytes": 43686
+    },
+    "vehicles": {
+      "file_count": 3,
+      "total_bytes": 174188
+    },
+    "rewards": {
+      "file_count": 3,
+      "total_bytes": 140361
+    },
+    "psionics": {
+      "file_count": 2,
+      "total_bytes": 109025
+    },
+    "variantrules": {
+      "file_count": 1,
+      "total_bytes": 677006
+    },
+    "tables": {
+      "file_count": 1,
+      "total_bytes": 19867
+    },
+    "languages": {
+      "file_count": 2,
+      "total_bytes": 63603
+    },
+    "trapshazards": {
+      "file_count": 2,
+      "total_bytes": 163321
+    },
+    "recipes": {
+      "file_count": 2,
+      "total_bytes": 1010585
+    },
+    "adventure": {
+      "file_count": 99,
+      "total_bytes": 47550302
+    },
+    "book": {
+      "file_count": 60,
+      "total_bytes": 20189085
+    },
+    "generated": {
+      "file_count": 11,
+      "total_bytes": 6949158
+    }
+  },
+  "docs_data_totals": {
+    "file_count": 494,
+    "total_bytes": 108872106
+  },
+  "site_blocks": {
+    "count": 8,
+    "entity_types": {
+      "condition": 1,
+      "feature": 1,
+      "item": 2,
+      "rule": 2,
+      "spell": 2
+    },
+    "content_types": {
+      "srd-sample": 8
+    }
+  }
+}

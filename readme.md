@@ -14,6 +14,40 @@ The app currently provides:
 - A DM screen with party overview, initiative, private notes, and quick rules.
 - Browser-local persistence with no server or account required.
 
+## DM tools
+
+Standalone, dependency-free helpers that live alongside the dashboard:
+
+- **Severity Damage Expander** — [`site/tools/severity-damage.html`](site/tools/severity-damage.html).
+  Expands the DMG 2024 "Damage Severity by Level" core chart into a draftable stat
+  line: pick party level + severity, place concrete AC/HP inside the tier band with a
+  role slider, split the damage into a multiattack routine, and copy a ready-to-run
+  monster draft. Backed by the matrix in
+  [`docs/monster-drafting-matrix.md`](docs/monster-drafting-matrix.md).
+- **5etools Homebrew Importer &amp; Scraper** — [`site/tools/homebrew-importer.html`](site/tools/homebrew-importer.html).
+  Drop `.json`/`.txt`/`.md`/`.csv` files (or paste text); it scrapes embedded JSON
+  — whole files and fenced ` ```json ` blocks alike — validates it against the
+  5etools homebrew shape (`_meta.sources` + content arrays), lints the `{@tag}`
+  syntax, and merges everything into one downloadable homebrew file. Fully
+  client-side; works offline on a local game network.
+
+### Homebrew conversion workflow
+
+Turning raw statblock/item/spell/class text into loadable 5etools brew JSON is a
+two-step, **extract → tag → validate** pipeline:
+
+1. The installable **[`5etools-homebrew`](.claude/skills/5etools-homebrew/)**
+   skill does the semantic conversion — PDF text extraction, segmenting content,
+   applying the `{@tag}` syntax and 5.5e/2024 conventions, and handling the hard
+   cases (full classes with level tables and subclass/feature references). The
+   human-readable version of its rules lives in
+   [`docs/5etools-homebrew-conversion-guide.md`](docs/5etools-homebrew-conversion-guide.md).
+2. The **Homebrew Importer & Scraper** page validates and merges that JSON into a
+   clean, downloadable brew file before it ever touches the live site.
+
+Design/balance and setup audits for this material live in
+[`docs/reviews/`](docs/reviews/).
+
 ## Run locally
 
 Serve the repository root with any static server, then open `/site/`.
