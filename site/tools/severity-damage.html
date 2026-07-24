@@ -89,10 +89,31 @@
   details p,details li{color:var(--muted);font-size:.88rem}
   .draft{white-space:pre-wrap;background:var(--bg);border:1px solid var(--line);border-radius:8px;
     padding:.8rem;font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--ink);
-    max-height:280px;overflow:auto}
+    max-height:340px;overflow:auto}
   .foot{color:var(--muted);font-size:.8rem;margin-top:2rem;border-top:1px solid var(--line);padding-top:1rem}
   .note{font-size:.82rem;color:var(--muted);margin:.4rem 0 0}
   .warn{color:var(--deadly)}
+  .pickrow{display:flex;gap:.5rem;align-items:center;margin-top:.35rem}
+  .pickrow select{margin-top:0}
+  .swap{flex:0 0 auto;padding:.5rem .65rem;line-height:1}
+  tr.pickable{cursor:pointer}
+  tr.pickable:hover td{background:var(--accent-soft)}
+  tr.picked td{background:var(--accent-soft);font-weight:600}
+  tr.picked td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
+  .kitgrid{display:grid;grid-template-columns:1fr;gap:.7rem;margin:.2rem 0 1rem}
+  @media(min-width:560px){.kitgrid{grid-template-columns:repeat(3,1fr)}}
+  .kitcard{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:.7rem .8rem;
+    display:flex;flex-direction:column;gap:.4rem;min-width:0}
+  .kitcard .kh{display:flex;align-items:center;justify-content:space-between;gap:.4rem}
+  .kitcard .k{font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+  .kitcard .name{font-weight:700;font-size:.95rem}
+  .kitcard .body{font-size:.85rem;color:var(--ink)}
+  .kitcard .hint{font-size:.78rem;color:var(--muted);font-style:italic}
+  .kitcard .empty{color:var(--muted);font-size:.85rem}
+  .swap-mini{background:none;border:1px solid var(--line);border-radius:6px;color:var(--muted);
+    cursor:pointer;font-size:.85rem;padding:.15rem .4rem;line-height:1}
+  .swap-mini:hover{color:var(--ink);border-color:var(--accent)}
+  .bossnote{font-size:.85rem;color:var(--muted);padding:.4rem 0}
 </style>
 </head>
 <body>
@@ -111,8 +132,9 @@
   <p class="lead">
     Pick a party level and a threat severity. The tool resolves the level tier, hands you the
     damage / DC / AC / HP core line, then <strong>expands</strong> it: place a concrete AC & HP inside the
-    band with the role slider, break the damage into a multiattack routine, and copy a ready-to-run draft.
-    Numbers trace to the core matrix in <code>docs/monster-drafting-matrix.md</code>.
+    band with the role slider, pick a Standard Action / Biome / Monster Type to build a coherent kit
+    (swap any slot for an alternate), and copy a ready-to-run draft. Numbers and combos trace to the
+    matrix in <code>docs/monster-drafting-matrix.md</code>.
   </p>
 
   <div class="grid">
@@ -140,6 +162,26 @@
       <div class="rowctl">
         <label><input type="checkbox" id="invert" checked> Glass-cannon coupling
           <small style="font-weight:400;display:inline;color:var(--muted)">(high AC ↔ low HP)</small>
+        </label>
+      </div>
+
+      <label class="field" style="margin-top:1.1rem">Biome
+        <div class="pickrow">
+          <select id="biome"></select>
+        </div>
+        <small>Environment ability that pairs with the Standard Action below.</small>
+      </label>
+
+      <label class="field">Monster type
+        <div class="pickrow">
+          <select id="mtype"></select>
+        </div>
+        <small>Signature trait that sells what it <em>is</em>.</small>
+      </label>
+
+      <div class="rowctl" style="margin-top:.2rem">
+        <label><input type="checkbox" id="bossMode"> Boss / solo encounter
+          <small style="font-weight:400;display:inline;color:var(--muted)">(adds Legendary / Lair / Mythic / Minion add-ons)</small>
         </label>
       </div>
     </section>
@@ -172,6 +214,15 @@
       </table>
       <p class="note" id="atkNote"></p>
 
+      <h2 style="margin-top:1.3rem">Standard action <span class="pill">click a row to pick it</span></h2>
+      <table>
+        <thead><tr><th>Action shape</th><th>Mechanical template</th></tr></thead>
+        <tbody id="actionRows"></tbody>
+      </table>
+
+      <h2 style="margin-top:1.3rem">Suggested kit</h2>
+      <div class="kitgrid" id="kitGrid"></div>
+
       <h2 style="margin-top:1.3rem">Severity ladder (this tier)</h2>
       <table>
         <thead><tr><th>Severity</th><th>Dice</th><th class="num">Avg</th><th>Use for</th></tr></thead>
@@ -183,9 +234,9 @@
         <tbody id="derivedRows"></tbody>
       </table>
 
-      <details>
-        <summary>Standard actions for this severity (from the matrix)</summary>
-        <div id="actionsBox"></div>
+      <details id="bossDetails">
+        <summary>Boss / solo encounter add-ons</summary>
+        <div id="bossBox"></div>
       </details>
 
       <h2 style="margin-top:1.3rem">Copyable draft</h2>
@@ -200,8 +251,11 @@
   <p class="foot">
     Self-contained, no network calls, no dependencies. Core damage / DC / AC / HP values are the
     matrix’s DMG-2024-sourced numbers; the <em>expansions</em> (role placement, multiattack split,
-    legendary/minion budgets) are derived heuristics — sanity-check total damage-per-round against
-    real party HP before a Deadly fight.
+    Standard Action / Biome / Type kit, legendary/minion/lair/mythic budgets) are the matrix’s own
+    flavor menu, not verified math — sanity-check total damage-per-round against real party HP
+    before a Deadly fight, and see <code>docs/reviews/monster-drafting-balance-review.md</code> for
+    the full balance pass (solo-boss HP bands run low; the “save-or-die-adjacent” shape needs a
+    telegraph and half-on-success before you hand it to a table).
   </p>
 </main>
 
@@ -249,6 +303,68 @@ const ACTIONS = {
   ]
 };
 
+// ---- Biome / Type / boss add-on data (mirrors the matrix subtables) ----
+const BIOMES = [
+  {name:"Forest / jungle", ability:"Roots/vines grapple or entangle; canopy blocks ranged attacks and imposes Disadvantage on Perception.", shape:"Reposition or Save-or-suffer (Restrained)"},
+  {name:"Mountain / highlands", ability:"Rockslide or thin air; forced movement toward a ledge, or Exhaustion accumulation over time.", shape:"Area nuisance or Escalation trigger"},
+  {name:"Swamp / marsh", ability:"Difficult terrain that’s also hazardous (sucking mud, methane pockets); Poisoned on failed save.", shape:"Area burst, low severity, ongoing"},
+  {name:"Desert", ability:"Heat exhaustion, sandstorm reduces visibility (Blinded-adjacent), mirage/illusion misdirection.", shape:"Minor debuff or Area nuisance"},
+  {name:"Arctic / tundra", ability:"Cold damage riders on attacks; ice terrain imposes Prone on failed Dex save when moving.", shape:"Single strike + Reposition combo"},
+  {name:"Underdark / caves", ability:"Total darkness exploited (blindsight vs. non-seeing PCs), cave-ins, spore clouds (Poisoned/Frightened).", shape:"Save-or-suffer or Lair trigger"},
+  {name:"Coastal / aquatic", ability:"Drowning rules apply, currents force movement, tide timing as a countdown clock.", shape:"Reposition or Escalation trigger"},
+  {name:"Urban / dungeon interior", ability:"Traps, collapsing structures, crowd/civilian complications, narrow corridors limiting positioning.", shape:"Warning shot or Area burst (small, contained)"},
+  {name:"Planar / extradimensional", ability:"Reality distortion — teleportation, gravity shifts, area deals psychic instead of physical.", shape:"Any shape, reskin damage type to psychic/force"},
+  {name:"Volcanic / elemental", ability:"Environmental Deadly-tier damage sources (lava, ash storms) that don’t need a “monster” at all.", shape:"Escalation trigger or standalone hazard"},
+];
+const TYPES = [
+  {name:"Aberration", trait:"Alters reality/mind on hit or proximity — Frightened, Charmed, or short-term memory loss, no obvious cause.", shape:"Save-or-suffer"},
+  {name:"Beast", trait:"Pack tactics (Advantage when an ally is adjacent to the same target) or superior senses (Advantage on Perception/tracking).", shape:"Passive trait, pairs with Multiattack"},
+  {name:"Celestial", trait:"Radiant damage rider; can end one condition on itself or an ally once per fight; smites on a critical.", shape:"Single heavy strike + passive"},
+  {name:"Construct", trait:"Immune to Poisoned/Exhaustion/Frightened; extremely resistant to conditions generally; slow but relentless.", shape:"Passive trait, pairs with a Reposition-resistant single strike"},
+  {name:"Dragon", trait:"Breath weapon (Area burst, Dangerous–Deadly, recharge) plus a passive fear aura (Frightened at close range).", shape:"Recharge burst + passive"},
+  {name:"Elemental", trait:"Immune to its own damage type; leaves a hazardous area behind it as it moves.", shape:"Area nuisance (persistent, not one-shot)"},
+  {name:"Fey", trait:"Illusion/charm-based control rather than raw damage; teleports short distances as a bonus-action equivalent.", shape:"Minor debuff or Save-or-suffer, low direct damage"},
+  {name:"Fiend", trait:"Damage rider is always something nasty (necrotic/fire) plus a curse-like debuff that lingers past the fight.", shape:"Single strike + lingering minor debuff"},
+  {name:"Giant", trait:"Simply hits much harder than its tier suggests — bump one severity step on a single strike, forced movement on hit.", shape:"Single heavy strike (upgraded)"},
+  {name:"Humanoid (notable NPC)", trait:"Tactical intelligence — uses cover, focuses the weakest-looking PC, retreats/calls for help below 50% HP.", shape:"Behavioral note, not a mechanical ability"},
+  {name:"Monstrosity", trait:"Grab-and-hold: Multiattack where one hit grapples and a second hit auto-damages grappled targets.", shape:"Multiattack (2) with a grapple rider"},
+  {name:"Ooze", trait:"Splits or corrodes equipment on hit; immune to nonmagical weapon damage or one damage type entirely.", shape:"Passive trait, pairs with any single strike"},
+  {name:"Plant", trait:"Slow, high HP, hits are secondary to area control (spores, roots, overgrowth restricting movement).", shape:"Area nuisance (persistent) + Reposition"},
+  {name:"Undead", trait:"Immune/resistant to Poisoned and Exhaustion; life drain heals it on hit; Frightened aura for the newly dead.", shape:"Single strike with a life-drain rider"},
+];
+const LEGENDARY = [
+  {cost:1, name:"Minor strike", tmpl:"One attack roll, Setback damage on hit. No movement."},
+  {cost:1, name:"Reposition", tmpl:"Move up to half speed without provoking Opportunity Attacks."},
+  {cost:1, name:"Sense/detect", tmpl:"Wisdom (Perception) check, or force a check from a nearby PC (e.g., resist an effect)."},
+  {cost:2, name:"Heavy strike", tmpl:"One attack roll, Dangerous damage on hit."},
+  {cost:2, name:"Minor area effect", tmpl:"Small area (10 ft.), Setback damage, DC save for half."},
+  {cost:3, name:"Full action", tmpl:"A full Standard Action row at the tier one step below the monster’s own severity."},
+];
+const LAIR = [
+  {name:"Structural", kind:"Collapse/shift", tmpl:"A section of terrain becomes difficult terrain, collapses, or opens a hazard — forced movement or area denial."},
+  {name:"Elemental", kind:"Environmental damage pulse", tmpl:"Setback-to-Dangerous damage in a defined zone, DC save for half — reskin to the lair’s theme."},
+  {name:"Sensory", kind:"Obscurement", tmpl:"Darkness, fog, or blinding light fills an area — Disadvantage on Perception or attacks inside."},
+  {name:"Summoning", kind:"Reinforcements", tmpl:"Once per fight (not every round), pulls in 1–2 Minion/Swarm/Summon entries."},
+  {name:"Debuff", kind:"Draining aura", tmpl:"Creatures in a zone have Disadvantage on saves vs. the boss’s other abilities, or the boss gains temp HP."},
+  {name:"Restorative", kind:"Boss regeneration", tmpl:"The boss regains a small flat HP amount (Setback-tier value)."},
+];
+const MYTHIC = [
+  {trigger:"Drops to 0 HP", name:"Second wind", tmpl:"Regains HP equal to its Deadly-tier damage value and gains a new trait."},
+  {trigger:"Drops to 0 HP", name:"Escalating rider", tmpl:"Standard Actions shift up one severity tier permanently for the rest of the fight."},
+  {trigger:"Reaches 50% of mythic HP", name:"Environmental shift", tmpl:"The battlefield changes — the biome ability activates or intensifies."},
+  {trigger:"Any mythic trigger", name:"New resistance/immunity", tmpl:"Gains resistance/immunity to whatever damage type the party has leaned on hardest."},
+  {trigger:"Any mythic trigger", name:"Mythic action pool", tmpl:"Gains a legendary-action-style pool, usable only during the mythic phase."},
+  {trigger:"Final trigger (last threshold)", name:"Death throes", tmpl:"One last Deadly-tier area burst centered on itself on true death — telegraph it."},
+];
+const MINIONS = [
+  {name:"Minion (single-hit)", tmpl:"1 HP effectively; dies on any hit that deals damage; one Setback attack."},
+  {name:"Minion (mob, tracked)", tmpl:"HP ≈ ¼ of the single-target band, tracked individually; same Setback attack."},
+  {name:"Swarm (area presence)", tmpl:"One stat block for the whole cluster; auto Setback damage to anyone starting in its space; Dangerous-tier HP pool."},
+  {name:"Swarm (degrading)", tmpl:"Damage output steps down as its HP drops past thresholds (Dangerous → Setback → gone)."},
+  {name:"Summon (ally-of-boss)", tmpl:"The boss’s action pulls in 1d4 Minions or one Setback creature, acting on its initiative count."},
+  {name:"Summon (lair-triggered)", tmpl:"A lair action itself is the summon trigger, once per fight."},
+];
+
 // ---- helpers ----
 const $ = s => document.querySelector(s);
 const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
@@ -271,6 +387,10 @@ function tierForLevel(lv){ return TIERS.find(t=>lv>=t.min&&lv<=t.max) || TIERS[T
 
 // ---- state ----
 let sev = "dangerous";
+let actionIdx = 0;
+let biomeIdx = -1;   // -1 = none selected
+let typeIdx = -1;    // -1 = none selected
+let legIdx = 0, lairIdx = 0, mythIdx = 0, minionIdx = 0;
 
 function currentModel(){
   const lv = clamp(parseInt($("#level").value||"1",10),1,20);
@@ -319,8 +439,10 @@ function render(){
   }).join("");
 
   renderAttacks(m);
+  renderActionRows();
+  renderKit();
   renderDerived(m);
-  renderActions();
+  renderBossAddons(m);
   renderDraft(m);
 }
 
@@ -335,7 +457,6 @@ function renderAttacks(m){
     // give any rounding remainder to the last hit so the aggregate matches
     let a = (i===atk-1) ? Math.round(total-running) : Math.round(per);
     running += a;
-    const below = i<atk-1 ? "" : "";
     rows.push('<tr><td class="num">'+(i+1)+'</td><td class="num">'+diceFor(a)+'</td>'+
       '<td class="num">'+a+'</td><td>'+(atk===1?"Single strike — full severity in one hit."
         :"≈1/"+atk+" of the round’s damage")+'</td></tr>');
@@ -354,6 +475,77 @@ function renderAttacks(m){
   }
 }
 
+function renderActionRows(){
+  const list = ACTIONS[sev];
+  actionIdx = clamp(actionIdx, 0, list.length-1);
+  $("#actionRows").innerHTML = list.map((a,i)=>
+    '<tr class="pickable'+(i===actionIdx?' picked':'')+'" data-i="'+i+'">'+
+    '<td style="font-weight:600;white-space:nowrap">'+a[0]+'</td><td>'+a[1]+'</td></tr>'
+  ).join("");
+  $("#actionRows").querySelectorAll("tr[data-i]").forEach(tr=>{
+    tr.addEventListener("click",()=>{ actionIdx = +tr.dataset.i; render(); });
+  });
+}
+
+function populateSelect(sel, list, labelFn){
+  sel.innerHTML = '<option value="-1">— None —</option>' +
+    list.map((x,i)=>'<option value="'+i+'">'+labelFn(x)+'</option>').join("");
+}
+
+function kitCard(kicker, title, body, hint, onSwap){
+  const swapBtn = onSwap ? '<button class="swap-mini" type="button" data-swap="1">🔀</button>' : '';
+  const div = document.createElement("div");
+  div.className = "kitcard";
+  if(title==null){
+    div.innerHTML = '<div class="kh"><span class="k">'+kicker+'</span>'+swapBtn+'</div><div class="empty">'+body+'</div>';
+  } else {
+    div.innerHTML = '<div class="kh"><span class="k">'+kicker+'</span>'+swapBtn+'</div>'+
+      '<div class="name">'+title+'</div><div class="body">'+body+'</div>'+
+      (hint?'<div class="hint">'+hint+'</div>':'');
+  }
+  if(onSwap){ div.querySelector('[data-swap]').addEventListener("click",onSwap); }
+  return div;
+}
+
+function renderKit(){
+  const grid = $("#kitGrid");
+  grid.innerHTML = "";
+
+  // Action card (always present — mirrors the picked row above)
+  const act = ACTIONS[sev][actionIdx];
+  grid.appendChild(kitCard("Standard action", act[0], act[1], null, ()=>{
+    actionIdx = (actionIdx+1) % ACTIONS[sev].length; render();
+  }));
+
+  // Biome card
+  if(biomeIdx<0){
+    grid.appendChild(kitCard("Biome", null, "None selected — pick one in the inputs, or swap to roll one in.", null, ()=>{
+      biomeIdx = 0; render();
+    }));
+  } else {
+    const b = BIOMES[biomeIdx];
+    grid.appendChild(kitCard("Biome — "+b.name, b.name, b.ability, "Suggested shape: "+b.shape, ()=>{
+      biomeIdx = (biomeIdx+1) % BIOMES.length; render();
+    }));
+  }
+
+  // Type card
+  if(typeIdx<0){
+    grid.appendChild(kitCard("Monster type", null, "None selected — pick one in the inputs, or swap to roll one in.", null, ()=>{
+      typeIdx = 0; render();
+    }));
+  } else {
+    const t = TYPES[typeIdx];
+    grid.appendChild(kitCard("Type — "+t.name, t.name, t.trait, "Suggested shape: "+t.shape, ()=>{
+      typeIdx = (typeIdx+1) % TYPES.length; render();
+    }));
+  }
+
+  // keep the input-panel selects in sync
+  $("#biome").value = String(biomeIdx);
+  $("#mtype").value = String(typeIdx);
+}
+
 function renderDerived(m){
   const sb = m.tier.sev.setback, dg = m.tier.sev.dangerous;
   const rows = [
@@ -369,10 +561,36 @@ function renderDerived(m){
     '</td><td>'+r[1]+'</td></tr>').join("");
 }
 
-function renderActions(){
-  $("#actionsBox").innerHTML = '<table><thead><tr><th>Action shape</th><th>Template</th></tr></thead><tbody>'+
-    ACTIONS[sev].map(a=>'<tr><td style="font-weight:600;white-space:nowrap">'+a[0]+'</td><td>'+a[1]+'</td></tr>').join("")+
-    '</tbody></table>';
+function renderBossAddons(m){
+  const box = $("#bossBox");
+  const on = $("#bossMode").checked;
+  if(!on){
+    box.innerHTML = '<p class="bossnote">Enable “Boss / solo encounter” in the inputs to draft a Legendary Action, a Lair Action, a Mythic Trait, and a Minion/Swarm/Summon template alongside the core kit.</p>';
+    return;
+  }
+  const leg = LEGENDARY[legIdx], lair = LAIR[lairIdx], myth = MYTHIC[mythIdx], min = MINIONS[minionIdx];
+  const row = (label, idx, setIdx, list, html) =>
+    '<div class="kitcard" style="margin-bottom:.6rem"><div class="kh"><span class="k">'+label+'</span>'+
+    '<button class="swap-mini" type="button" data-role="'+label+'">🔀</button></div>'+html+'</div>';
+  box.innerHTML =
+    row("Legendary action", legIdx, null, LEGENDARY,
+      '<div class="name">('+leg.cost+'pt) '+leg.name+'</div><div class="body">'+leg.tmpl+'</div>') +
+    row("Lair action", lairIdx, null, LAIR,
+      '<div class="name">'+lair.name+' — '+lair.kind+'</div><div class="body">'+lair.tmpl+'</div>') +
+    row("Mythic trait", mythIdx, null, MYTHIC,
+      '<div class="name">'+myth.name+'</div><div class="hint">'+myth.trigger+'</div><div class="body">'+myth.tmpl+'</div>') +
+    row("Minion / swarm / summon", minionIdx, null, MINIONS,
+      '<div class="name">'+min.name+'</div><div class="body">'+min.tmpl+'</div>');
+  box.querySelectorAll('[data-role]').forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      const role = btn.dataset.role;
+      if(role==="Legendary action") legIdx = (legIdx+1)%LEGENDARY.length;
+      else if(role==="Lair action") lairIdx = (lairIdx+1)%LAIR.length;
+      else if(role==="Mythic trait") mythIdx = (mythIdx+1)%MYTHIC.length;
+      else if(role==="Minion / swarm / summon") minionIdx = (minionIdx+1)%MINIONS.length;
+      render();
+    });
+  });
 }
 
 function renderDraft(m){
@@ -380,7 +598,12 @@ function renderDraft(m){
   const per = Math.round(m.cell.avg/atk);
   const routine = atk===1 ? "Single strike: "+m.cell.dice+" ("+m.cell.avg+")"
     : "Multiattack ("+atk+"): "+atk+" × "+diceFor(per)+" ≈ "+m.cell.avg+" total";
-  const txt =
+  const act = ACTIONS[sev][actionIdx];
+  const biome = biomeIdx>=0 ? BIOMES[biomeIdx] : null;
+  const type = typeIdx>=0 ? TYPES[typeIdx] : null;
+  const bossOn = $("#bossMode").checked;
+
+  let txt =
 `── MONSTER DRAFT ──────────────────────
 Party level : ${m.lv}   (tier ${m.tier.label})
 Severity    : ${sev.toUpperCase()}  — ${SEV_USE[sev]}
@@ -389,9 +612,23 @@ Save DC     : ${m.dc}
 Damage/round: ${m.cell.dice}  (avg ${m.cell.avg})
 Attack      : ${routine}
 
-Legendary   : 3 pts/round (Minor ${m.tier.sev.setback.dice} =1pt · Heavy ${m.tier.sev.dangerous.dice} =2pt)
-Minion      : ${m.tier.sev.setback.dice} Setback attack, dies to any hit
-Reminder    : sanity-check ${m.cell.avg}/round vs. party HP before committing.
+Standard action : ${act[0]} — ${act[1]}`;
+  if(biome) txt += `\nBiome (${biome.name}) : ${biome.ability}\n  ↳ suggested shape: ${biome.shape}`;
+  if(type) txt += `\nType (${type.name}) : ${type.trait}\n  ↳ suggested shape: ${type.shape}`;
+
+  txt += `\n\nLegendary   : 3 pts/round (Minor ${m.tier.sev.setback.dice} =1pt · Heavy ${m.tier.sev.dangerous.dice} =2pt)
+Minion      : ${m.tier.sev.setback.dice} Setback attack, dies to any hit`;
+
+  if(bossOn){
+    const leg = LEGENDARY[legIdx], lair = LAIR[lairIdx], myth = MYTHIC[mythIdx], min = MINIONS[minionIdx];
+    txt += `\n\n── BOSS ADD-ONS ───────────────────────
+Legendary action : (${leg.cost}pt) ${leg.name} — ${leg.tmpl}
+Lair action      : ${lair.name} (${lair.kind}) — ${lair.tmpl}
+Mythic trait     : [${myth.trigger}] ${myth.name} — ${myth.tmpl}
+Minion template  : ${min.name} — ${min.tmpl}`;
+  }
+
+  txt += `\nReminder    : sanity-check ${m.cell.avg}/round vs. party HP before committing.
 ───────────────────────────────────────`;
   $("#draft").textContent = txt;
 }
@@ -400,12 +637,19 @@ Reminder    : sanity-check ${m.cell.avg}/round vs. party HP before committing.
 document.querySelectorAll(".sev-toggle button").forEach(b=>{
   b.addEventListener("click",()=>{
     sev = b.dataset.sev;
+    actionIdx = 0;
     document.querySelectorAll(".sev-toggle button").forEach(x=>x.setAttribute("aria-pressed", x===b));
     render();
   });
 });
 ["level","role","atk"].forEach(id=>$("#"+id).addEventListener("input",render));
 $("#invert").addEventListener("change",render);
+$("#bossMode").addEventListener("change",()=>{ $("#bossDetails").open = $("#bossMode").checked; render(); });
+
+populateSelect($("#biome"), BIOMES, b=>b.name);
+populateSelect($("#mtype"), TYPES, t=>t.name);
+$("#biome").addEventListener("change",()=>{ biomeIdx = parseInt($("#biome").value,10); render(); });
+$("#mtype").addEventListener("change",()=>{ typeIdx = parseInt($("#mtype").value,10); render(); });
 
 $("#rollBtn").addEventListener("click",()=>{
   const m = currentModel();
