@@ -16,15 +16,18 @@ The app currently provides:
 
 ## DM tools
 
-Standalone, dependency-free helpers that live alongside the dashboard:
+Standalone, dependency-free helpers that live in `docs/tools/` — published live
+alongside the 5etools mirror (GitHub Pages serves `docs/`), and linked from the
+DM panel on the [landing page](docs/index.html):
 
-- **Severity Damage Expander** — [`site/tools/severity-damage.html`](site/tools/severity-damage.html).
+- **Severity Damage Expander** — [`docs/tools/severity-damage.html`](docs/tools/severity-damage.html).
   Expands the DMG 2024 "Damage Severity by Level" core chart into a draftable stat
   line: pick party level + severity, place concrete AC/HP inside the tier band with a
-  role slider, split the damage into a multiattack routine, and copy a ready-to-run
-  monster draft. Backed by the matrix in
+  role slider, split the damage into a multiattack routine, pick a Standard Action /
+  Biome / Monster Type to build a coherent kit (swap any slot for an alternate), and
+  copy a ready-to-run monster draft. Backed by the matrix in
   [`docs/monster-drafting-matrix.md`](docs/monster-drafting-matrix.md).
-- **5etools Homebrew Importer &amp; Scraper** — [`site/tools/homebrew-importer.html`](site/tools/homebrew-importer.html).
+- **5etools Homebrew Importer &amp; Scraper** — [`docs/tools/homebrew-importer.html`](docs/tools/homebrew-importer.html).
   Drop `.json`/`.txt`/`.md`/`.csv` files (or paste text); it scrapes embedded JSON
   — whole files and fenced ` ```json ` blocks alike — validates it against the
   5etools homebrew shape (`_meta.sources` + content arrays), lints the `{@tag}`
@@ -63,7 +66,10 @@ Opening `site/index.html` directly may prevent the browser from loading JSON bec
 
 ## GitHub Pages
 
-Configure Pages to deploy from the branch containing the build and use `/site` as the published folder when that option is available. The app contains no build step or external dependency.
+Pages is configured to deploy from `main` / `docs` — that's the vendored 5etools mirror,
+the landing page, and the DM tools above. The `site/` WT Tools dashboard build is a
+separate, not-yet-published prototype; it isn't served by Pages and has no build step
+or external dependency of its own.
 
 ## Data status
 

@@ -114,10 +114,11 @@ Before returning, self-check:
 - Every `{@tag}` has balanced braces and a real tag name.
 
 Then tell the user to run the file through the **WT Tools Homebrew Importer**
-(`site/tools/homebrew-importer.html` in the wt-tools repo — open it in a browser,
-drop the file in). It re-checks parse validity, missing `name`/`source`, orphan
-sources, and malformed tags before anything touches the live 5etools site, where
-a single bad file white-screens the whole thing.
+(`docs/tools/homebrew-importer.html` in the wt-tools repo — published live
+alongside the 5etools mirror, or open the file directly in a browser — drop the
+file in). It re-checks parse validity, missing `name`/`source`, orphan sources,
+and malformed tags before anything touches the live 5etools site, where a single
+bad file white-screens the whole thing.
 
 ## Output
 
