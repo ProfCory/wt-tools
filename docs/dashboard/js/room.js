@@ -4,8 +4,11 @@
  * Message protocol (JSON over the PeerJS data channel):
  *   { type: "ping", ts }
  *   { type: "pong", ts }
- * Later phases add more message types (slot-claim, sheet-update, vtt-*, etc.)
- * — every message MUST have a "type" field so peers can dispatch on it.
+ *   { type: "slots-sync", slots }            DM -> one or all peers
+ *   { type: "claim-slot", index, name }      player -> DM
+ *   { type: "claim-rejected", index, reason } DM -> requesting peer
+ * Later phases add more message types (sheet-update, vtt-*, etc.) — every
+ * message MUST have a "type" field so peers can dispatch on it.
  */
 (function (global) {
 	"use strict";
