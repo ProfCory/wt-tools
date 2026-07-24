@@ -12,9 +12,10 @@ Reference for converting running text (statblocks, items, spells, species) into
 valid, interactive **5etools homebrew JSON**. Used two ways:
 
 1. **By hand** — as a lookup for the schema shape and `{@tag}` syntax.
-2. **By an agent** — the `homebrew-converter` agent (`.claude/agents/homebrew-converter.md`)
-   applies these rules to produce tagged JSON, which you then run through the
-   **[Homebrew Importer & Scraper](../site/tools/homebrew-importer.html)** to
+2. **By the skill** — the installable `5etools-homebrew` skill
+   (`.claude/skills/5etools-homebrew/`) applies these rules to produce tagged
+   JSON, which you then run through the
+   **[Homebrew Importer & Scraper](tools/homebrew-importer.html)** to
    validate and merge.
 
 The reliable pipeline is **extract text → verify → tag → validate**, not
@@ -175,7 +176,7 @@ Because 5.5e is the primary ruleset, converted text should reflect the 2024 upda
   agent share one source of truth.
 - **Validate every `.json` before committing.** A single parse error
   white-screens the site. Run files through the
-  [Homebrew Importer & Scraper](../site/tools/homebrew-importer.html) first — it
+  [Homebrew Importer & Scraper](tools/homebrew-importer.html) first — it
   reports parse errors, missing `name`/`source`, orphan sources, and malformed
   `{@tag}` syntax before anything reaches the live site.
 - Host homebrew JSON in a **separate repo** from the core 5etools mirror to avoid
