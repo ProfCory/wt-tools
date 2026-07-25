@@ -93,6 +93,7 @@
     "classes": {
       "type": "array",
       "minItems": 1,
+      "maxItems": 20,
       "items": {
         "$ref": "#/$defs/classProgression"
       }
@@ -137,6 +138,7 @@
     },
     "spellcasting": {
       "type": "array",
+      "uniqueItems": true,
       "items": {
         "$ref": "#/$defs/spellcastingProgression"
       }
@@ -145,19 +147,22 @@
       "type": "array",
       "items": {
         "$ref": "#/$defs/resourceInstance"
-      }
+      },
+      "$comment": "Resource ids are unique and current must not exceed maximum; both constraints require collection/business validation."
     },
     "inventory": {
       "type": "array",
       "items": {
         "$ref": "#/$defs/inventoryInstance"
-      }
+      },
+      "$comment": "Inventory instance ids are unique; enforce this in business validation."
     },
     "conditions": {
       "type": "array",
       "items": {
         "$ref": "#/$defs/conditionInstance"
-      }
+      },
+      "$comment": "Condition instance ids are unique; enforce this in business validation."
     },
     "choiceIds": {
       "type": "array",
@@ -171,6 +176,7 @@
     },
     "advancementHistory": {
       "type": "array",
+      "maxItems": 20,
       "items": {
         "$ref": "#/$defs/advancementRecord"
       }
@@ -244,7 +250,8 @@
         "subclass": {
           "$ref": "#/$defs/definitionRef"
         }
-      }
+      },
+      "$comment": "The sum of class levels must be between 1 and 20; enforce this in business validation."
     },
     "spellcastingProgression": {
       "type": "object",
@@ -312,7 +319,8 @@
             "manual"
           ]
         }
-      }
+      },
+      "$comment": "current must be less than or equal to maximum; enforce this in business validation."
     },
     "inventoryInstance": {
       "type": "object",
