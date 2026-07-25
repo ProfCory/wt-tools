@@ -245,11 +245,22 @@ validates all records before replacing active state and reports migrations.
 
 ## Phased implementation
 
-### Phase 0 — contracts
+### Phase 0 — contracts (complete)
 
-- Land this build specification and the three schemas.
-- Add schema validation fixtures and resolver unit fixtures for PHB/XPHB name
-  collisions, missing spell `classes`, `baseitem[]`, and nested backgrounds.
+- [x] Land this build specification and the three schemas.
+- [x] Add schema-valid campaign, character, and choice examples.
+- [x] Add resolver fixtures for PHB/XPHB name collisions, editionless spells
+  without `classes`, `baseitem[]`, source-qualified item metadata, and nested
+  backgrounds.
+- [x] Enforce cross-record business invariants in executable contract tests.
+- [x] Run the Phase 0 suite in GitHub Actions for dashboard changes.
+
+Run the same suite locally from `docs/` after installing dependencies:
+
+```sh
+node --check dashboard/js/data-resolver.js
+node --test dashboard/test/*.test.mjs
+```
 
 ### Phase 1 — resolver and policy
 
@@ -285,4 +296,3 @@ The character-sheet build is ready for implementation when:
 - removing a choice cleanly revokes its dependent grants
 - multiclass progressions remain separate
 - disallowed and DM-hidden records cannot appear in serialized player payloads
-
