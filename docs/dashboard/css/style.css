@@ -184,3 +184,73 @@ button:disabled {
 	padding: 0.15rem 0;
 	border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
+
+#builder-form {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+}
+
+.builder-field {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+	font-size: 0.85rem;
+}
+
+.builder-field input,
+.builder-field select {
+	padding: 0.35rem 0.5rem;
+	background: var(--bg);
+	color: var(--text);
+	border: 1px solid var(--border);
+	border-radius: 6px;
+}
+
+fieldset {
+	border: 1px solid var(--border);
+	border-radius: 6px;
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 0.5rem;
+}
+
+.builder-preview {
+	background: var(--bg);
+	border: 1px solid var(--border);
+	border-radius: 6px;
+	padding: 0.5rem 0.75rem;
+	font-size: 0.85rem;
+}
+
+.stats-list {
+	display: grid;
+	grid-template-columns: auto 1fr;
+	gap: 0.15rem 0.75rem;
+	margin: 0;
+}
+
+.stats-list dt {
+	color: var(--muted);
+}
+
+.stats-list dd {
+	margin: 0;
+}
+
+.feature-list,
+#f-spells-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.spell-option {
+	display: block;
+	font-size: 0.85rem;
+}
+
+.slot-char-summary {
+	color: var(--muted);
+	font-size: 0.8rem;
+}

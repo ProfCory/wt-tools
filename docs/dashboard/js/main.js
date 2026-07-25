@@ -19,6 +19,11 @@
 		dmSlots: $("#dm-slots"),
 		playerSlotsWrap: $("#player-slots-wrap"),
 		playerSlots: $("#player-slots"),
+		builderWrap: $("#builder-wrap"),
+		builderForm: $("#builder-form"),
+		btnBuildSave: $("#btn-build-save"),
+		sheetWrap: $("#sheet-wrap"),
+		sheetView: $("#sheet-view"),
 	};
 
 	function log(msg) {
@@ -50,7 +55,7 @@
 	 * Renders the 5 slots into `container`. In player mode, empty slots get a
 	 * name input + Claim button; `onClaim(index, name)` fires on click.
 	 */
-	function renderSlots(container, slots, { myPeerId = null, onClaim = null } = {}) {
+	function renderSlots(container, slots, { myPeerId = null, onClaim = null, characters = null } = {}) {
 		container.innerHTML = "";
 		for (const slot of slots) {
 			const li = document.createElement("li");
@@ -67,6 +72,15 @@
 				name.className = "slot-name";
 				name.textContent = slot.name + (slot.peerId === myPeerId ? " (you)" : "");
 				li.appendChild(name);
+
+				const charExport = characters?.get(slot.peerId);
+				if (charExport) {
+					const cls = charExport.choices.classes[0];
+					const summary = document.createElement("span");
+					summary.className = "slot-char-summary";
+					summary.textContent = ` — ${charExport.name}, Lvl ${cls.level}, AC ${charExport.derived.armor_class}, HP ${charExport.state.current_hp}/${charExport.derived.max_hp}`;
+					li.appendChild(summary);
+				}
 			} else if (onClaim) {
 				const input = document.createElement("input");
 				input.type = "text";
@@ -107,9 +121,10 @@
 		log("Starting host session…");
 		const host = new WTRoom.DMHost();
 		const slotManager = new WTSlots.SlotManager();
+		const characters = new Map(); // peerId -> latest character-full export
 
 		function renderDmSlots() {
-			renderSlots(els.dmSlots, slotManager.snapshot());
+			renderSlots(els.dmSlots, slotManager.snapshot(), { characters });
 		}
 		renderDmSlots();
 
@@ -140,6 +155,10 @@
 				} else {
 					host.sendTo(peerId, { type: "claim-rejected", index: data.index, reason: result.reason });
 				}
+			} else if (data && data.type === "character-full") {
+				characters.set(peerId, data.character);
+				log(`Character update from ${peerId}: ${data.character.name}`);
+				renderDmSlots();
 			}
 		});
 
@@ -167,7 +186,10 @@
 		els.playerStatus.textContent = `Connecting to room ${roomCode}…`;
 		log(`Connecting to room ${roomCode}…`);
 		const client = new WTRoom.PlayerClient(roomCode);
+		const compendium = new WTCompendium.Compendium();
 		let latestSlots = WTSlots.createEmptySlots();
+		let builderMounted = false;
+		let latestCharacter = null;
 
 		function renderPlayerSlots() {
 			renderSlots(els.playerSlots, latestSlots, {
@@ -175,6 +197,24 @@
 				onClaim: (index, name) => {
 					log(`Claiming slot ${index + 1} as "${name}"…`);
 					client.send({ type: "claim-slot", index, name });
+				},
+			});
+		}
+
+		function maybeShowBuilder() {
+			const myClaim = latestSlots.find((s) => s.peerId === client.peer?.id);
+			if (!myClaim || builderMounted) return;
+			builderMounted = true;
+			els.builderWrap.hidden = false;
+			WTBuilder.mount(els.builderForm, els.btnBuildSave, {
+				compendium,
+				initial: latestCharacter,
+				onExport: (characterExport) => {
+					latestCharacter = characterExport;
+					client.send({ type: "character-full", character: characterExport });
+					log(`Saved character: ${characterExport.name}`);
+					els.sheetWrap.hidden = false;
+					WTBuilder.renderSheet(els.sheetView, characterExport);
 				},
 			});
 		}
@@ -187,6 +227,7 @@
 				latestSlots = data.slots;
 				els.playerSlotsWrap.hidden = false;
 				renderPlayerSlots();
+				maybeShowBuilder();
 			} else if (data && data.type === "claim-rejected") {
 				log(`Slot ${data.index + 1} claim rejected: ${data.reason}`);
 			}
