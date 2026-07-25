@@ -1,0 +1,179 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://profcory.github.io/wt-tools/dashboard/schemas/campaign.schema.json",
+  "title": "WT Tools Campaign",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "id",
+    "name",
+    "contentPolicy",
+    "playerSlots",
+    "characterAssignments",
+    "customContent",
+    "dmHiddenRecords"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "id": {
+      "$ref": "#/$defs/id"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "contentPolicy": {
+      "$ref": "#/$defs/contentPolicy"
+    },
+    "playerSlots": {
+      "type": "array",
+      "maxItems": 5,
+      "items": {
+        "$ref": "#/$defs/playerSlot"
+      }
+    },
+    "characterAssignments": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/characterAssignment"
+      }
+    },
+    "customContent": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/definitionRef"
+      }
+    },
+    "dmHiddenRecords": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/definitionRef"
+      }
+    },
+    "notes": {
+      "type": "string"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+    },
+    "contentPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ruleVersion",
+        "allowedSources",
+        "allowUnearthedArcana",
+        "allowLegacy",
+        "allowCustom"
+      ],
+      "properties": {
+        "ruleVersion": {
+          "enum": [
+            "2014",
+            "2024",
+            "mixed"
+          ]
+        },
+        "allowedSources": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": "Explicit 5etools source codes, such as XPHB or XDMG. An empty array allows no vendored records."
+        },
+        "allowUnearthedArcana": {
+          "type": "boolean"
+        },
+        "allowLegacy": {
+          "type": "boolean"
+        },
+        "allowCustom": {
+          "type": "boolean"
+        },
+        "requireSrd52": {
+          "type": "boolean",
+          "default": false
+        },
+        "requireBasicRules2024": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "playerSlot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "label"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        }
+      }
+    },
+    "characterAssignment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "slotId",
+        "characterId"
+      ],
+      "properties": {
+        "slotId": {
+          "$ref": "#/$defs/id"
+        },
+        "characterId": {
+          "$ref": "#/$defs/id"
+        }
+      }
+    },
+    "definitionRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "name",
+        "source"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}
