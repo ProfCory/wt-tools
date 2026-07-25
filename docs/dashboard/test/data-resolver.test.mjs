@@ -82,9 +82,27 @@ test("items-base reads baseitem and indexes supporting tables", () => {
 	assert.equal(result.types.get("M").name, "Melee Weapon");
 });
 
-test("content policy filters editions, UA, SRD, and basic-rules flags", () => {
+test("item metadata uses source-qualified keys and only safe shorthand aliases", () => {
+	const result = resolver.normalizeItemsBase({
+		baseitem: [],
+		itemMastery: [
+			{ name: "Sap", source: "XPHB", entries: ["Current"] },
+			{ name: "Sap", source: "HB", entries: ["Custom"] },
+			{ name: "Nick", source: "XPHB", entries: ["Unique"] },
+		],
+		itemProperty: [],
+		itemType: [],
+	});
+
+	assert.equal(result.masteries.get("Sap|XPHB").entries[0], "Current");
+	assert.equal(result.masteries.get("Sap|HB").entries[0], "Custom");
+	assert.equal(result.masteries.has("Sap"), false);
+	assert.equal(result.masteries.get("Nick"), result.masteries.get("Nick|XPHB"));
+});
+
+test("content policy infers core-source editions and filters UA and flags", () => {
 	const records = [
-		{ name: "Current", source: "XPHB", edition: "one", srd52: true },
+		{ name: "Current", source: "XPHB", srd52: true },
 		{ name: "Legacy", source: "PHB" },
 		{ name: "Playtest", source: "UA2024", edition: "one" },
 	];
@@ -102,18 +120,58 @@ test("content policy filters editions, UA, SRD, and basic-rules flags", () => {
 		),
 		false,
 	);
+	assert.equal(resolver.inferEdition(records[0]), "one");
+	assert.equal(resolver.inferEdition(records[1]), "classic");
 });
 
-test("reprintedAs selects only an allowed reprint", () => {
+test("allowLegacy is enforced for every rule version", () => {
+	const legacy = { name: "Legacy", source: "PHB" };
+	const current = { name: "Current", source: "XPHB" };
+	const allowedSources = ["PHB", "XPHB"];
+
+	for (const ruleVersion of ["2014", "2024", "mixed"]) {
+		assert.equal(
+			resolver.recordMatchesPolicy(legacy, {
+				ruleVersion,
+				allowedSources,
+				allowLegacy: false,
+			}),
+			false,
+		);
+	}
+	assert.deepEqual(
+		resolver
+			.filterDefinitions([legacy, current], {
+				ruleVersion: "2014",
+				allowedSources,
+				allowLegacy: true,
+			})
+			.map((record) => record.name),
+		["Legacy"],
+	);
+	assert.deepEqual(
+		resolver
+			.filterDefinitions([legacy, current], {
+				ruleVersion: "mixed",
+				allowedSources,
+				allowLegacy: true,
+			})
+			.map((record) => record.name),
+		["Legacy", "Current"],
+	);
+});
+
+test("reprintedAs selects only an allowed reprint from a reusable index", () => {
 	const legacy = {
 		name: "Example",
 		source: "PHB",
 		reprintedAs: ["Example|XPHB"],
 	};
-	const current = { name: "Example", source: "XPHB", edition: "one" };
+	const current = { name: "Example", source: "XPHB" };
+	const index = resolver.buildReprintIndex([legacy, current]);
 
 	assert.equal(
-		resolver.resolveReprint(legacy, [legacy, current], policy2024),
+		resolver.resolveReprint(legacy, index, policy2024),
 		current,
 	);
 });

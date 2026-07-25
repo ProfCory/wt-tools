@@ -60,7 +60,8 @@
       "uniqueItems": true,
       "items": {
         "$ref": "#/$defs/id"
-      }
+      },
+      "$comment": "Every selected id must exist in options and selection count must remain within minimumSelections and maximumSelections."
     },
     "grants": {
       "type": "array",
@@ -118,6 +119,119 @@
           "minimum": 0
         }
       }
+    },
+    "featureRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "name",
+        "source",
+        "className",
+        "classSource",
+        "level"
+      ],
+      "properties": {
+        "type": {
+          "enum": [
+            "classFeature",
+            "subclassFeature"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "className": {
+          "type": "string",
+          "minLength": 1
+        },
+        "classSource": {
+          "type": "string",
+          "minLength": 1
+        },
+        "subclassShortName": {
+          "type": "string",
+          "minLength": 1
+        },
+        "subclassSource": {
+          "type": "string",
+          "minLength": 1
+        },
+        "level": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "subclassFeature"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "subclassShortName": {
+                "type": "string",
+                "minLength": 1
+              },
+              "subclassSource": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "subclassShortName",
+              "subclassSource"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "subclassShortName"
+            ]
+          },
+          "then": {
+            "properties": {
+              "subclassSource": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "subclassSource"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "subclassSource"
+            ]
+          },
+          "then": {
+            "properties": {
+              "subclassShortName": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "subclassShortName"
+            ]
+          }
+        }
+      ],
+      "description": "Collision-safe 5etools class/subclass feature identity. The full key includes feature source, class name/source, level, and subclass short name/source when applicable."
     },
     "requirement": {
       "type": "object",
@@ -186,7 +300,8 @@
             "$ref": "#/$defs/grant"
           }
         }
-      }
+      },
+      "$comment": "Option ids are unique within a choice; enforce this in business validation."
     },
     "grant": {
       "type": "object",
@@ -218,22 +333,51 @@
             },
             {
               "$ref": "#/$defs/definitionRef"
+            },
+            {
+              "$ref": "#/$defs/featureRef"
             }
           ]
         },
         "value": {
-          "type": [
-            "number",
-            "string",
-            "boolean",
-            "null"
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
           ]
         },
         "quantity": {
           "type": "integer",
           "minimum": 1
         }
-      }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "feature"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "target": {
+                "$ref": "#/$defs/featureRef"
+              }
+            }
+          }
+        }
+      ]
     }
   }
 }

@@ -9,6 +9,9 @@
 
 	const LEGACY_EDITIONS = new Set(["classic", "legacy"]);
 	const CURRENT_EDITION = "one";
+	const CURRENT_SOURCES = new Set(["xphb", "xdmg", "xmm", "xsrd"]);
+	const LEGACY_SOURCES = new Set(["phb", "dmg", "mm"]);
+	const COMPILED_POLICY = Symbol("compiledPolicy");
 
 	function normalizeKey(value) {
 		return String(value || "").trim().toLowerCase();
@@ -133,11 +136,26 @@
 		return indexByKey(records, subclassFeatureKey);
 	}
 
-	function normalizedPolicy(policy) {
+	function inferEdition(record) {
+		const explicit = normalizeKey(record?.edition);
+		if (explicit) return explicit;
+
+		const source = normalizeKey(record?.source);
+		if (CURRENT_SOURCES.has(source)) return CURRENT_EDITION;
+		if (LEGACY_SOURCES.has(source)) return "classic";
+		return "";
+	}
+
+	function compilePolicy(policy) {
+		if (policy?.[COMPILED_POLICY] === true) return policy;
 		const value = policy || {};
 		return {
+			[COMPILED_POLICY]: true,
 			ruleVersion: value.ruleVersion || "mixed",
-			allowedSources: new Set(value.allowedSources || []),
+			allowedSources:
+				value.allowedSources instanceof Set
+					? value.allowedSources
+					: new Set(value.allowedSources || []),
 			allowUnearthedArcana: value.allowUnearthedArcana === true,
 			allowLegacy: value.allowLegacy === true,
 			allowCustom: value.allowCustom === true,
@@ -154,9 +172,8 @@
 		return normalizeKey(source) === "custom";
 	}
 
-	function recordMatchesPolicy(record, policy) {
+	function recordMatchesCompiledPolicy(record, active) {
 		if (!record || !record.source) return false;
-		const active = normalizedPolicy(policy);
 
 		if (!active.allowedSources.has(record.source)) return false;
 		if (isUnearthedArcanaSource(record.source) && !active.allowUnearthedArcana) {
@@ -166,28 +183,45 @@
 		if (active.requireSrd52 && record.srd52 !== true) return false;
 		if (active.requireBasicRules2024 && record.basicRules2024 !== true) return false;
 
-		const edition = normalizeKey(record.edition);
+		const edition = inferEdition(record);
 		const isCurrent = edition === CURRENT_EDITION;
-		const isLegacy = !isCurrent || LEGACY_EDITIONS.has(edition);
+		const isLegacy = LEGACY_EDITIONS.has(edition);
 
+		if (isLegacy && !active.allowLegacy) return false;
 		if (active.ruleVersion === "2014" && isCurrent) return false;
-		if (active.ruleVersion === "2024" && isLegacy && !active.allowLegacy) return false;
+		if (active.ruleVersion === "2014" && !isLegacy) return false;
+		if (active.ruleVersion === "2024" && !isCurrent && !isLegacy) return false;
+		if (active.ruleVersion === "mixed" && !edition) return true;
 
-		return true;
+		return isCurrent || isLegacy;
+	}
+
+	function recordMatchesPolicy(record, policy) {
+		return recordMatchesCompiledPolicy(record, compilePolicy(policy));
 	}
 
 	function filterDefinitions(records, policy) {
-		return (records || []).filter((record) => recordMatchesPolicy(record, policy));
+		const active = compilePolicy(policy);
+		return (records || []).filter((record) =>
+			recordMatchesCompiledPolicy(record, active),
+		);
 	}
 
-	function resolveReprint(record, records, policy) {
+	function definitionKey(record) {
+		return `${normalizeKey(record?.name)}|${normalizeKey(record?.source)}`;
+	}
+
+	function buildReprintIndex(records) {
+		return indexByKey(records, definitionKey);
+	}
+
+	function resolveReprint(record, recordsOrIndex, policy) {
 		if (!record) return null;
-		const byKey = new Map(
-			(records || []).map((candidate) => [
-				`${normalizeKey(candidate.name)}|${normalizeKey(candidate.source)}`,
-				candidate,
-			]),
-		);
+		const active = compilePolicy(policy);
+		const byKey =
+			recordsOrIndex instanceof Map
+				? recordsOrIndex
+				: buildReprintIndex(recordsOrIndex);
 
 		const reprints = Array.isArray(record.reprintedAs)
 			? record.reprintedAs
@@ -199,10 +233,10 @@
 			const candidate = byKey.get(
 				`${normalizeKey(ref.name)}|${normalizeKey(ref.source)}`,
 			);
-			if (candidate && recordMatchesPolicy(candidate, policy)) return candidate;
+			if (candidate && recordMatchesCompiledPolicy(candidate, active)) return candidate;
 		}
 
-		return recordMatchesPolicy(record, policy) ? record : null;
+		return recordMatchesCompiledPolicy(record, active) ? record : null;
 	}
 
 	function lookupSpellNode(spell, lookup) {
@@ -211,7 +245,7 @@
 
 	function resolveSpellEligibility(spell, lookup, policy) {
 		const node = lookupSpellNode(spell, lookup);
-		const active = normalizedPolicy(policy);
+		const active = compilePolicy(policy);
 		const classLists = [];
 
 		for (const [classSource, classNames] of Object.entries(node?.class || {})) {
@@ -236,7 +270,7 @@
 	}
 
 	function resolveSubclassOptions(classRef, lookup, policy) {
-		const active = normalizedPolicy(policy);
+		const active = compilePolicy(policy);
 		const classNode = lookup?.[classRef.source]?.[classRef.name] || {};
 		const options = [];
 
@@ -261,9 +295,28 @@
 
 	function mapByCode(records, codeFields) {
 		const result = new Map();
+		const aliases = new Map();
 		for (const record of records || []) {
 			const code = codeFields.map((field) => record[field]).find(Boolean);
-			if (code) result.set(code, record);
+			if (!code) continue;
+
+			const source = record.source && String(record.source).trim();
+			if (source) {
+				const qualified = `${code}|${source}`;
+				if (result.has(qualified)) {
+					throw new Error(`Duplicate item metadata key: ${qualified}`);
+				}
+				result.set(qualified, record);
+			}
+
+			if (!aliases.has(code)) aliases.set(code, []);
+			aliases.get(code).push(record);
+		}
+
+		for (const [code, matches] of aliases) {
+			if (matches.length === 1 || matches.every((record) => !record.source)) {
+				result.set(code, matches[0]);
+			}
 		}
 		return result;
 	}
@@ -282,8 +335,11 @@
 	}
 
 	const api = {
+		buildReprintIndex,
 		classFeatureKey,
+		compilePolicy,
 		filterDefinitions,
+		inferEdition,
 		indexClassFeatures,
 		indexSubclassFeatures,
 		isUnearthedArcanaSource,
