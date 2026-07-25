@@ -1,0 +1,239 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://profcory.github.io/wt-tools/dashboard/schemas/choice.schema.json",
+  "title": "WT Tools Character Choice",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "id",
+    "characterId",
+    "origin",
+    "requirements",
+    "options",
+    "minimumSelections",
+    "maximumSelections",
+    "selectedOptionIds",
+    "grants",
+    "dependencies"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "id": {
+      "$ref": "#/$defs/id"
+    },
+    "characterId": {
+      "$ref": "#/$defs/id"
+    },
+    "origin": {
+      "$ref": "#/$defs/definitionRef"
+    },
+    "prompt": {
+      "type": "string",
+      "minLength": 1
+    },
+    "requirements": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/requirement"
+      }
+    },
+    "options": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/option"
+      }
+    },
+    "minimumSelections": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "maximumSelections": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "selectedOptionIds": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/id"
+      }
+    },
+    "grants": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/grant"
+      }
+    },
+    "replacementChoiceId": {
+      "$ref": "#/$defs/id"
+    },
+    "dependencies": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/id"
+      }
+    },
+    "status": {
+      "enum": [
+        "pending",
+        "complete",
+        "invalidated"
+      ],
+      "default": "pending"
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+    },
+    "definitionRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "name",
+        "source"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "level": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "requirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "operator",
+        "value"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "ability",
+            "class",
+            "level",
+            "proficiency",
+            "source",
+            "choice",
+            "custom"
+          ]
+        },
+        "path": {
+          "type": "string"
+        },
+        "operator": {
+          "enum": [
+            "eq",
+            "ne",
+            "gt",
+            "gte",
+            "lt",
+            "lte",
+            "includes",
+            "exists"
+          ]
+        },
+        "value": {}
+      }
+    },
+    "option": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "label",
+        "requirements",
+        "grants"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "requirements": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/requirement"
+          }
+        },
+        "grants": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/grant"
+          }
+        }
+      }
+    },
+    "grant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "target"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "ability",
+            "proficiency",
+            "language",
+            "feat",
+            "feature",
+            "spell",
+            "item",
+            "resource",
+            "modifier",
+            "choice"
+          ]
+        },
+        "target": {
+          "oneOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "$ref": "#/$defs/definitionRef"
+            }
+          ]
+        },
+        "value": {
+          "type": [
+            "number",
+            "string",
+            "boolean",
+            "null"
+          ]
+        },
+        "quantity": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    }
+  }
+}
