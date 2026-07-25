@@ -31,6 +31,7 @@
     },
     "playerSlots": {
       "type": "array",
+      "minItems": 1,
       "maxItems": 5,
       "items": {
         "$ref": "#/$defs/playerSlot"
@@ -38,12 +39,14 @@
     },
     "characterAssignments": {
       "type": "array",
+      "maxItems": 5,
       "items": {
         "$ref": "#/$defs/characterAssignment"
       }
     },
     "customContent": {
       "type": "array",
+      "uniqueItems": true,
       "items": {
         "$ref": "#/$defs/definitionRef"
       }
@@ -150,7 +153,8 @@
         "characterId": {
           "$ref": "#/$defs/id"
         }
-      }
+      },
+      "$comment": "slotId and characterId are each unique across the assignment collection; both constraints require collection-level business validation."
     },
     "definitionRef": {
       "type": "object",
