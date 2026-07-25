@@ -1,0 +1,120 @@
+{
+  "xphbSpells": {
+    "observedCount": 391,
+    "recordsWithEdition": 0,
+    "recordsWithClasses": 0,
+    "representative": {
+      "name": "Magic Missile",
+      "source": "XPHB",
+      "level": 1,
+      "school": "F"
+    },
+    "lookup": {
+      "xphb": {
+        "magic missile": {
+          "class": {
+            "XPHB": {
+              "Wizard": true
+            }
+          }
+        }
+      }
+    }
+  },
+  "phbClass": {
+    "source": "PHB",
+    "featureRefs": [
+      "Arcane Recovery|Wizard||1",
+      "Spellcasting|Wizard||1",
+      {
+        "classFeature": "Arcane Tradition|Wizard||2"
+      }
+    ]
+  },
+  "xphbBackground": {
+    "name": "Acolyte",
+    "source": "XPHB",
+    "edition": "one",
+    "ability": [
+      {
+        "choose": {
+          "weighted": {
+            "from": ["int", "wis", "cha"],
+            "weights": [2, 1]
+          }
+        }
+      },
+      {
+        "choose": {
+          "weighted": {
+            "from": ["int", "wis", "cha"],
+            "weights": [1, 1, 1]
+          }
+        }
+      }
+    ],
+    "startingEquipment": [
+      {
+        "A": [
+          {
+            "item": "book|xphb",
+            "displayName": "Book (Prayers)"
+          },
+          {
+            "item": "parchment|xphb",
+            "quantity": 10
+          },
+          {
+            "value": 800
+          }
+        ],
+        "B": [
+          {
+            "value": 5000
+          }
+        ]
+      }
+    ]
+  },
+  "itemsBase": {
+    "baseitem": [
+      {
+        "name": "Battleaxe",
+        "source": "XPHB",
+        "type": "M|XPHB",
+        "property": ["V|XPHB"],
+        "mastery": ["Topple|XPHB"]
+      }
+    ],
+    "itemMastery": [
+      {
+        "name": "Topple",
+        "source": "XPHB"
+      }
+    ],
+    "itemProperty": [
+      {
+        "abbreviation": "V",
+        "source": "PHB",
+        "template": "{{prop_name_lower}} ({{item.dmg2}})"
+      },
+      {
+        "abbreviation": "V",
+        "source": "XPHB",
+        "template": "{{prop_name}} ({{item.dmg2}})"
+      }
+    ],
+    "itemType": [
+      {
+        "name": "Melee Weapon",
+        "abbreviation": "M",
+        "source": "PHB"
+      },
+      {
+        "name": "Melee Weapon",
+        "abbreviation": "M",
+        "source": "XPHB"
+      }
+    ]
+  }
+}
