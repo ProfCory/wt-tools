@@ -9,6 +9,9 @@
 	"use strict";
 
 	const C = global.WTCompendium;
+	const R = global.WTEntryRender;
+
+	const ABILITIES = ["str", "dex", "con", "int", "wis", "cha"];
 
 	function el(tag, attrs = {}, children = []) {
 		const node = document.createElement(tag);
@@ -47,9 +50,11 @@
 		const nameInput = el("input", { type: "text", id: "f-name", maxlength: "40" });
 		const raceSelect = el("select", { id: "f-race" });
 		for (const r of races) raceSelect.appendChild(el("option", { value: r.name, text: r.name }));
+		const racePreview = el("div", { class: "menu-preview" });
 
 		const bgSelect = el("select", { id: "f-background" });
 		for (const b of backgrounds) bgSelect.appendChild(el("option", { value: b.name, text: b.name }));
+		const bgPreview = el("div", { class: "menu-preview" });
 
 		const classSelect = el("select", { id: "f-class" });
 		for (const name of classNames) {
@@ -60,11 +65,30 @@
 
 		const abilityInputs = {};
 		const abilitiesFieldset = el("fieldset", {}, el("legend", { text: "Ability Scores" }));
-		for (const ab of ["str", "dex", "con", "int", "wis", "cha"]) {
+		for (const ab of ABILITIES) {
 			const input = el("input", { type: "number", id: `f-${ab}`, min: "1", max: "30", value: "10" });
 			abilityInputs[ab] = input;
 			abilitiesFieldset.appendChild(field(ab.toUpperCase(), input));
 		}
+
+		// Bonus helper: several unenforced ways to bump scores (2014 species
+		// bonus, or a 2/1 or 1/1/1 flexible spread like Tasha's/2024
+		// backgrounds). Nothing here validates against the others -- pick
+		// one, hit Apply, sort out any overlap yourself.
+		const asiMethodSelect = el("select", { id: "f-asi-method" }, [
+			el("option", { value: "none", text: "— none —" }),
+			el("option", { value: "species", text: "Species bonus (2014)" }),
+			el("option", { value: "flex21", text: "Flexible +2/+1 (Tasha's / background)" }),
+			el("option", { value: "flex111", text: "Flexible +1/+1/+1 (Tasha's / background)" }),
+		]);
+		const asiControls = el("div", { id: "f-asi-controls" });
+		const asiApplyBtn = el("button", { type: "button", text: "Apply to scores above" });
+		const asiFieldset = el("fieldset", {}, [
+			el("legend", { text: "Ability score bonus helper" }),
+			field("Method", asiMethodSelect),
+			asiControls,
+			asiApplyBtn,
+		]);
 
 		const armorSelect = el("select", { id: "f-armor" });
 		armorSelect.appendChild(el("option", { value: "", text: "None" }));
@@ -81,19 +105,27 @@
 		const featuresPreview = el("div", { id: "f-features-preview", class: "builder-preview" });
 		const statsPreview = el("div", { id: "f-stats-preview", class: "builder-preview" });
 
+		// Order matches how a player actually fills this in: identity ->
+		// what you get from it (features) -> ability scores -> spells ->
+		// gear -> the numbers those choices add up to. The spell menu can
+		// run to 200+ rows, so it and everything after it must come last —
+		// otherwise it buries the rest of the form thousands of pixels down.
 		formEl.appendChild(field("Name", nameInput));
 		formEl.appendChild(field("Species", raceSelect));
+		formEl.appendChild(racePreview);
 		formEl.appendChild(field("Background", bgSelect));
+		formEl.appendChild(bgPreview);
 		formEl.appendChild(field("Class", classSelect));
 		formEl.appendChild(field("Level", levelInput));
-		formEl.appendChild(abilitiesFieldset);
-		formEl.appendChild(spellsWrap);
-		formEl.appendChild(field("Armor", armorSelect));
-		formEl.appendChild(field("Shield", shieldCheckbox));
 		formEl.appendChild(el("h4", { text: "Granted features" }));
 		formEl.appendChild(featuresPreview);
+		formEl.appendChild(abilitiesFieldset);
+		formEl.appendChild(asiFieldset);
+		formEl.appendChild(field("Armor", armorSelect));
+		formEl.appendChild(field("Shield", shieldCheckbox));
 		formEl.appendChild(el("h4", { text: "Derived stats" }));
 		formEl.appendChild(statsPreview);
+		formEl.appendChild(spellsWrap);
 
 		let currentClassData = null; // { cls, classFeature }
 		let selectedSpellIds = new Set();
@@ -108,19 +140,106 @@
 
 		function renderFeatures() {
 			featuresPreview.innerHTML = "";
-			if (!currentClassData) return;
+			if (!currentClassData) return [];
 			const level = parseInt(levelInput.value, 10) || 1;
 			const features = compendium.featuresUpToLevel(
 				currentClassData.cls,
 				currentClassData.classFeature,
 				level
 			);
-			const list = el("ul", { class: "feature-list" });
 			for (const f of features) {
-				list.appendChild(el("li", { text: `${f.name} (lvl ${f.level})` }));
+				featuresPreview.appendChild(
+					R.collapsibleRow({ title: f.name, meta: `lvl ${f.level}`, entries: f.entries })
+				);
 			}
-			featuresPreview.appendChild(list);
 			return features;
+		}
+
+		function renderRacePreview() {
+			racePreview.innerHTML = "";
+			const race = races.find((r) => r.name === raceSelect.value);
+			if (!race) return;
+			racePreview.appendChild(
+				R.collapsibleRow({ title: race.name, meta: race.source, entries: race.entries })
+			);
+		}
+
+		function renderBackgroundPreview() {
+			bgPreview.innerHTML = "";
+			const background = backgrounds.find((b) => b.name === bgSelect.value);
+			if (!background) return;
+			bgPreview.appendChild(
+				R.collapsibleRow({ title: background.name, meta: background.source, entries: background.entries })
+			);
+		}
+
+		/** Every ability the currently-selected ASI method could touch. */
+		function renderAsiControls() {
+			asiControls.innerHTML = "";
+			const method = asiMethodSelect.value;
+			if (method === "species") {
+				const race = races.find((r) => r.name === raceSelect.value);
+				const abilityBlock = race?.ability?.[0];
+				if (!abilityBlock) {
+					asiControls.appendChild(el("p", { text: "No structured ability bonus in the data for this species — apply it by hand if the book text grants one." }));
+					return;
+				}
+				const fixed = ABILITIES.filter((ab) => abilityBlock[ab]);
+				if (fixed.length) {
+					asiControls.appendChild(
+						el("p", { text: `Fixed: ${fixed.map((ab) => `${ab.toUpperCase()} +${abilityBlock[ab]}`).join(", ")}` })
+					);
+				}
+				if (abilityBlock.choose) {
+					asiControls.appendChild(el("p", { text: `Choose ${abilityBlock.choose.count} from ${abilityBlock.choose.from.map((a) => a.toUpperCase()).join(", ")} (+1 each):` }));
+					for (const ab of abilityBlock.choose.from) {
+						const cb = el("input", { type: "checkbox", value: ab, "data-role": "species-choose" });
+						asiControls.appendChild(el("label", { class: "spell-option" }, [cb, el("span", { text: ` ${ab.toUpperCase()}` })]));
+					}
+				}
+			} else if (method === "flex21") {
+				asiControls.appendChild(el("p", { text: "Pick the ability that gets +2, and a different one that gets +1." }));
+				const plusTwo = el("select", { "data-role": "flex21-two" });
+				const plusOne = el("select", { "data-role": "flex21-one" });
+				for (const sel of [plusTwo, plusOne]) {
+					for (const ab of ABILITIES) sel.appendChild(el("option", { value: ab, text: ab.toUpperCase() }));
+				}
+				asiControls.appendChild(field("+2 to", plusTwo));
+				asiControls.appendChild(field("+1 to", plusOne));
+			} else if (method === "flex111") {
+				asiControls.appendChild(el("p", { text: "Pick three abilities to get +1 each." }));
+				for (const ab of ABILITIES) {
+					const cb = el("input", { type: "checkbox", value: ab, "data-role": "flex111" });
+					asiControls.appendChild(el("label", { class: "spell-option" }, [cb, el("span", { text: ` ${ab.toUpperCase()}` })]));
+				}
+			}
+		}
+
+		function applyAsiBonus() {
+			const method = asiMethodSelect.value;
+			const deltas = {};
+			if (method === "species") {
+				const race = races.find((r) => r.name === raceSelect.value);
+				const abilityBlock = race?.ability?.[0];
+				if (!abilityBlock) return;
+				for (const ab of ABILITIES) if (abilityBlock[ab]) deltas[ab] = (deltas[ab] || 0) + abilityBlock[ab];
+				for (const cb of asiControls.querySelectorAll('[data-role="species-choose"]:checked')) {
+					deltas[cb.value] = (deltas[cb.value] || 0) + 1;
+				}
+			} else if (method === "flex21") {
+				const two = asiControls.querySelector('[data-role="flex21-two"]')?.value;
+				const one = asiControls.querySelector('[data-role="flex21-one"]')?.value;
+				if (two) deltas[two] = (deltas[two] || 0) + 2;
+				if (one) deltas[one] = (deltas[one] || 0) + 1;
+			} else if (method === "flex111") {
+				for (const cb of asiControls.querySelectorAll('[data-role="flex111"]:checked')) {
+					deltas[cb.value] = (deltas[cb.value] || 0) + 1;
+				}
+			}
+			for (const [ab, delta] of Object.entries(deltas)) {
+				abilityInputs[ab].value = String((parseInt(abilityInputs[ab].value, 10) || 10) + delta);
+			}
+			renderStats();
 		}
 
 		function renderStats() {
@@ -154,38 +273,55 @@
 			statsPreview.appendChild(dl);
 		}
 
-		async function renderSpells() {
-			spellsList.innerHTML = "";
+		async function renderSpells(token) {
 			if (!currentClassData?.cls.spellcastingAbility) {
 				spellsWrap.hidden = true;
+				spellsList.innerHTML = "";
 				return;
 			}
-			spellsWrap.hidden = false;
 			const className = currentClassData.cls.name;
 			const spells = await compendium.listSpellsForClass(className);
+			if (token !== requestToken) return; // a newer class/level change superseded this fetch
+			spellsWrap.hidden = false;
+			spellsList.innerHTML = "";
 			spells.sort((a, b) => a.level - b.level || a.name.localeCompare(b.name));
 			for (const sp of spells) {
 				const id = C.makeId("spell", sp.name, sp.source);
-				const cb = el("input", { type: "checkbox", value: id });
+				const row = R.collapsibleRow({
+					title: sp.name,
+					meta: sp.level === 0 ? "cantrip" : `lvl ${sp.level}`,
+					entries: sp.entries,
+				});
+				const cb = el("input", { type: "checkbox", value: id, class: "entry-select" });
 				cb.checked = selectedSpellIds.has(id);
+				// Selecting a spell shouldn't also toggle its description open.
+				cb.addEventListener("click", (e) => e.stopPropagation());
 				cb.addEventListener("change", () => {
 					if (cb.checked) selectedSpellIds.add(id);
 					else selectedSpellIds.delete(id);
 				});
-				const label = el("label", { class: "spell-option" }, [
-					cb,
-					el("span", { text: ` ${sp.name} (lvl ${sp.level})` }),
-				]);
-				spellsList.appendChild(label);
+				row.querySelector(".entry-summary").prepend(cb);
+				spellsList.appendChild(row);
 			}
 		}
 
+		let requestToken = 0;
+
+		/**
+		 * Rapid class/level changes fire this repeatedly; each call's async
+		 * fetches (getClass, listSpellsForClass) race independently, and an
+		 * older, slower call finishing after a newer one would otherwise
+		 * overwrite the DOM with stale data. The token makes every step
+		 * check "am I still the latest request?" before touching anything.
+		 */
 		async function onClassOrLevelChange() {
+			const token = ++requestToken;
 			const className = classSelect.value;
 			if (className) currentClassData = await compendium.getClass(className);
+			if (token !== requestToken) return;
 			renderFeatures();
 			renderStats();
-			await renderSpells();
+			await renderSpells(token);
 		}
 
 		classSelect.addEventListener("change", onClassOrLevelChange);
@@ -199,6 +335,14 @@
 		}
 		armorSelect.addEventListener("change", renderStats);
 		shieldCheckbox.addEventListener("change", renderStats);
+		raceSelect.addEventListener("change", () => {
+			renderRacePreview();
+			if (asiMethodSelect.value === "species") renderAsiControls();
+		});
+		bgSelect.addEventListener("change", renderBackgroundPreview);
+		asiMethodSelect.addEventListener("change", renderAsiControls);
+		asiApplyBtn.addEventListener("click", applyAsiBonus);
+		renderAsiControls();
 
 		if (initial) {
 			nameInput.value = initial.name || "";
@@ -219,6 +363,8 @@
 			selectedSpellIds = new Set(initial.choices?.selected_spells || []);
 		}
 
+		renderRacePreview();
+		renderBackgroundPreview();
 		await onClassOrLevelChange();
 
 		saveBtn.addEventListener("click", async () => {
@@ -243,7 +389,7 @@
 				max_hp: C.maxHp(currentClassData.cls.hd.faces, level, conMod),
 				armor_class: C.armorClass(dexMod, armorItem, shieldItem),
 				passive_perception: 10 + C.abilityModifier(scores.wis),
-				granted_features: features.map((f) => f.id),
+				granted_features: features.map((f) => ({ id: f.id, name: f.name, level: f.level })),
 			};
 			if (currentClassData.cls.spellcastingAbility) {
 				const scMod = C.abilityModifier(scores[currentClassData.cls.spellcastingAbility]);
@@ -311,6 +457,15 @@
 			dl.appendChild(el("dd", { text: String(value) }));
 		}
 		container.appendChild(dl);
+
+		if (characterExport.derived.granted_features?.length) {
+			container.appendChild(el("h5", { text: "Features" }));
+			const list = el("ul");
+			for (const f of characterExport.derived.granted_features) {
+				list.appendChild(el("li", { text: `${f.name} (lvl ${f.level})` }));
+			}
+			container.appendChild(list);
+		}
 
 		if (characterExport.choices.selected_spells.length) {
 			container.appendChild(el("h5", { text: "Spells" }));

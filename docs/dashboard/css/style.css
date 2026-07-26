@@ -254,3 +254,54 @@ fieldset {
 	color: var(--muted);
 	font-size: 0.8rem;
 }
+
+.menu-preview {
+	margin-bottom: 0.5rem;
+}
+
+.entry-row {
+	background: var(--bg);
+	border: 1px solid var(--border);
+	border-radius: 6px;
+	margin-bottom: 0.35rem;
+	padding: 0.3rem 0.6rem;
+}
+
+.entry-row .entry-summary {
+	cursor: pointer;
+	display: flex;
+	align-items: baseline;
+	gap: 0.5rem;
+}
+
+.entry-row .entry-summary::before {
+	content: "+ ";
+	color: var(--accent);
+	font-family: ui-monospace, monospace;
+}
+
+.entry-row.is-open .entry-summary::before {
+	content: "− ";
+}
+
+.entry-title {
+	font-weight: 600;
+}
+
+.entry-meta {
+	color: var(--muted);
+	font-size: 0.8rem;
+}
+
+.entry-body {
+	margin-top: 0.4rem;
+	font-size: 0.85rem;
+}
+
+.entry-body p {
+	margin: 0.3rem 0;
+}
+
+.entry-select {
+	margin-right: 0.25rem;
+}
