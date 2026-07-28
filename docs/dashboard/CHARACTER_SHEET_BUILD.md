@@ -262,17 +262,34 @@ node --check dashboard/js/data-resolver.js
 node --test dashboard/test/*.test.mjs
 ```
 
-### Phase 1 — resolver and policy
+### Phase 1 — resolver and policy (complete)
 
-- Implement indexed lazy loading and explicit source filters.
-- Implement full feature keys, spell-source lookup joins, subclass lookup joins,
-  reprint resolution, and item metadata joins.
+- [x] Implement indexed lazy loading and explicit source filters
+  (`compilePolicy`, `filterDefinitions`, `recordMatchesPolicy`).
+- [x] Implement full feature keys, spell-source lookup joins, subclass lookup
+  joins, reprint resolution, and item metadata joins (`classFeatureKey` /
+  `indexClassFeatures`, `resolveSpellEligibility`, `resolveSubclassOptions`,
+  `resolveReprint` / `buildReprintIndex`, `normalizeItemsBase`).
 
-### Phase 2 — builder
+All of the above ships in `docs/dashboard/js/data-resolver.js` and is covered
+by the Phase 0 test suite. It is not yet consumed by the builder — see the
+Phase 2 note below.
 
-- Implement class progression, background, species, feat, equipment, spell,
-  subclass, and multiclass choices.
-- Recompute grants and invalidate dependent choices after edits.
+### Phase 2 — builder (partial)
+
+- [x] A working builder landed (`docs/dashboard/js/compendium.js` +
+  `docs/dashboard/js/builder.js`): live class/species/background/feature/spell
+  /armor selection with derived stats (proficiency bonus, HP, AC), reading
+  directly from `docs/data/` through its own `Compendium` loader.
+- [ ] **Known gap:** the builder does not route through `WTDataResolver`. It
+  does its own direct data access instead of the Phase 1 policy/collision/
+  reprint/eligibility joins, so campaign content filters, source-aware feature
+  keys, and 2024 spell eligibility are not enforced yet. Ability-score
+  application is intentionally unenforced (matches direction that scoring
+  discrepancies are the DM's call).
+- [ ] Formal choice/grant recomputation and invalidation on edit (the original
+  choice-engine design) was descoped in favor of the simpler menu above; not
+  yet revisited.
 
 ### Phase 3 — sheet
 
