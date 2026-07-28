@@ -42,6 +42,12 @@ Damage dice are the DMG 2024 "Damage Severity by Level" table (p.249) — reused
 
 **AC/HP band notes:** these are wide on purpose — a Setback-severity monster at the top of its level tier's HP band with high AC plays very differently than a low-AC glass cannon at the bottom of the band with the same severity rating. Push AC up and HP down for a "hits hard, dies fast" skirmisher; invert for a "grinds you down" bruiser. Pick a point in the band that matches the role you want, then move on — don't min-max this part.
 
+**Solo boss HP — multiply the band, don't just pick the top of it.** The HP band is calibrated for a single attacker's damage, not a full party's focused fire — the exact scenario Legendary/Lair/Mythic exist to survive. A top-of-band solo boss facing a full party of four dies in roughly 1.3 rounds, before it gets a second turn. **For any solo boss, multiply the HP band by ×2–3** before layering on Legendary/Lair/Mythic add-ons. The band as printed is fine for grouped monsters and chaff — the problem is purely the solo-at-the-top case.
+
+**Save DC scales with severity, not just tier.** The DC band applies across a whole level tier, but a Deadly boss and a Setback minion at the same tier shouldn't share a DC — the Deadly one is the higher-CR threat and its save-or-suffer effects should actually bite. Use **DC = bottom of band for Setback, top of band for Dangerous, top of band +1–2 for Deadly**, rather than picking one DC for the whole draft.
+
+**The severity columns telescope cleanly** — Setback at one tier equals Dangerous at the tier below it, and Dangerous equals Deadly at the tier below that (e.g. 5th–10th Dangerous is 22, exactly 11th–16th's Setback). That's not a coincidence, it's how the table's built, and it's why "aggregate a few smaller hits into the next severity up" (see Standard Actions below) mostly holds together.
+
 ---
 
 ## Standard Actions by Severity
@@ -55,7 +61,7 @@ Pick the action's *shape* from the row matching your chosen severity, then reski
 | Single strike | One attack roll, Setback damage on hit. |
 | Minor debuff | On hit: target has Disadvantage on next roll of a stated type (attack/save/check), no save. |
 | Area nuisance | Setback damage in a small area (5–10 ft.), DC save for half. |
-| Reposition | No damage; forces movement, knocks Prone, or imposes the Grappled condition (escape DC = Save DC). |
+| Reposition | No damage; forces movement, knocks Prone, or imposes the Grappled condition (escape DC = Save DC — runs a bit stickier than a standard 8+prof+Str grapple, especially at tiers 3–4; that's intentional, not an error). |
 | Warning shot | Telegraphed action that resolves next round — gives players a chance to react before Dangerous damage lands. |
 
 ### Dangerous-tier actions
@@ -64,7 +70,7 @@ Pick the action's *shape* from the row matching your chosen severity, then reski
 |---|---|
 | Multiattack (2) | Two attack rolls, each dealing Setback damage (aggregate ≈ Dangerous). |
 | Single heavy strike | One attack roll, Dangerous damage on hit. |
-| Save-or-suffer | DC save; on failure, Dangerous damage **and** a condition (Poisoned, Frightened, Restrained) until end of target's next turn. |
+| Save-or-suffer | DC save; **failure** = Dangerous damage **and** a condition (Poisoned, Frightened, Restrained) until end of target's next turn; **success = half damage, no condition.** |
 | Area burst | Dangerous damage in a moderate area (15–20 ft. cone/radius), DC save for half. |
 | Recharge burst | As above, but locked behind a recharge (5–6 on d6) so it can't spam every round. |
 | Lair/terrain trigger | Triggered by the environment (see Biome table) rather than an action — free "action" once per round while conditions hold. |
@@ -73,9 +79,9 @@ Pick the action's *shape* from the row matching your chosen severity, then reski
 
 | Action Shape | Mechanical Template |
 |---|---|
-| Multiattack (3) | Three attack rolls, mix of Setback/Dangerous damage totaling Deadly-ish across the round. |
+| Multiattack (3) | Three attack rolls, **each roughly halfway between Setback and Dangerous** damage, totaling ≈ Deadly across the round. Don't draft this as three flat Setback hits — that undershoots Deadly by 30–40% at most tiers. |
 | Signature strike | One attack roll, Deadly damage on hit — reserve for a boss's "big swing," telegraph it the round before if you can. |
-| Legendary-style save-or-die-adjacent | DC save; failure = Deadly damage and a severe condition (Unconscious, Paralyzed, Stunned) — use rarely, and only when the table has agreed to high lethality. |
+| Legendary-style save-or-die-adjacent | DC save; **failure** = Deadly damage + a severe condition (Unconscious, Paralyzed, Stunned); **success = half damage, no condition.** Must be **telegraphed the round before** (a visible tell, not a silent trigger), and the target gets a **repeat save at the end of its turn** to shed the condition early. Use rarely, and only when the table has agreed to high lethality — even softened, this is the single most dangerous shape in the matrix. |
 | Battlefield-wide burst | Deadly damage in a large area (30+ ft.), DC save for half — this is a whole-party-threatening event, use once per fight at most. |
 | Escalation trigger | Ability upgrades in severity as the monster loses HP thresholds (e.g., Dangerous at full HP, Deadly below 50%) — good for solo bosses fighting a full party. |
 
@@ -136,7 +142,7 @@ For solo monsters fighting a full party — lets the monster act between PC turn
 | 2 | Minor area effect | Small area (10 ft.), Setback damage, DC save for half — good for a "keeps everyone honest" zone deterrent. |
 | 3 | Full action | A full turn's worth of action — one full Standard Action row (see above) at the tier one step below the monster's own severity. |
 
-**Guidance:** budget 3 points/round so the monster gets roughly "one strong thing or two small things" between each of its own turns. Don't let legendary actions deal Deadly-tier damage on their own — that's what its actual turn is for.
+**Guidance:** budget 3 points/round so the monster gets roughly "one strong thing or two small things" between each of its own turns. Don't let legendary actions deal Deadly-tier damage on their own — that's what its actual turn is for. **If the Cost-3 "full action" would be an Area burst, cap it at Setback-tier or make it single-target instead** — a Deadly boss dropping a Dangerous-tier AoE on the whole party between turns, stacked on top of its own turn and a lair action, can spike incoming damage well past what the party can heal through.
 
 ---
 
@@ -153,7 +159,7 @@ For a "final form" twist on a boss once it hits 0 HP or a set HP threshold — t
 | Any mythic trigger | Mythic action pool | Gains a legendary-action-style pool (see above) it didn't have before, usable only during the mythic phase. |
 | Final trigger (last threshold) | Death throes | On true death, one last Deadly-tier area burst centered on itself — telegraph this one, it's a "get clear" moment, not a gotcha. |
 
-**Guidance:** pick 1–2 rows, not all of them — a mythic phase should feel like "oh, it's not over" once, not a Russian-doll of transformations. Always telegraph the mythic trigger narratively (a scream, a crack spreading across its hide) so the table reads it as a moment, not a DM fiat HP reset.
+**Guidance:** pick 1–2 rows, not all of them — a mythic phase should feel like "oh, it's not over" once, not a Russian-doll of transformations. Always telegraph the mythic trigger narratively (a scream, a crack spreading across its hide) so the table reads it as a moment, not a DM fiat HP reset. **Don't stack the Deadly-tier "Escalation trigger" (from Standard Actions) with the "Escalating rider" mythic trait on the same monster** — together they escalate the same action twice over, which compounds further than either was designed to alone.
 
 ---
 
@@ -187,7 +193,7 @@ For "lots of weak things at once" instead of one strong thing — pads out an en
 | Summon (temporary ally-of-boss) | A boss's action pulls in 1d4 Minion-template creatures, or one Setback-severity creature, that act on the boss's initiative count | Draft the summoned creature itself from this whole matrix at one severity step below the boss |
 | Summon (lair-triggered) | See Lair Actions table — a lair action itself is the summon trigger, once per fight | As above |
 
-**Guidance:** minions and swarms exist to make a fight feel populated and let a Multiattack or Area burst matter narratively (clearing 4 minions in one swing feels great) — don't give them save-or-suffer riders or multiattacks of their own, that's what turns "fun chaff" into "annoying bookkeeping."
+**Guidance:** minions and swarms exist to make a fight feel populated and let a Multiattack or Area burst matter narratively (clearing 4 minions in one swing feels great) — don't give them save-or-suffer riders or multiattacks of their own, that's what turns "fun chaff" into "annoying bookkeeping." Note the auto-damage swarm (no attack roll) is a deliberate simplification — MM 2024 swarms make attack rolls instead — traded here for table speed; it's slightly more punishing but bounded to Setback, so it stays fine.
 
 ---
 
@@ -198,9 +204,11 @@ For "lots of weak things at once" instead of one strong thing — pads out an en
 1. **Core Table**, 5th–10th tier, Dangerous → 4d10 damage (avg 22), Save DC 15, AC 15, HP ~100.
 2. **Standard Action**, Dangerous tier → Multiattack (2): two claw strikes, each 2d10 (Setback-tier damage per hit, aggregating to Dangerous across the round).
 3. **Biome (swamp)** → Area burst, low severity, ongoing: a lingering poison-gas cloud in a 10 ft. radius, DC 15 Con save or Poisoned until the cloud clears.
-4. **Monster Type (fiend)** → damage rider: claw damage is necrotic instead of slashing, plus a lingering curse — target has Disadvantage on death saves until the fiend dies or 1 hour passes.
+4. **Monster Type (fiend)** → damage rider: claw damage is necrotic instead of slashing, plus a lingering curse — **on a critical hit only**, the target has Disadvantage on death saves; a **DC 15 Con save at the end of each of the target's turns** ends it early, and it fades automatically at the end of the fight if not shed sooner.
 
 Total draft time: under a minute, zero MM lookups, and it has a clear identity (necrotic-clawed swamp fiend that poisons the area and curses on hit) without needing a paragraph of lore.
+
+*(The curse above is deliberately softer than an early draft of this example, which applied on any hit with no save to resist, no way to end it early, and let it persist past the fight — a Dangerous-tier mid-boss doing Deadly-adjacent work. Crit-only + a repeat save + an end-of-fight cap brings it back in line with its "real fight, not a death" billing.)*
 
 **Scaling the same draft up to a boss fight:** add a **Legendary Action** pool (3/round: minor strikes and repositions between PC turns), a **Lair Action** (the swamp itself pulses poison gas on initiative 20, cycling with a collapsing-ground reposition effect), and one **Mythic Trait** (Escalating rider — at 0 HP it doesn't die, it regains ~55 HP and its claw multiattack shifts from Dangerous- to Deadly-tier damage for the rest of the fight). Now the same swamp fiend anchors an entire boss encounter instead of a single fight-in-a-vacuum.
 
@@ -214,3 +222,4 @@ Total draft time: under a minute, zero MM lookups, and it has a clear identity (
 - **Escalation triggers are your boss-fight lever.** A single monster fighting a full party dies to action economy unless it gets to do more as it gets hurt — that's what the Deadly-tier escalation row is for.
 - **Legendary/Lair/Mythic are boss-only add-ons, not defaults.** A standard Dangerous- or Deadly-severity monster doesn't need any of them. Reach for these specifically when one creature needs to carry an entire encounter against a full party — they exist to fix action economy and fight-length pacing, not to make a monster "cooler."
 - **Minions/swarms are the population lever.** Use them when the encounter needs bodies on the field — either alongside a boss (to threaten action economy from the party's side too) or as the whole encounter on their own (a swarm doesn't need a boss to be a real fight).
+- **1d10 truly averages 5.5, not 5.** The Core Table's "1d10 (5)" matches the DMG's own printed rounding — not a transcription error, just the book's convention. Use 5 as written; only worth a footnote if you want the exact expected value.
