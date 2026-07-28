@@ -1,0 +1,70 @@
+{
+  "schemaVersion": "1.0.0",
+  "id": "choice-wizard-subclass",
+  "characterId": "character-seren",
+  "origin": {
+    "type": "class",
+    "name": "Wizard",
+    "source": "XPHB",
+    "level": 3
+  },
+  "prompt": "Choose a Wizard subclass.",
+  "requirements": [
+    {
+      "kind": "level",
+      "path": "classes.Wizard.level",
+      "operator": "gte",
+      "value": 3
+    }
+  ],
+  "options": [
+    {
+      "id": "option-evoker",
+      "label": "Evoker",
+      "requirements": [],
+      "grants": [
+        {
+          "kind": "feature",
+          "target": {
+            "type": "subclassFeature",
+            "name": "Evocation Savant",
+            "source": "XPHB",
+            "className": "Wizard",
+            "classSource": "XPHB",
+            "subclassShortName": "Evoker",
+            "subclassSource": "XPHB",
+            "level": 3
+          }
+        }
+      ]
+    },
+    {
+      "id": "option-illusionist",
+      "label": "Illusionist",
+      "requirements": [],
+      "grants": [
+        {
+          "kind": "feature",
+          "target": {
+            "type": "subclassFeature",
+            "name": "Illusion Savant",
+            "source": "XPHB",
+            "className": "Wizard",
+            "classSource": "XPHB",
+            "subclassShortName": "Illusionist",
+            "subclassSource": "XPHB",
+            "level": 3
+          }
+        }
+      ]
+    }
+  ],
+  "minimumSelections": 1,
+  "maximumSelections": 1,
+  "selectedOptionIds": [
+    "option-evoker"
+  ],
+  "grants": [],
+  "dependencies": [],
+  "status": "complete"
+}

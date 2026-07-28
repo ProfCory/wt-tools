@@ -249,13 +249,14 @@
   </div>
 
   <p class="foot">
-    Self-contained, no network calls, no dependencies. Core damage / DC / AC / HP values are the
+    Self-contained, no network calls, no dependencies. Core damage / AC/HP-band values are the
     matrix’s DMG-2024-sourced numbers; the <em>expansions</em> (role placement, multiattack split,
     Standard Action / Biome / Type kit, legendary/minion/lair/mythic budgets) are the matrix’s own
     flavor menu, not verified math — sanity-check total damage-per-round against real party HP
-    before a Deadly fight, and see <code>docs/reviews/monster-drafting-balance-review.md</code> for
-    the full balance pass (solo-boss HP bands run low; the “save-or-die-adjacent” shape needs a
-    telegraph and half-on-success before you hand it to a table).
+    before a Deadly fight. Save DC now scales with severity and “Boss / solo encounter” multiplies
+    HP ×2.5, per the fixes in <code>docs/reviews/monster-drafting-balance-review.md</code>; the
+    remaining Should-fix/Optional items there are text-level guidance in the matrix doc itself, not
+    something this calculator computes.
   </p>
 </main>
 
@@ -290,14 +291,14 @@ const ACTIONS = {
   dangerous:[
     ["Multiattack (2)","Two attack rolls, each Setback damage (aggregate ≈ Dangerous)."],
     ["Single heavy strike","One attack roll, Dangerous damage on hit."],
-    ["Save-or-suffer","DC save; on fail, Dangerous damage AND a condition until end of target’s next turn."],
+    ["Save-or-suffer","DC save; fail = Dangerous damage AND a condition until end of target’s next turn; success = half damage, no condition."],
     ["Area burst","Dangerous damage in a 15–20 ft. cone/radius, DC save for half."],
     ["Recharge burst","As above but locked behind a recharge (5–6 on d6)."],
   ],
   deadly:[
-    ["Multiattack (3)","Three attack rolls, mix of Setback/Dangerous totalling Deadly-ish."],
+    ["Multiattack (3)","Three attack rolls, each ~halfway between Setback and Dangerous, totalling ≈ Deadly. Don’t draft as 3 flat Setback hits — undershoots by 30–40%."],
     ["Signature strike","One attack roll, Deadly damage — a boss’s big swing; telegraph it."],
-    ["Save-or-die-adjacent","DC save; fail = Deadly damage and a severe condition. Use rarely."],
+    ["Save-or-die-adjacent","DC save; fail = Deadly damage + severe condition, success = half damage/no condition. Telegraph it first; repeat save at end of turn. Use rarely."],
     ["Battlefield burst","Deadly damage in a 30+ ft. area, DC save for half. Once per fight."],
     ["Escalation trigger","Severity steps up as the monster crosses HP thresholds."],
   ]
@@ -385,6 +386,15 @@ function rollDice(n,die,flat){let t=0;for(let i=0;i<n;i++)t+=1+Math.floor(Math.r
 
 function tierForLevel(lv){ return TIERS.find(t=>lv>=t.min&&lv<=t.max) || TIERS[TIERS.length-1]; }
 
+// Balance-review fix: DC should scale with severity, not the AC/HP role slider —
+// a Deadly boss and a Setback minion at the same tier shouldn't share a save DC.
+const SOLO_BOSS_HP_MULT = 2.5; // balance-review fix: solo bosses need ×2-3 the printed HP band
+function dcForSeverity(tier, s){
+  if(s==="setback") return tier.dc[0];
+  if(s==="dangerous") return tier.dc[1];
+  return tier.dc[1]+2; // deadly: top of band +2
+}
+
 // ---- state ----
 let sev = "dangerous";
 let actionIdx = 0;
@@ -398,11 +408,13 @@ function currentModel(){
   const tier = tierForLevel(lv);
   const roleT = parseInt($("#role").value,10)/100;
   const invert = $("#invert").checked;
+  const bossOn = $("#bossMode").checked;
   const ac = lerp(tier.ac[0], tier.ac[1], roleT);
-  const hp = invert ? lerp(tier.hp[1], tier.hp[0], roleT)   // high AC ↔ low HP
-                    : lerp(tier.hp[0], tier.hp[1], roleT);
-  const dc = lerp(tier.dc[0], tier.dc[1], roleT);
-  return {lv,tier,roleT,invert,ac,hp,dc,cell:tier.sev[sev]};
+  const hpBase = invert ? lerp(tier.hp[1], tier.hp[0], roleT)   // high AC ↔ low HP
+                        : lerp(tier.hp[0], tier.hp[1], roleT);
+  const hp = bossOn ? Math.round(hpBase*SOLO_BOSS_HP_MULT) : hpBase;
+  const dc = dcForSeverity(tier, sev);
+  return {lv,tier,roleT,invert,bossOn,ac,hp,hpBase,dc,cell:tier.sev[sev]};
 }
 
 function roleLabel(t){
@@ -427,7 +439,9 @@ function render(){
   $("#dmgV").innerHTML = m.cell.dice+' <small>(avg '+m.cell.avg+')</small>';
   $("#dcV").textContent = m.dc;
   $("#acV").textContent = m.ac;
-  $("#hpV").textContent = m.hp;
+  $("#hpV").innerHTML = m.bossOn
+    ? m.hp+' <small>('+m.hpBase+' ×'+SOLO_BOSS_HP_MULT+' solo)</small>'
+    : m.hp;
   $("#rollOut").textContent = "";
 
   // severity ladder
@@ -607,8 +621,8 @@ function renderDraft(m){
 `── MONSTER DRAFT ──────────────────────
 Party level : ${m.lv}   (tier ${m.tier.label})
 Severity    : ${sev.toUpperCase()}  — ${SEV_USE[sev]}
-AC / HP     : AC ${m.ac}  ·  HP ${m.hp}   [${roleLabel(m.roleT)}]
-Save DC     : ${m.dc}
+AC / HP     : AC ${m.ac}  ·  HP ${m.hp}${m.bossOn ? " (base "+m.hpBase+" ×"+SOLO_BOSS_HP_MULT+" solo boss)" : ""}   [${roleLabel(m.roleT)}]
+Save DC     : ${m.dc}  (scaled to ${sev} severity)
 Damage/round: ${m.cell.dice}  (avg ${m.cell.avg})
 Attack      : ${routine}
 

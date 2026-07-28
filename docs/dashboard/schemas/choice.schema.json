@@ -1,0 +1,383 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://profcory.github.io/wt-tools/dashboard/schemas/choice.schema.json",
+  "title": "WT Tools Character Choice",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "id",
+    "characterId",
+    "origin",
+    "requirements",
+    "options",
+    "minimumSelections",
+    "maximumSelections",
+    "selectedOptionIds",
+    "grants",
+    "dependencies"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "id": {
+      "$ref": "#/$defs/id"
+    },
+    "characterId": {
+      "$ref": "#/$defs/id"
+    },
+    "origin": {
+      "$ref": "#/$defs/definitionRef"
+    },
+    "prompt": {
+      "type": "string",
+      "minLength": 1
+    },
+    "requirements": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/requirement"
+      }
+    },
+    "options": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/option"
+      }
+    },
+    "minimumSelections": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "maximumSelections": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "selectedOptionIds": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/id"
+      },
+      "$comment": "Every selected id must exist in options and selection count must remain within minimumSelections and maximumSelections."
+    },
+    "grants": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/grant"
+      }
+    },
+    "replacementChoiceId": {
+      "$ref": "#/$defs/id"
+    },
+    "dependencies": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/id"
+      }
+    },
+    "status": {
+      "enum": [
+        "pending",
+        "complete",
+        "invalidated"
+      ],
+      "default": "pending"
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+    },
+    "definitionRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "name",
+        "source"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "level": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "featureRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "name",
+        "source",
+        "className",
+        "classSource",
+        "level"
+      ],
+      "properties": {
+        "type": {
+          "enum": [
+            "classFeature",
+            "subclassFeature"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "className": {
+          "type": "string",
+          "minLength": 1
+        },
+        "classSource": {
+          "type": "string",
+          "minLength": 1
+        },
+        "subclassShortName": {
+          "type": "string",
+          "minLength": 1
+        },
+        "subclassSource": {
+          "type": "string",
+          "minLength": 1
+        },
+        "level": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "subclassFeature"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "subclassShortName": {
+                "type": "string",
+                "minLength": 1
+              },
+              "subclassSource": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "subclassShortName",
+              "subclassSource"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "subclassShortName"
+            ]
+          },
+          "then": {
+            "properties": {
+              "subclassSource": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "subclassSource"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "subclassSource"
+            ]
+          },
+          "then": {
+            "properties": {
+              "subclassShortName": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "subclassShortName"
+            ]
+          }
+        }
+      ],
+      "description": "Collision-safe 5etools class/subclass feature identity. The full key includes feature source, class name/source, level, and subclass short name/source when applicable."
+    },
+    "requirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "operator",
+        "value"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "ability",
+            "class",
+            "level",
+            "proficiency",
+            "source",
+            "choice",
+            "custom"
+          ]
+        },
+        "path": {
+          "type": "string"
+        },
+        "operator": {
+          "enum": [
+            "eq",
+            "ne",
+            "gt",
+            "gte",
+            "lt",
+            "lte",
+            "includes",
+            "exists"
+          ]
+        },
+        "value": {}
+      }
+    },
+    "option": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "label",
+        "requirements",
+        "grants"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "requirements": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/requirement"
+          }
+        },
+        "grants": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/grant"
+          }
+        }
+      },
+      "$comment": "Option ids are unique within a choice; enforce this in business validation."
+    },
+    "grant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "target"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "ability",
+            "proficiency",
+            "language",
+            "feat",
+            "feature",
+            "spell",
+            "item",
+            "resource",
+            "modifier",
+            "choice"
+          ]
+        },
+        "target": {
+          "oneOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "$ref": "#/$defs/definitionRef"
+            },
+            {
+              "$ref": "#/$defs/featureRef"
+            }
+          ]
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "quantity": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "feature"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "target": {
+                "$ref": "#/$defs/featureRef"
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

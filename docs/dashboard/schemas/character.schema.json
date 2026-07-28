@@ -1,0 +1,417 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://profcory.github.io/wt-tools/dashboard/schemas/character.schema.json",
+  "title": "WT Tools Character",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "id",
+    "campaignId",
+    "identity",
+    "abilities",
+    "classes",
+    "proficiencies",
+    "spellcasting",
+    "resources",
+    "inventory",
+    "conditions",
+    "choiceIds",
+    "advancementHistory"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "id": {
+      "$ref": "#/$defs/id"
+    },
+    "campaignId": {
+      "$ref": "#/$defs/id"
+    },
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "playerName": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "pronouns": {
+          "type": "string",
+          "maxLength": 80
+        },
+        "alignment": {
+          "type": "string",
+          "maxLength": 80
+        },
+        "appearance": {
+          "type": "string"
+        }
+      }
+    },
+    "abilities": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "str",
+        "dex",
+        "con",
+        "int",
+        "wis",
+        "cha"
+      ],
+      "properties": {
+        "str": {
+          "$ref": "#/$defs/abilityScore"
+        },
+        "dex": {
+          "$ref": "#/$defs/abilityScore"
+        },
+        "con": {
+          "$ref": "#/$defs/abilityScore"
+        },
+        "int": {
+          "$ref": "#/$defs/abilityScore"
+        },
+        "wis": {
+          "$ref": "#/$defs/abilityScore"
+        },
+        "cha": {
+          "$ref": "#/$defs/abilityScore"
+        }
+      }
+    },
+    "classes": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 20,
+      "items": {
+        "$ref": "#/$defs/classProgression"
+      }
+    },
+    "background": {
+      "$ref": "#/$defs/definitionRef"
+    },
+    "species": {
+      "$ref": "#/$defs/definitionRef"
+    },
+    "proficiencies": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "armor",
+        "weapons",
+        "tools",
+        "skills",
+        "savingThrows",
+        "languages"
+      ],
+      "properties": {
+        "armor": {
+          "$ref": "#/$defs/stringSet"
+        },
+        "weapons": {
+          "$ref": "#/$defs/stringSet"
+        },
+        "tools": {
+          "$ref": "#/$defs/stringSet"
+        },
+        "skills": {
+          "$ref": "#/$defs/stringSet"
+        },
+        "savingThrows": {
+          "$ref": "#/$defs/stringSet"
+        },
+        "languages": {
+          "$ref": "#/$defs/stringSet"
+        }
+      }
+    },
+    "spellcasting": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/spellcastingProgression"
+      }
+    },
+    "resources": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/resourceInstance"
+      },
+      "$comment": "Resource ids are unique and current must not exceed maximum; both constraints require collection/business validation."
+    },
+    "inventory": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/inventoryInstance"
+      },
+      "$comment": "Inventory instance ids are unique; enforce this in business validation."
+    },
+    "conditions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/conditionInstance"
+      },
+      "$comment": "Condition instance ids are unique; enforce this in business validation."
+    },
+    "choiceIds": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/id"
+      }
+    },
+    "notes": {
+      "type": "string"
+    },
+    "advancementHistory": {
+      "type": "array",
+      "maxItems": 20,
+      "items": {
+        "$ref": "#/$defs/advancementRecord"
+      }
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+    },
+    "abilityScore": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 30
+    },
+    "stringSet": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "definitionRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "name",
+        "source"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "classProgression": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "class",
+        "level"
+      ],
+      "properties": {
+        "class": {
+          "$ref": "#/$defs/definitionRef"
+        },
+        "level": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20
+        },
+        "subclass": {
+          "$ref": "#/$defs/definitionRef"
+        }
+      },
+      "$comment": "The sum of class levels must be between 1 and 20; enforce this in business validation."
+    },
+    "spellcastingProgression": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "class",
+        "knownSpellRefs",
+        "preparedSpellRefs"
+      ],
+      "properties": {
+        "class": {
+          "$ref": "#/$defs/definitionRef"
+        },
+        "ability": {
+          "enum": [
+            "int",
+            "wis",
+            "cha"
+          ]
+        },
+        "knownSpellRefs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/definitionRef"
+          }
+        },
+        "preparedSpellRefs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/definitionRef"
+          }
+        }
+      }
+    },
+    "resourceInstance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "current",
+        "maximum"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "current": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "maximum": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "reset": {
+          "enum": [
+            "shortRest",
+            "longRest",
+            "dawn",
+            "manual"
+          ]
+        }
+      },
+      "$comment": "current must be less than or equal to maximum; enforce this in business validation."
+    },
+    "inventoryInstance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "definition",
+        "quantity",
+        "equipped",
+        "attuned"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "definition": {
+          "$ref": "#/$defs/definitionRef"
+        },
+        "quantity": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "equipped": {
+          "type": "boolean"
+        },
+        "attuned": {
+          "type": "boolean"
+        },
+        "charges": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "conditionInstance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "definition"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "definition": {
+          "$ref": "#/$defs/definitionRef"
+        },
+        "source": {
+          "type": "string"
+        },
+        "duration": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "advancementRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "level",
+        "class",
+        "choiceIds"
+      ],
+      "properties": {
+        "level": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20
+        },
+        "class": {
+          "$ref": "#/$defs/definitionRef"
+        },
+        "choiceIds": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/id"
+          }
+        },
+        "recordedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    }
+  }
+}
