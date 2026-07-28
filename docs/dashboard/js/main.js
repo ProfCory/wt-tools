@@ -16,6 +16,14 @@
 		btnPing: $("#btn-ping"),
 		pingTargetWrap: $("#ping-target-wrap"),
 		pingTarget: $("#ping-target"),
+		dmSlots: $("#dm-slots"),
+		playerSlotsWrap: $("#player-slots-wrap"),
+		playerSlots: $("#player-slots"),
+		builderWrap: $("#builder-wrap"),
+		builderForm: $("#builder-form"),
+		btnBuildSave: $("#btn-build-save"),
+		sheetWrap: $("#sheet-wrap"),
+		sheetView: $("#sheet-view"),
 	};
 
 	function log(msg) {
@@ -43,6 +51,59 @@
 		els.waitingList.querySelector(`[data-peer-id="${CSS.escape(peerId)}"]`)?.remove();
 	}
 
+	/**
+	 * Renders the 5 slots into `container`. In player mode, empty slots get a
+	 * name input + Claim button; `onClaim(index, name)` fires on click.
+	 */
+	function renderSlots(container, slots, { myPeerId = null, onClaim = null, characters = null } = {}) {
+		container.innerHTML = "";
+		for (const slot of slots) {
+			const li = document.createElement("li");
+			li.className = "slot" + (slot.peerId ? " slot-claimed" : " slot-empty");
+			li.dataset.slotIndex = String(slot.index);
+
+			const label = document.createElement("span");
+			label.className = "slot-label";
+			label.textContent = `Slot ${slot.index + 1}: `;
+			li.appendChild(label);
+
+			if (slot.peerId) {
+				const name = document.createElement("span");
+				name.className = "slot-name";
+				name.textContent = slot.name + (slot.peerId === myPeerId ? " (you)" : "");
+				li.appendChild(name);
+
+				const charExport = characters?.get(slot.peerId);
+				if (charExport) {
+					const cls = charExport.choices.classes[0];
+					const summary = document.createElement("span");
+					summary.className = "slot-char-summary";
+					summary.textContent = ` — ${charExport.name}, Lvl ${cls.level}, AC ${charExport.derived.armor_class}, HP ${charExport.state.current_hp}/${charExport.derived.max_hp}`;
+					li.appendChild(summary);
+				}
+			} else if (onClaim) {
+				const input = document.createElement("input");
+				input.type = "text";
+				input.placeholder = `Player ${slot.index + 1}`;
+				input.className = "slot-name-input";
+				input.maxLength = 40;
+				const btn = document.createElement("button");
+				btn.type = "button";
+				btn.textContent = "Claim";
+				btn.addEventListener("click", () => onClaim(slot.index, input.value));
+				li.appendChild(input);
+				li.appendChild(btn);
+			} else {
+				const name = document.createElement("span");
+				name.className = "slot-name slot-name-empty";
+				name.textContent = "empty";
+				li.appendChild(name);
+			}
+
+			container.appendChild(li);
+		}
+	}
+
 	function refreshPingTargets(host) {
 		els.pingTarget.innerHTML = "";
 		for (const peerId of host.connections.keys()) {
@@ -59,14 +120,25 @@
 		showPanel(els.dmPanel);
 		log("Starting host session…");
 		const host = new WTRoom.DMHost();
+		const slotManager = new WTSlots.SlotManager();
+		const characters = new Map(); // peerId -> latest character-full export
+
+		function renderDmSlots() {
+			renderSlots(els.dmSlots, slotManager.snapshot(), { characters });
+		}
+		renderDmSlots();
 
 		host.on("error", (err) => log(`Host error: ${err.message || err}`));
 		host.on("player-joined", ({ peerId }) => {
 			log(`Player joined: ${peerId}`);
 			addWaitingRow(peerId);
 			refreshPingTargets(host);
+			host.sendTo(peerId, { type: "slots-sync", slots: slotManager.snapshot() });
 		});
 		host.on("player-left", ({ peerId }) => {
+			// Slot claims persist through a dropped connection (a network
+			// blip shouldn't let someone else steal an active player's
+			// slot) — the transport link, not the claim, is what's gone.
 			log(`Player left: ${peerId}`);
 			removeWaitingRow(peerId);
 			refreshPingTargets(host);
@@ -75,6 +147,18 @@
 			log(`Data from ${peerId}: ${JSON.stringify(data)}`);
 			if (data && data.type === "ping") {
 				host.sendTo(peerId, { type: "pong", ts: data.ts });
+			} else if (data && data.type === "claim-slot") {
+				const result = slotManager.claim(peerId, data.index, data.name);
+				if (result.ok) {
+					renderDmSlots();
+					host.broadcast({ type: "slots-sync", slots: slotManager.snapshot() });
+				} else {
+					host.sendTo(peerId, { type: "claim-rejected", index: data.index, reason: result.reason });
+				}
+			} else if (data && data.type === "character-full") {
+				characters.set(peerId, data.character);
+				log(`Character update from ${peerId}: ${data.character.name}`);
+				renderDmSlots();
 			}
 		});
 
@@ -102,11 +186,50 @@
 		els.playerStatus.textContent = `Connecting to room ${roomCode}…`;
 		log(`Connecting to room ${roomCode}…`);
 		const client = new WTRoom.PlayerClient(roomCode);
+		const compendium = new WTCompendium.Compendium();
+		let latestSlots = WTSlots.createEmptySlots();
+		let builderMounted = false;
+		let latestCharacter = null;
+
+		function renderPlayerSlots() {
+			renderSlots(els.playerSlots, latestSlots, {
+				myPeerId: client.peer?.id,
+				onClaim: (index, name) => {
+					log(`Claiming slot ${index + 1} as "${name}"…`);
+					client.send({ type: "claim-slot", index, name });
+				},
+			});
+		}
+
+		function maybeShowBuilder() {
+			const myClaim = latestSlots.find((s) => s.peerId === client.peer?.id);
+			if (!myClaim || builderMounted) return;
+			builderMounted = true;
+			els.builderWrap.hidden = false;
+			WTBuilder.mount(els.builderForm, els.btnBuildSave, {
+				compendium,
+				initial: latestCharacter,
+				onExport: (characterExport) => {
+					latestCharacter = characterExport;
+					client.send({ type: "character-full", character: characterExport });
+					log(`Saved character: ${characterExport.name}`);
+					els.sheetWrap.hidden = false;
+					WTBuilder.renderSheet(els.sheetView, characterExport);
+				},
+			});
+		}
 
 		client.on("data", (data) => {
 			log(`Data from DM: ${JSON.stringify(data)}`);
 			if (data && data.type === "ping") {
 				client.send({ type: "pong", ts: data.ts });
+			} else if (data && data.type === "slots-sync") {
+				latestSlots = data.slots;
+				els.playerSlotsWrap.hidden = false;
+				renderPlayerSlots();
+				maybeShowBuilder();
+			} else if (data && data.type === "claim-rejected") {
+				log(`Slot ${data.index + 1} claim rejected: ${data.reason}`);
 			}
 		});
 		client.on("disconnected", () => {

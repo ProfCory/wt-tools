@@ -4,8 +4,16 @@
  * Message protocol (JSON over the PeerJS data channel):
  *   { type: "ping", ts }
  *   { type: "pong", ts }
- * Later phases add more message types (slot-claim, sheet-update, vtt-*, etc.)
- * — every message MUST have a "type" field so peers can dispatch on it.
+ *   { type: "slots-sync", slots }            DM -> one or all peers
+ *   { type: "claim-slot", index, name }      player -> DM
+ *   { type: "claim-rejected", index, reason } DM -> requesting peer
+ *   { type: "character-full", character }   player -> DM, full character
+ *                                            export (see
+ *                                            CHARACTER_DATA_DESIGN.md);
+ *                                            sent on builder save/level-up
+ * Later phases add more message types (character-state patches, vtt-*,
+ * etc.) — every message MUST have a "type" field so peers can dispatch on
+ * it.
  */
 (function (global) {
 	"use strict";
