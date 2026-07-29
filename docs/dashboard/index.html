@@ -33,6 +33,12 @@
 
 			<h3>Connected peers</h3>
 			<ul id="waiting-list" class="waiting-list"></ul>
+
+			<h3>Bestiary <span class="hint">(checked = shared with players)</span></h3>
+			<div id="dm-bestiary-list" class="menu-preview"></div>
+
+			<h3>DM Notes <span class="hint">(private — never sent to players)</span></h3>
+			<textarea id="dm-notes" rows="4" class="dm-notes"></textarea>
 		</section>
 
 		<section id="player-panel" hidden>
@@ -54,6 +60,11 @@
 				<h3>Character Sheet</h3>
 				<div id="sheet-view"></div>
 			</div>
+
+			<div id="player-bestiary-wrap" hidden>
+				<h3>Bestiary <span class="hint">(only what the DM has shared)</span></h3>
+				<div id="player-bestiary-list" class="menu-preview"></div>
+			</div>
 		</section>
 
 		<section id="test-panel">
@@ -71,6 +82,7 @@
 	<script src="js/room.js"></script>
 	<script src="js/slots.js"></script>
 	<script src="js/compendium.js"></script>
+	<script src="js/bestiary.js"></script>
 	<script src="js/entry-render.js"></script>
 	<script src="js/builder.js"></script>
 	<script src="js/main.js"></script>

@@ -167,6 +167,12 @@
 				return !!entry?.class?.PHB?.[className];
 			});
 		}
+
+		/** DM-only browsing source; defaults to the core Monster Manual. */
+		async getBestiary(sourceCode = "mm") {
+			const data = await this._fetchJson(`bestiary/bestiary-${sourceCode.toLowerCase()}.json`);
+			return data.monster;
+		}
 	}
 
 	global.WTCompendium = {
