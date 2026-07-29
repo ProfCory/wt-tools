@@ -6,6 +6,20 @@
 	const els = {
 		roleChooser: $("#role-chooser"),
 		btnHost: $("#btn-host"),
+		btnStandaloneBuilder: $("#btn-standalone-builder"),
+		standalonePanel: $("#standalone-panel"),
+		btnStandaloneBack: $("#btn-standalone-back"),
+		standaloneListWrap: $("#standalone-list-wrap"),
+		standaloneList: $("#standalone-list"),
+		btnStandaloneNew: $("#btn-standalone-new"),
+		standaloneBuilderWrap: $("#standalone-builder-wrap"),
+		standaloneBuilderHeading: $("#standalone-builder-heading"),
+		standaloneBuilderForm: $("#standalone-builder-form"),
+		btnStandaloneSave: $("#btn-standalone-save"),
+		btnStandaloneCancel: $("#btn-standalone-cancel"),
+		standaloneSheetWrap: $("#standalone-sheet-wrap"),
+		standaloneSheetView: $("#standalone-sheet-view"),
+		btnStandaloneDone: $("#btn-standalone-done"),
 		dmPanel: $("#dm-panel"),
 		playerPanel: $("#player-panel"),
 		roomLink: $("#room-link"),
@@ -38,9 +52,46 @@
 	}
 
 	function showPanel(panel) {
-		for (const p of [els.roleChooser, els.dmPanel, els.playerPanel]) {
+		for (const p of [els.roleChooser, els.dmPanel, els.playerPanel, els.standalonePanel]) {
 			p.hidden = p !== panel;
 		}
+	}
+
+	// Characters built without a DM session (no code yet) live here, keyed by
+	// character_id, so they can be re-opened, re-exported, or picked up later
+	// once the player actually joins a room -- see loadSavedCharacters() use
+	// in maybeShowBuilder().
+	const SAVED_CHARACTERS_KEY = "wt-dashboard-saved-characters";
+
+	function loadSavedCharacters() {
+		try {
+			return JSON.parse(localStorage.getItem(SAVED_CHARACTERS_KEY) || "[]");
+		} catch {
+			return [];
+		}
+	}
+
+	function upsertSavedCharacter(characterExport) {
+		const list = loadSavedCharacters();
+		const idx = list.findIndex((c) => c.character_id === characterExport.character_id);
+		if (idx >= 0) list[idx] = characterExport;
+		else list.push(characterExport);
+		localStorage.setItem(SAVED_CHARACTERS_KEY, JSON.stringify(list));
+	}
+
+	function deleteSavedCharacter(characterId) {
+		const list = loadSavedCharacters().filter((c) => c.character_id !== characterId);
+		localStorage.setItem(SAVED_CHARACTERS_KEY, JSON.stringify(list));
+	}
+
+	function downloadCharacterJson(characterExport) {
+		const blob = new Blob([JSON.stringify(characterExport, null, 2)], { type: "application/json" });
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement("a");
+		a.href = url;
+		a.download = `${(characterExport.name || "character").replace(/[^a-z0-9]+/gi, "-").toLowerCase()}.json`;
+		a.click();
+		URL.revokeObjectURL(url);
 	}
 
 	function addWaitingRow(peerId) {
@@ -153,6 +204,98 @@
 		els.btnPing.disabled = host.connections.size === 0;
 	}
 
+	/**
+	 * The "no code yet" path: builds and exports a character with no PeerJS
+	 * connection at all. Saved characters live in this browser's localStorage
+	 * and can also be downloaded as a .json file to bring into a real session
+	 * later (a real session's builder offers to import any saved here -- see
+	 * maybeShowBuilder in startAsPlayer).
+	 */
+	function initStandaloneBuilder() {
+		const standaloneCompendium = new WTCompendium.Compendium();
+
+		function classSummary(characterExport) {
+			const cls = characterExport.choices.classes[0];
+			const className = WTCompendium.parseId(cls.class_id).slug;
+			return `${className}, Lvl ${cls.level}`;
+		}
+
+		function showList() {
+			els.standaloneListWrap.hidden = false;
+			els.standaloneBuilderWrap.hidden = true;
+			els.standaloneSheetWrap.hidden = true;
+			renderStandaloneList();
+		}
+
+		function renderStandaloneList() {
+			const saved = loadSavedCharacters();
+			els.standaloneList.innerHTML = "";
+			if (!saved.length) {
+				const li = document.createElement("li");
+				li.innerHTML = `<span class="slot-name slot-name-empty">No saved characters yet.</span>`;
+				els.standaloneList.appendChild(li);
+				return;
+			}
+			for (const c of saved) {
+				const li = document.createElement("li");
+				li.className = "slot";
+				li.innerHTML = `<span class="slot-name">${c.name}</span><span class="slot-char-summary"> — ${classSummary(c)}</span>`;
+
+				const btnLoad = document.createElement("button");
+				btnLoad.type = "button";
+				btnLoad.textContent = "Edit";
+				btnLoad.addEventListener("click", () => openBuilder(c));
+
+				const btnExport = document.createElement("button");
+				btnExport.type = "button";
+				btnExport.textContent = "Export";
+				btnExport.addEventListener("click", () => downloadCharacterJson(c));
+
+				const btnDelete = document.createElement("button");
+				btnDelete.type = "button";
+				btnDelete.textContent = "Delete";
+				btnDelete.addEventListener("click", () => {
+					if (!confirm(`Delete "${c.name}"? This can't be undone.`)) return;
+					deleteSavedCharacter(c.character_id);
+					renderStandaloneList();
+				});
+
+				li.appendChild(btnLoad);
+				li.appendChild(btnExport);
+				li.appendChild(btnDelete);
+				els.standaloneList.appendChild(li);
+			}
+		}
+
+		async function openBuilder(initial) {
+			els.standaloneListWrap.hidden = true;
+			els.standaloneSheetWrap.hidden = true;
+			els.standaloneBuilderWrap.hidden = false;
+			els.standaloneBuilderHeading.textContent = initial ? `Editing: ${initial.name}` : "New Character";
+			await WTBuilder.mount(els.standaloneBuilderForm, els.btnStandaloneSave, {
+				compendium: standaloneCompendium,
+				initial,
+				onExport: (characterExport) => {
+					upsertSavedCharacter(characterExport);
+					downloadCharacterJson(characterExport);
+					log(`Saved & exported character: ${characterExport.name}`);
+					els.standaloneBuilderWrap.hidden = true;
+					els.standaloneSheetWrap.hidden = false;
+					WTBuilder.renderSheet(els.standaloneSheetView, characterExport);
+				},
+			});
+		}
+
+		els.btnStandaloneBuilder.addEventListener("click", () => {
+			showPanel(els.standalonePanel);
+			showList();
+		});
+		els.btnStandaloneBack.addEventListener("click", () => showPanel(els.roleChooser));
+		els.btnStandaloneNew.addEventListener("click", () => openBuilder(null));
+		els.btnStandaloneCancel.addEventListener("click", showList);
+		els.btnStandaloneDone.addEventListener("click", showList);
+	}
+
 	async function startAsDM() {
 		showPanel(els.dmPanel);
 		log("Starting host session…");
@@ -257,14 +400,10 @@
 			});
 		}
 
-		function maybeShowBuilder() {
-			const myClaim = latestSlots.find((s) => s.peerId === client.peer?.id);
-			if (!myClaim || builderMounted) return;
-			builderMounted = true;
-			els.builderWrap.hidden = false;
+		function mountPlayerBuilder(initial) {
 			WTBuilder.mount(els.builderForm, els.btnBuildSave, {
 				compendium,
-				initial: latestCharacter,
+				initial,
 				onExport: (characterExport) => {
 					latestCharacter = characterExport;
 					client.send({ type: "character-full", character: characterExport });
@@ -273,6 +412,41 @@
 					WTBuilder.renderSheet(els.sheetView, characterExport);
 				},
 			});
+		}
+
+		/** Offers to prefill from a character built earlier via the "no code" path. */
+		function renderImportPicker(saved) {
+			const wrap = document.createElement("div");
+			wrap.className = "builder-preview";
+			const select = document.createElement("select");
+			select.appendChild(new Option("— start blank —", ""));
+			for (const c of saved) select.appendChild(new Option(c.name, c.character_id));
+			const btn = document.createElement("button");
+			btn.type = "button";
+			btn.textContent = "Start";
+			btn.addEventListener("click", () => {
+				const chosen = saved.find((c) => c.character_id === select.value) || null;
+				wrap.remove();
+				mountPlayerBuilder(chosen);
+			});
+			wrap.append("Bring in a saved character? ", select, btn);
+			els.builderWrap.insertBefore(wrap, els.builderForm);
+		}
+
+		function maybeShowBuilder() {
+			const myClaim = latestSlots.find((s) => s.peerId === client.peer?.id);
+			if (!myClaim || builderMounted) return;
+			builderMounted = true;
+			els.builderWrap.hidden = false;
+
+			if (!latestCharacter) {
+				const saved = loadSavedCharacters();
+				if (saved.length) {
+					renderImportPicker(saved);
+					return;
+				}
+			}
+			mountPlayerBuilder(latestCharacter);
 		}
 
 		client.on("data", (data) => {
@@ -317,6 +491,7 @@
 	}
 
 	function init() {
+		initStandaloneBuilder();
 		const roomCode = WTRoom.roomCodeFromUrl();
 		if (roomCode) {
 			startAsPlayer(roomCode);
