@@ -133,6 +133,7 @@
 
 		let currentClassData = null; // { cls, classFeature }
 		let selectedSpellIds = new Set();
+		let lastRenderedSpells = []; // full spell objects (name/level/entries) for the current class, so save can pull entries text for the sheet without a second fetch
 
 		function abilityScores() {
 			const scores = {};
@@ -343,6 +344,7 @@
 			spellsWrap.hidden = false;
 			spellsList.innerHTML = "";
 			spells.sort((a, b) => a.level - b.level || a.name.localeCompare(b.name));
+			lastRenderedSpells = spells;
 			for (const sp of spells) {
 				const id = C.makeId("spell", sp.name, sp.source);
 				const row = R.collapsibleRow({
@@ -358,7 +360,7 @@
 					if (cb.checked) selectedSpellIds.add(id);
 					else selectedSpellIds.delete(id);
 				});
-				row.querySelector(".entry-summary").prepend(cb);
+				row.querySelector(".entry-summary").append(cb);
 				spellsList.appendChild(row);
 			}
 		}
@@ -450,13 +452,22 @@
 				max_hp: C.maxHp(currentClassData.cls.hd.faces, level, conMod),
 				armor_class: C.armorClass(dexMod, armorItem, shieldItem),
 				passive_perception: 10 + C.abilityModifier(scores.wis),
-				granted_features: features.map((f) => ({ id: f.id, name: f.name, level: f.level })),
+				granted_features: features.map((f) => ({ id: f.id, name: f.name, level: f.level, entries: f.entries })),
 			};
 			if (currentClassData.cls.spellcastingAbility) {
 				const scMod = C.abilityModifier(scores[currentClassData.cls.spellcastingAbility]);
 				derived.spell_attack_bonus = prof + scMod;
 				derived.spell_save_dc = 8 + prof + scMod;
 			}
+			// Display convenience for the sheet -- resolves each selected spell's
+			// full entries text once, at save time, so the sheet can render it
+			// without recomputing or re-fetching (it just trusts this export).
+			derived.selected_spell_details = Array.from(selectedSpellIds).map((id) => {
+				const sp = lastRenderedSpells.find((s) => C.makeId("spell", s.name, s.source) === id);
+				return sp
+					? { id, name: sp.name, level: sp.level, entries: sp.entries }
+					: { id, name: C.parseId(id).slug.replace(/-/g, " "), level: null, entries: [] };
+			});
 
 			const characterExport = {
 				schema_version: "0.1",
@@ -521,14 +532,28 @@
 
 		if (characterExport.derived.granted_features?.length) {
 			container.appendChild(el("h5", { text: "Features" }));
-			const list = el("ul");
 			for (const f of characterExport.derived.granted_features) {
-				list.appendChild(el("li", { text: `${f.name} (lvl ${f.level})` }));
+				container.appendChild(
+					R.collapsibleRow({ title: f.name, meta: `lvl ${f.level}`, entries: f.entries || [] })
+				);
 			}
-			container.appendChild(list);
 		}
 
-		if (characterExport.choices.selected_spells.length) {
+		const spellDetails = characterExport.derived.selected_spell_details;
+		if (spellDetails?.length) {
+			container.appendChild(el("h5", { text: "Spells" }));
+			for (const sp of spellDetails) {
+				container.appendChild(
+					R.collapsibleRow({
+						title: sp.name,
+						meta: sp.level === 0 ? "cantrip" : sp.level != null ? `lvl ${sp.level}` : "",
+						entries: sp.entries || [],
+					})
+				);
+			}
+		} else if (characterExport.choices.selected_spells.length) {
+			// Older export from before selected_spell_details existed -- fall
+			// back to plain names rather than showing nothing.
 			container.appendChild(el("h5", { text: "Spells" }));
 			const list = el("ul");
 			for (const id of characterExport.choices.selected_spells) {

@@ -4,6 +4,11 @@
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<title>wt-tools Dashboard</title>
+	<!-- main.css wraps itself in @layer vetools, so our own unlayered
+	     style.css below always wins the cascade regardless of load order --
+	     this only supplies styling for the real Renderer's own markup
+	     (dice rollers, entry blocks) that our dashboard doesn't define. -->
+	<link rel="stylesheet" href="../css/main.css" />
 	<link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
@@ -78,14 +83,31 @@
 		</section>
 	</main>
 
-	<script src="vendor/peerjs.min.js"></script>
-	<script src="js/data-resolver.js"></script>
-	<script src="js/room.js"></script>
-	<script src="js/slots.js"></script>
-	<script src="js/compendium.js"></script>
-	<script src="js/bestiary.js"></script>
-	<script src="js/entry-render.js"></script>
-	<script src="js/builder.js"></script>
-	<script src="js/main.js"></script>
+	<!--
+		Real wt-tools rendering pipeline, referenced directly from the live
+		site (not copied) so it can never drift from what spells.html/
+		classes.html/etc. actually ship. entry-render.js calls into this
+		instead of a hand-rolled {@tag} parser -- verified working (dice
+		rollers, real hover-wired links) with just these files; no hover-
+		card system needed since links just navigate on click, which they
+		do natively without it.
+	-->
+	<script defer src="../lib/jquery.js"></script>
+	<script defer src="../js/parser.js"></script>
+	<script defer src="../js/utils.js"></script>
+	<script defer src="../js/utils-ui.js"></script>
+	<script type="module" src="../js/utils-config.js"></script>
+	<script defer src="../js/render.js"></script>
+	<script defer src="../js/render-dice.js"></script>
+
+	<script defer src="vendor/peerjs.min.js"></script>
+	<script defer src="js/data-resolver.js"></script>
+	<script defer src="js/room.js"></script>
+	<script defer src="js/slots.js"></script>
+	<script defer src="js/compendium.js"></script>
+	<script defer src="js/bestiary.js"></script>
+	<script defer src="js/entry-render.js"></script>
+	<script defer src="js/builder.js"></script>
+	<script defer src="js/main.js"></script>
 </body>
 </html>
