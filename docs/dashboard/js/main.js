@@ -135,7 +135,7 @@
 				cb.title = "Share with players";
 				cb.addEventListener("click", (e) => e.stopPropagation());
 				cb.addEventListener("change", () => onToggle(id, cb.checked));
-				row.querySelector(".entry-summary").prepend(cb);
+				row.querySelector(".entry-summary").append(cb);
 			}
 			container.appendChild(row);
 		}

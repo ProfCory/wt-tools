@@ -275,13 +275,27 @@ fieldset {
 }
 
 .entry-row .entry-summary::before {
-	content: "+ ";
+	content: "+";
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex: none;
+	width: 1.1em;
+	height: 1.1em;
 	color: var(--accent);
 	font-family: ui-monospace, monospace;
+	font-size: 1rem;
+	font-weight: 700;
+	border: 1px solid var(--accent);
+	border-radius: 3px;
 }
 
 .entry-row.is-open .entry-summary::before {
-	content: "− ";
+	content: "−";
+}
+
+.entry-select {
+	margin-left: auto;
 }
 
 .entry-title {
@@ -300,10 +314,6 @@ fieldset {
 
 .entry-body p {
 	margin: 0.3rem 0;
-}
-
-.entry-select {
-	margin-right: 0.25rem;
 }
 
 .dm-notes {
