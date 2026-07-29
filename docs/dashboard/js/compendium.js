@@ -199,6 +199,59 @@
 			const data = await this._fetchJson(`bestiary/bestiary-${sourceCode.toLowerCase()}.json`);
 			return data.monster;
 		}
+
+		/** 2024 subclasses for a class entry returned by getClass(). */
+		subclassesForClass(classData) {
+			return classData.raw.subclass.filter(
+				(s) => s.edition === "one" && s.classSource === classData.cls.source
+			);
+		}
+
+		/**
+		 * Resolves a subclass's own feature refs up to `level`, same shape as
+		 * featuresUpToLevel(). Refs are 6-field:
+		 * Name|ClassName|ClassSource|SubclassShortName|SubclassSource|Level.
+		 */
+		subclassFeaturesUpToLevel(subclassEntry, subclassFeatureList, level) {
+			const refs = (subclassEntry.subclassFeatures || []);
+			const parsed = refs.map((ref) => {
+				const [name, className, classSource, subclassShortName, subclassSource, levelStr] = ref.split("|");
+				return {
+					name,
+					className: className || subclassEntry.className,
+					classSource: classSource || subclassEntry.classSource,
+					subclassShortName: subclassShortName || subclassEntry.shortName,
+					subclassSource: subclassSource || subclassEntry.source,
+					level: parseInt(levelStr, 10) || 1,
+				};
+			});
+			return parsed
+				.filter((r) => r.level <= level)
+				.map((r) => {
+					const full = subclassFeatureList.find(
+						(f) =>
+							f.name === r.name &&
+							f.level === r.level &&
+							f.className === r.className &&
+							f.classSource === r.classSource &&
+							f.subclassShortName === r.subclassShortName &&
+							f.subclassSource === r.subclassSource
+					);
+					return {
+						id: makeId("subclass-feature", `${subclassEntry.name}-${r.name}-${r.level}`, subclassEntry.source),
+						name: r.name,
+						level: r.level,
+						entries: full ? full.entries : [],
+					};
+				})
+				.sort((a, b) => a.level - b.level);
+		}
+
+		/** 2024 (XPHB) feats -- no prerequisite filtering, just the raw list. */
+		async listFeats() {
+			const data = await this._fetchJson("feats.json");
+			return data.feat.filter((f) => f.source === "XPHB");
+		}
 	}
 
 	global.WTCompendium = {
