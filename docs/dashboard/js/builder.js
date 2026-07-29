@@ -31,6 +31,50 @@
 	}
 
 	/**
+	 * A collapsible group for arbitrary DOM content (filter controls + a
+	 * long checklist), styled like R.collapsibleRow but built from real
+	 * child elements instead of rendered entries markup. Returns a setMeta
+	 * hook so callers can keep e.g. a "3 selected" count current without
+	 * rebuilding the section (which would blow away its open/closed state).
+	 */
+	function collapsibleSection(title, bodyEl, { startOpen = false } = {}) {
+		const row = el("div", { class: "entry-row" + (startOpen ? " is-open" : "") });
+		const summary = el("div", { class: "entry-summary" });
+		const titleSpan = el("span", { class: "entry-title", text: title });
+		const metaSpan = el("span", { class: "entry-meta" });
+		summary.appendChild(titleSpan);
+		summary.appendChild(metaSpan);
+		row.appendChild(summary);
+		bodyEl.classList.add("entry-body");
+		bodyEl.hidden = !startOpen;
+		row.appendChild(bodyEl);
+		summary.addEventListener("click", () => {
+			bodyEl.hidden = !bodyEl.hidden;
+			row.classList.toggle("is-open", !bodyEl.hidden);
+		});
+		return { row, setMeta: (text) => { metaSpan.textContent = text; } };
+	}
+
+	const FEAT_CATEGORY_LABELS = {
+		G: "General",
+		O: "Origin",
+		FS: "Fighting Style",
+		"FS:P": "Fighting Style",
+		"FS:R": "Fighting Style",
+		EB: "Epic Boon",
+	};
+	const FEAT_CATEGORY_FILTERS = [
+		["all", "All categories"],
+		["G", "General"],
+		["O", "Origin"],
+		["FS", "Fighting Style"],
+		["EB", "Epic Boon"],
+	];
+	function featCategoryGroup(category) {
+		return String(category || "").startsWith("FS") ? "FS" : category;
+	}
+
+	/**
 	 * Mounts the builder into `formEl`; `saveBtn` triggers export.
 	 * `initial` (optional) is a previous character-full export to prefill.
 	 * `onExport(characterExport)` is called on save.
@@ -38,11 +82,12 @@
 	async function mount(formEl, saveBtn, { compendium, onExport, initial = null }) {
 		formEl.innerHTML = "<p>Loading compendium data…</p>";
 
-		const [classNames, races, backgrounds, armors] = await Promise.all([
+		const [classNames, races, backgrounds, armors, feats] = await Promise.all([
 			compendium.listClassNames(),
 			compendium.listRaces(),
 			compendium.listBackgrounds(),
 			compendium.listArmorAndShields(),
+			compendium.listFeats(),
 		]);
 
 		formEl.innerHTML = "";
@@ -60,6 +105,12 @@
 		for (const name of classNames) {
 			classSelect.appendChild(el("option", { value: name, text: name[0].toUpperCase() + name.slice(1) }));
 		}
+
+		// Subclasses have no entries text of their own in the data (their
+		// description lives in the first subclass feature, e.g. "Abjurer" at
+		// level 3) -- so no separate preview block, just the select; its
+		// features fold straight into the granted-features preview below.
+		const subclassSelect = el("select", { id: "f-subclass" });
 
 		const levelInput = el("input", { type: "number", id: "f-level", min: "1", max: "20", value: "1" });
 
@@ -101,10 +152,31 @@
 		}
 		const shieldCheckbox = el("input", { type: "checkbox", id: "f-shield" });
 
+		// Spells: filterable by level (cantrip/1st-9th) since a full class list
+		// can run 40-60+ rows; wrapped in a collapsible section so it can be
+		// tucked away once picks are made without losing them.
 		const spellsWrap = el("div", { id: "f-spells-wrap", hidden: "" });
-		spellsWrap.appendChild(el("h4", { text: "Spells known" }));
+		const spellLevelFilter = el("select", { id: "f-spell-level-filter" }, [
+			el("option", { value: "all", text: "All levels" }),
+			el("option", { value: "0", text: "Cantrip" }),
+			...[1, 2, 3, 4, 5, 6, 7, 8, 9].map((lvl) => el("option", { value: String(lvl), text: `Level ${lvl}` })),
+		]);
 		const spellsList = el("div", { id: "f-spells-list" });
-		spellsWrap.appendChild(spellsList);
+		const spellsSectionBody = el("div", {}, [field("Filter by level", spellLevelFilter), spellsList]);
+		const spellsSection = collapsibleSection("Spells known", spellsSectionBody, { startOpen: true });
+		spellsWrap.appendChild(spellsSection.row);
+
+		// Feats: no prerequisite checking (ability/class/level requirements
+		// aren't enforced here) -- a plain checklist beats no feat support at
+		// all. Filterable by category since the 2024 list runs 70+ entries.
+		const featCategoryFilter = el(
+			"select",
+			{ id: "f-feat-category-filter" },
+			FEAT_CATEGORY_FILTERS.map(([value, text]) => el("option", { value, text }))
+		);
+		const featsList = el("div", { id: "f-feats-list" });
+		const featsSectionBody = el("div", {}, [field("Filter by category", featCategoryFilter), featsList]);
+		const featsSection = collapsibleSection("Feats", featsSectionBody);
 
 		const featuresPreview = el("div", { id: "f-features-preview", class: "builder-preview" });
 		const statsPreview = el("div", { id: "f-stats-preview", class: "builder-preview" });
@@ -120,20 +192,40 @@
 		formEl.appendChild(field("Background", bgSelect));
 		formEl.appendChild(bgPreview);
 		formEl.appendChild(field("Class", classSelect));
+		formEl.appendChild(field("Subclass", subclassSelect));
 		formEl.appendChild(field("Level", levelInput));
 		formEl.appendChild(el("h4", { text: "Granted features" }));
 		formEl.appendChild(featuresPreview);
 		formEl.appendChild(abilitiesFieldset);
 		formEl.appendChild(asiFieldset);
+		formEl.appendChild(featsSection.row);
 		formEl.appendChild(field("Armor", armorSelect));
 		formEl.appendChild(field("Shield", shieldCheckbox));
 		formEl.appendChild(el("h4", { text: "Derived stats" }));
 		formEl.appendChild(statsPreview);
 		formEl.appendChild(spellsWrap);
 
-		let currentClassData = null; // { cls, classFeature }
+		let currentClassData = null; // { cls, classFeature, raw }
 		let selectedSpellIds = new Set();
+		let selectedFeatIds = new Set();
 		let lastRenderedSpells = []; // full spell objects (name/level/entries) for the current class, so save can pull entries text for the sheet without a second fetch
+		let subclassBuiltForClass = null; // guards against wiping the picked subclass on every level change
+
+		feats.sort((a, b) => featCategoryGroup(a.category).localeCompare(featCategoryGroup(b.category)) || a.name.localeCompare(b.name));
+
+		function selectedSubclassEntry() {
+			if (!currentClassData || !subclassSelect.value) return null;
+			return compendium.subclassesForClass(currentClassData).find((s) => s.name === subclassSelect.value) || null;
+		}
+
+		function renderSubclassOptions() {
+			subclassSelect.innerHTML = "";
+			subclassSelect.appendChild(el("option", { value: "", text: "— none —" }));
+			if (!currentClassData) return;
+			for (const s of compendium.subclassesForClass(currentClassData)) {
+				subclassSelect.appendChild(el("option", { value: s.name, text: s.name }));
+			}
+		}
 
 		function abilityScores() {
 			const scores = {};
@@ -152,12 +244,17 @@
 				currentClassData.classFeature,
 				level
 			);
-			for (const f of features) {
+			const subclass = selectedSubclassEntry();
+			const subclassFeatures = subclass
+				? compendium.subclassFeaturesUpToLevel(subclass, currentClassData.raw.subclassFeature, level)
+				: [];
+			const allFeatures = [...features, ...subclassFeatures].sort((a, b) => a.level - b.level);
+			for (const f of allFeatures) {
 				featuresPreview.appendChild(
 					R.collapsibleRow({ title: f.name, meta: `lvl ${f.level}`, entries: f.entries })
 				);
 			}
-			return features;
+			return allFeatures;
 		}
 
 		function renderRacePreview() {
@@ -332,20 +429,11 @@
 			statsPreview.appendChild(dl);
 		}
 
-		async function renderSpells(token) {
-			if (!currentClassData?.cls.spellcastingAbility) {
-				spellsWrap.hidden = true;
-				spellsList.innerHTML = "";
-				return;
-			}
-			const className = currentClassData.cls.name;
-			const spells = await compendium.listSpellsForClass(className, currentClassData.cls.source);
-			if (token !== requestToken) return; // a newer class/level change superseded this fetch
-			spellsWrap.hidden = false;
+		function renderSpellRows() {
 			spellsList.innerHTML = "";
-			spells.sort((a, b) => a.level - b.level || a.name.localeCompare(b.name));
-			lastRenderedSpells = spells;
-			for (const sp of spells) {
+			const filter = spellLevelFilter.value;
+			for (const sp of lastRenderedSpells) {
+				if (filter !== "all" && String(sp.level) !== filter) continue;
 				const id = C.makeId("spell", sp.name, sp.source);
 				const row = R.collapsibleRow({
 					title: sp.name,
@@ -359,10 +447,53 @@
 				cb.addEventListener("change", () => {
 					if (cb.checked) selectedSpellIds.add(id);
 					else selectedSpellIds.delete(id);
+					spellsSection.setMeta(`${selectedSpellIds.size} selected`);
 				});
 				row.querySelector(".entry-summary").append(cb);
 				spellsList.appendChild(row);
 			}
+			spellsSection.setMeta(`${selectedSpellIds.size} selected`);
+		}
+
+		async function renderSpells(token) {
+			if (!currentClassData?.cls.spellcastingAbility) {
+				spellsWrap.hidden = true;
+				lastRenderedSpells = [];
+				spellsList.innerHTML = "";
+				return;
+			}
+			const className = currentClassData.cls.name;
+			const spells = await compendium.listSpellsForClass(className, currentClassData.cls.source);
+			if (token !== requestToken) return; // a newer class/level change superseded this fetch
+			spellsWrap.hidden = false;
+			spells.sort((a, b) => a.level - b.level || a.name.localeCompare(b.name));
+			lastRenderedSpells = spells;
+			renderSpellRows();
+		}
+
+		function renderFeatRows() {
+			featsList.innerHTML = "";
+			const filter = featCategoryFilter.value;
+			for (const feat of feats) {
+				if (filter !== "all" && featCategoryGroup(feat.category) !== filter) continue;
+				const id = C.makeId("feat", feat.name, feat.source);
+				const row = R.collapsibleRow({
+					title: feat.name,
+					meta: FEAT_CATEGORY_LABELS[feat.category] || feat.category || "",
+					entries: feat.entries,
+				});
+				const cb = el("input", { type: "checkbox", value: id, class: "entry-select" });
+				cb.checked = selectedFeatIds.has(id);
+				cb.addEventListener("click", (e) => e.stopPropagation());
+				cb.addEventListener("change", () => {
+					if (cb.checked) selectedFeatIds.add(id);
+					else selectedFeatIds.delete(id);
+					featsSection.setMeta(`${selectedFeatIds.size} selected`);
+				});
+				row.querySelector(".entry-summary").append(cb);
+				featsList.appendChild(row);
+			}
+			featsSection.setMeta(`${selectedFeatIds.size} selected`);
 		}
 
 		let requestToken = 0;
@@ -379,17 +510,26 @@
 			const className = classSelect.value;
 			if (className) currentClassData = await compendium.getClass(className);
 			if (token !== requestToken) return;
+			// Subclass options only depend on the class, not level -- rebuilding
+			// them on every level tick would wipe out the player's pick.
+			if (subclassBuiltForClass !== className) {
+				renderSubclassOptions();
+				subclassBuiltForClass = className;
+			}
 			renderFeatures();
 			renderStats();
 			await renderSpells(token);
 		}
 
 		classSelect.addEventListener("change", onClassOrLevelChange);
+		subclassSelect.addEventListener("change", renderFeatures);
 		levelInput.addEventListener("change", onClassOrLevelChange);
 		levelInput.addEventListener("input", () => {
 			renderFeatures();
 			renderStats();
 		});
+		spellLevelFilter.addEventListener("change", renderSpellRows);
+		featCategoryFilter.addEventListener("change", renderFeatRows);
 		for (const input of Object.values(abilityInputs)) {
 			input.addEventListener("input", renderStats);
 		}
@@ -424,11 +564,23 @@
 				}
 			}
 			selectedSpellIds = new Set(initial.choices?.selected_spells || []);
+			selectedFeatIds = new Set(initial.choices?.selected_feats || []);
 		}
 
 		renderRacePreview();
 		renderBackgroundPreview();
 		await onClassOrLevelChange();
+
+		const initialSubclassId = initial?.choices?.classes?.[0]?.subclass_id;
+		if (initialSubclassId) {
+			const subSlug = C.parseId(initialSubclassId).slug;
+			const match = Array.from(subclassSelect.options).find((o) => C.slugify(o.value) === subSlug);
+			if (match) {
+				subclassSelect.value = match.value;
+				renderFeatures();
+			}
+		}
+		renderFeatRows();
 
 		saveBtn.addEventListener("click", async () => {
 			if (!classSelect.value) {
@@ -441,6 +593,7 @@
 			const background = backgrounds.find((b) => b.name === bgSelect.value);
 			const armorItem = armors.find((a) => a.name === armorSelect.value) || null;
 			const shieldItem = shieldCheckbox.checked ? armors.find((a) => C.baseType(a) === "S") : null;
+			const subclass = selectedSubclassEntry();
 			const features = renderFeatures();
 			const conMod = C.abilityModifier(scores.con);
 			const dexMod = C.abilityModifier(scores.dex);
@@ -468,6 +621,14 @@
 					? { id, name: sp.name, level: sp.level, entries: sp.entries }
 					: { id, name: C.parseId(id).slug.replace(/-/g, " "), level: null, entries: [] };
 			});
+			// Same idea for feats -- no prerequisite validation happened above,
+			// this just records what was checked.
+			derived.selected_feat_details = Array.from(selectedFeatIds).map((id) => {
+				const feat = feats.find((f) => C.makeId("feat", f.name, f.source) === id);
+				return feat
+					? { id, name: feat.name, category: feat.category, entries: feat.entries }
+					: { id, name: C.parseId(id).slug.replace(/-/g, " "), category: null, entries: [] };
+			});
 
 			const characterExport = {
 				schema_version: "0.1",
@@ -481,10 +642,12 @@
 						{
 							class_id: C.makeId("class", currentClassData.cls.name, currentClassData.cls.source),
 							level,
+							subclass_id: subclass ? C.makeId("subclass", subclass.name, subclass.source) : null,
 						},
 					],
 					ability_scores: scores,
 					selected_spells: Array.from(selectedSpellIds),
+					selected_feats: Array.from(selectedFeatIds),
 					selected_equipment: [
 						...(armorItem ? [C.makeId("item", armorItem.name, armorItem.source)] : []),
 						...(shieldItem ? [C.makeId("item", shieldItem.name, shieldItem.source)] : []),
@@ -514,8 +677,9 @@
 		container.innerHTML = "";
 		const cls = characterExport.choices.classes[0];
 		const className = C.parseId(cls.class_id).slug;
+		const subclassName = cls.subclass_id ? ` (${C.parseId(cls.subclass_id).slug.replace(/-/g, " ")})` : "";
 		container.appendChild(
-			el("h4", { text: `${characterExport.name} — ${className} ${cls.level}` })
+			el("h4", { text: `${characterExport.name} — ${className}${subclassName} ${cls.level}` })
 		);
 		const dl = el("dl", { class: "stats-list" });
 		const rows = [
@@ -557,6 +721,28 @@
 			container.appendChild(el("h5", { text: "Spells" }));
 			const list = el("ul");
 			for (const id of characterExport.choices.selected_spells) {
+				list.appendChild(el("li", { text: C.parseId(id).slug.replace(/-/g, " ") }));
+			}
+			container.appendChild(list);
+		}
+
+		const featDetails = characterExport.derived.selected_feat_details;
+		if (featDetails?.length) {
+			container.appendChild(el("h5", { text: "Feats" }));
+			for (const f of featDetails) {
+				container.appendChild(
+					R.collapsibleRow({
+						title: f.name,
+						meta: FEAT_CATEGORY_LABELS[f.category] || f.category || "",
+						entries: f.entries || [],
+					})
+				);
+			}
+		} else if (characterExport.choices.selected_feats?.length) {
+			// Older export from before selected_feat_details existed.
+			container.appendChild(el("h5", { text: "Feats" }));
+			const list = el("ul");
+			for (const id of characterExport.choices.selected_feats) {
 				list.appendChild(el("li", { text: C.parseId(id).slug.replace(/-/g, " ") }));
 			}
 			container.appendChild(list);
