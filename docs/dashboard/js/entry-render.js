@@ -1,11 +1,11 @@
 /*
  * Minimal renderer for 5etools "entries" markup ({@tag ...} inline refs,
- * nested {type:"entries"|"list"} blocks). Deliberately not the real
- * docs/js/render.js (17k lines, deeply coupled to the full site's globals)
- * — this handles just enough to make dashboard text readable, wrapped in
- * native <details>/<summary> so it collapses/expands like every other
- * 5etools page. Not exhaustive; unknown tags fall back to their first
- * pipe-segment as plain text.
+ * nested {type:"entries"|"list"} blocks, and untyped {name, entries} blocks
+ * like bestiary traits/actions). Deliberately not the real docs/js/render.js
+ * (17k lines, deeply coupled to the full site's globals) — this handles just
+ * enough to make dashboard text readable, wrapped in a collapsible row so it
+ * expands/collapses like every other 5etools page. Not exhaustive; unknown
+ * tags fall back to their first pipe-segment as plain text.
  */
 (function (global) {
 	"use strict";
@@ -26,6 +26,10 @@
 		hit: (parts) => `${parts[0] >= 0 ? "+" : ""}${parts[0]}`,
 		h: () => `Hit: `,
 		recharge: (parts) => `(Recharge ${parts[0] || "6"}–6)`,
+		atk: (parts) => {
+			const labels = { mw: "Melee Weapon Attack", rw: "Ranged Weapon Attack", ms: "Melee Spell Attack", rs: "Ranged Spell Attack" };
+			return `${parts[0].split(",").map((a) => labels[a] || a).join(" or ")}:`;
+		},
 	};
 
 	/** Renders a single string's {@tag ...} markup to a safe inline HTML string. */
@@ -70,6 +74,14 @@
 			if (entry.entry) return `${heading}${renderInline(entry.entry)}`;
 			if (entry.entries) return `${heading}${renderEntries(entry.entries)}`;
 			return heading;
+		}
+
+		// Untyped {name, entries} block (bestiary traits/actions use this shape
+		// with no "type" field at all) — treat the same as type:"entries".
+		if (!entry.type && entry.entries && Array.isArray(entry.entries)) {
+			const heading = entry.name ? `<strong>${escapeHtml(entry.name)}.</strong> ` : "";
+			const body = renderEntries(entry.entries);
+			return body.replace(/^<p>/, `<p>${heading}`) || `<p>${heading}</p>`;
 		}
 
 		// Unhandled block type (table, inset, etc.) — skip rather than mis-render.

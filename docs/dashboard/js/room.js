@@ -8,9 +8,16 @@
  *   { type: "claim-slot", index, name }      player -> DM
  *   { type: "claim-rejected", index, reason } DM -> requesting peer
  *   { type: "character-full", character }   player -> DM, full character
- *                                            export (see
- *                                            CHARACTER_DATA_DESIGN.md);
- *                                            sent on builder save/level-up
+ *                                            export; sent on builder
+ *                                            save/level-up
+ *   { type: "bestiary-sync", monsters }     DM -> one or all peers; monsters
+ *                                            is ALWAYS the DM's
+ *                                            BestiaryManager.sharedPayload()
+ *                                            output -- never the full
+ *                                            bestiary. Hidden monsters and
+ *                                            DM notes are withheld at the
+ *                                            source and never constructed
+ *                                            into an outgoing message at all.
  * Later phases add more message types (character-state patches, vtt-*,
  * etc.) — every message MUST have a "type" field so peers can dispatch on
  * it.

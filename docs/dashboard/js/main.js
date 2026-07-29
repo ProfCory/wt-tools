@@ -24,6 +24,9 @@
 		btnBuildSave: $("#btn-build-save"),
 		sheetWrap: $("#sheet-wrap"),
 		sheetView: $("#sheet-view"),
+		dmBestiaryList: $("#dm-bestiary-list"),
+		playerBestiaryWrap: $("#player-bestiary-wrap"),
+		playerBestiaryList: $("#player-bestiary-list"),
 	};
 
 	function log(msg) {
@@ -104,6 +107,40 @@
 		}
 	}
 
+	function monsterMeta(m) {
+		const acEntry = Array.isArray(m.ac) ? m.ac[0] : m.ac;
+		const ac = typeof acEntry === "object" ? acEntry.ac : acEntry;
+		const hp = m.hp?.average ?? m.hp;
+		return `CR ${m.cr ?? "?"} · AC ${ac ?? "?"} · HP ${hp ?? "?"}`;
+	}
+
+	/**
+	 * Renders monster rows. Pass `onToggle` (DM only) to add a share
+	 * checkbox per row; omitted entirely on the player side, which only
+	 * ever receives monsters the DM already chose to share.
+	 */
+	function renderBestiaryList(container, monsters, { onToggle = null } = {}) {
+		container.innerHTML = "";
+		for (const m of monsters) {
+			const id = WTCompendium.makeId("monster", m.name, m.source);
+			const row = WTEntryRender.collapsibleRow({
+				title: m.name,
+				meta: monsterMeta(m),
+				entries: [...(m.trait || []), ...(m.action || [])],
+			});
+			if (onToggle) {
+				const cb = document.createElement("input");
+				cb.type = "checkbox";
+				cb.className = "entry-select";
+				cb.title = "Share with players";
+				cb.addEventListener("click", (e) => e.stopPropagation());
+				cb.addEventListener("change", () => onToggle(id, cb.checked));
+				row.querySelector(".entry-summary").prepend(cb);
+			}
+			container.appendChild(row);
+		}
+	}
+
 	function refreshPingTargets(host) {
 		els.pingTarget.innerHTML = "";
 		for (const peerId of host.connections.keys()) {
@@ -121,6 +158,8 @@
 		log("Starting host session…");
 		const host = new WTRoom.DMHost();
 		const slotManager = new WTSlots.SlotManager();
+		const bestiaryManager = new WTBestiary.BestiaryManager();
+		const compendium = new WTCompendium.Compendium();
 		const characters = new Map(); // peerId -> latest character-full export
 
 		function renderDmSlots() {
@@ -128,12 +167,29 @@
 		}
 		renderDmSlots();
 
+		function renderDmBestiary() {
+			renderBestiaryList(els.dmBestiaryList, Array.from(bestiaryManager.byId.values()), {
+				onToggle: (id, shared) => {
+					bestiaryManager.setShared(id, shared);
+					host.broadcast({ type: "bestiary-sync", monsters: bestiaryManager.sharedPayload() });
+				},
+			});
+		}
+		compendium
+			.getBestiary("xmm")
+			.then((monsters) => {
+				bestiaryManager.load(monsters);
+				renderDmBestiary();
+			})
+			.catch((err) => log(`Failed to load bestiary: ${err.message || err}`));
+
 		host.on("error", (err) => log(`Host error: ${err.message || err}`));
 		host.on("player-joined", ({ peerId }) => {
 			log(`Player joined: ${peerId}`);
 			addWaitingRow(peerId);
 			refreshPingTargets(host);
 			host.sendTo(peerId, { type: "slots-sync", slots: slotManager.snapshot() });
+			host.sendTo(peerId, { type: "bestiary-sync", monsters: bestiaryManager.sharedPayload() });
 		});
 		host.on("player-left", ({ peerId }) => {
 			// Slot claims persist through a dropped connection (a network
@@ -230,6 +286,9 @@
 				maybeShowBuilder();
 			} else if (data && data.type === "claim-rejected") {
 				log(`Slot ${data.index + 1} claim rejected: ${data.reason}`);
+			} else if (data && data.type === "bestiary-sync") {
+				els.playerBestiaryWrap.hidden = false;
+				renderBestiaryList(els.playerBestiaryList, data.monsters.map((m) => m.monster));
 			}
 		});
 		client.on("disconnected", () => {

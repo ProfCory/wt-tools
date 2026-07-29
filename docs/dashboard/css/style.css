@@ -305,3 +305,14 @@ fieldset {
 .entry-select {
 	margin-right: 0.25rem;
 }
+
+.dm-notes {
+	width: 100%;
+	padding: 0.5rem;
+	background: var(--bg);
+	color: var(--text);
+	border: 1px solid var(--border);
+	border-radius: 6px;
+	font-family: inherit;
+	resize: vertical;
+}
