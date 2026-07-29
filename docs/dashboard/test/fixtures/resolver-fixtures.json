@@ -1,0 +1,87 @@
+{
+  "classFeatures": [
+    {
+      "name": "Spellcasting",
+      "className": "Wizard",
+      "classSource": "PHB",
+      "level": 1
+    },
+    {
+      "name": "Spellcasting",
+      "className": "Wizard",
+      "classSource": "XPHB",
+      "level": 1
+    }
+  ],
+  "spell": {
+    "name": "Magic Missile",
+    "source": "XPHB",
+    "level": 1
+  },
+  "spellLookup": {
+    "xphb": {
+      "magic missile": {
+        "class": {
+          "PHB": {
+            "Wizard": true
+          },
+          "XPHB": {
+            "Wizard": true
+          }
+        }
+      }
+    }
+  },
+  "subclassLookup": {
+    "XPHB": {
+      "Wizard": {
+        "PHB": {
+          "Evocation": {
+            "name": "School of Evocation"
+          }
+        },
+        "XPHB": {
+          "Evoker": {
+            "name": "Evoker"
+          }
+        }
+      }
+    }
+  },
+  "itemsBase": {
+    "baseitem": [
+      {
+        "name": "Longsword",
+        "source": "XPHB",
+        "type": "M",
+        "mastery": [
+          "Sap"
+        ],
+        "property": [
+          "V"
+        ]
+      }
+    ],
+    "itemMastery": [
+      {
+        "name": "Sap",
+        "entries": [
+          "Fixture mastery text."
+        ]
+      }
+    ],
+    "itemProperty": [
+      {
+        "name": "Versatile",
+        "abbreviation": "V"
+      }
+    ],
+    "itemType": [
+      {
+        "name": "Melee Weapon",
+        "abbreviation": "M"
+      }
+    ]
+  }
+}
+

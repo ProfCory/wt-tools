@@ -1,10 +1,24 @@
 # WT Tools
 
-A static, GitHub Pages-friendly D&D 2024 campaign dashboard built around normalized, pretagged rules blocks.
+A static, GitHub Pages-friendly D&D 2024 campaign dashboard built around
+normalized, pretagged rules blocks.
+
+## Application direction
+
+`docs/dashboard/` is the canonical application and the target for the real
+character builder, character sheet, and WebRTC campaign experience. GitHub
+Pages serves the `docs/` tree.
+
+`site/` is the earlier local-storage draggable-block prototype. Its useful
+sheet and interaction concepts may be folded into `docs/dashboard/`, but it is
+not a separate production target.
+
+The implementation contract for that work is
+[`docs/dashboard/CHARACTER_SHEET_BUILD.md`](docs/dashboard/CHARACTER_SHEET_BUILD.md).
 
 ## Current playtest build: 0.1
 
-The app currently provides:
+The `site/` prototype currently provides:
 
 - Honor-system role selection for one DM and five player slots.
 - Persistent character basics, abilities, passives, notes, and dashboard zones.
@@ -14,65 +28,83 @@ The app currently provides:
 - A DM screen with party overview, initiative, private notes, and quick rules.
 - Browser-local persistence with no server or account required.
 
+The `docs/dashboard/` shell provides the published-location foundation for the
+canonical application and its peer-to-peer room flow.
+
+## Character-sheet contracts
+
+The initial persisted-state contracts are:
+
+- [`campaign.schema.json`](docs/dashboard/schemas/campaign.schema.json)
+- [`character.schema.json`](docs/dashboard/schemas/character.schema.json)
+- [`choice.schema.json`](docs/dashboard/schemas/choice.schema.json)
+
+They separate reusable rule definitions from campaign policy, character
+instances, and reversible player choices.
+
 ## DM tools
 
-Standalone, dependency-free helpers that live in `docs/tools/` — published live
-alongside the 5etools mirror (GitHub Pages serves `docs/`), and linked from the
-DM panel on the [landing page](docs/index.html):
+Standalone, dependency-free helpers live in `docs/tools/`. They are published
+alongside the 5etools mirror and linked from the DM panel on the
+[`docs/` landing page](docs/index.html):
 
-- **Severity Damage Expander** — [`docs/tools/severity-damage.html`](docs/tools/severity-damage.html).
-  Expands the DMG 2024 "Damage Severity by Level" core chart into a draftable stat
-  line: pick party level + severity, place concrete AC/HP inside the tier band with a
-  role slider, split the damage into a multiattack routine, pick a Standard Action /
-  Biome / Monster Type to build a coherent kit (swap any slot for an alternate), and
-  copy a ready-to-run monster draft. Backed by the matrix in
+- **Severity Damage Expander** —
+  [`docs/tools/severity-damage.html`](docs/tools/severity-damage.html). It
+  expands the DMG 2024 damage-severity chart into a draftable stat line and is
+  backed by
   [`docs/monster-drafting-matrix.md`](docs/monster-drafting-matrix.md).
-- **5etools Homebrew Importer &amp; Scraper** — [`docs/tools/homebrew-importer.html`](docs/tools/homebrew-importer.html).
-  Drop `.json`/`.txt`/`.md`/`.csv` files (or paste text); it scrapes embedded JSON
-  — whole files and fenced ` ```json ` blocks alike — validates it against the
-  5etools homebrew shape (`_meta.sources` + content arrays), lints the `{@tag}`
-  syntax, and merges everything into one downloadable homebrew file. Fully
-  client-side; works offline on a local game network.
+- **5etools Homebrew Importer & Scraper** —
+  [`docs/tools/homebrew-importer.html`](docs/tools/homebrew-importer.html). It
+  accepts JSON/text/Markdown/CSV, extracts embedded JSON, validates the
+  5etools homebrew shape, lints tags, and merges client-side.
 
 ### Homebrew conversion workflow
 
-Turning raw statblock/item/spell/class text into loadable 5etools brew JSON is a
-two-step, **extract → tag → validate** pipeline:
+Turning raw statblock, item, spell, or class text into loadable 5etools brew
+JSON is an **extract → tag → validate** pipeline:
 
-1. The installable **[`5etools-homebrew`](.claude/skills/5etools-homebrew/)**
-   skill does the semantic conversion — PDF text extraction, segmenting content,
-   applying the `{@tag}` syntax and 5.5e/2024 conventions, and handling the hard
-   cases (full classes with level tables and subclass/feature references). The
-   human-readable version of its rules lives in
-   [`docs/5etools-homebrew-conversion-guide.md`](docs/5etools-homebrew-conversion-guide.md).
-2. The **Homebrew Importer & Scraper** page validates and merges that JSON into a
-   clean, downloadable brew file before it ever touches the live site.
+1. The installable
+   [`5etools-homebrew`](.claude/skills/5etools-homebrew/) skill performs the
+   semantic conversion.
+2. The Homebrew Importer & Scraper validates and merges the JSON before it
+   reaches the live site.
 
-Design/balance and setup audits for this material live in
-[`docs/reviews/`](docs/reviews/).
+The human-readable conversion rules live in
+[`docs/5etools-homebrew-conversion-guide.md`](docs/5etools-homebrew-conversion-guide.md).
+Design, balance, and setup audits live in [`docs/reviews/`](docs/reviews/).
 
 ## Run locally
 
-Serve the repository root with any static server, then open `/site/`.
+Serve the repository root with any static server:
 
 ```powershell
 cd C:\wt-tools
 python -m http.server 8000
 ```
 
-Open `http://localhost:8000/site/`.
-
-Opening `site/index.html` directly may prevent the browser from loading JSON because of local-file security restrictions.
+Open `http://localhost:8000/docs/dashboard/` for the canonical application or
+`http://localhost:8000/site/` for the legacy prototype. Opening either
+`index.html` directly may prevent JSON loading because of local-file security
+restrictions.
 
 ## GitHub Pages
 
-Pages is configured to deploy from `main` / `docs` — that's the vendored 5etools mirror,
-the landing page, and the DM tools above. The `site/` WT Tools dashboard build is a
-separate, not-yet-published prototype; it isn't served by Pages and has no build step
-or external dependency of its own.
+Pages is configured to serve `main` / `docs`. That published tree contains the
+vendored 5etools mirror, the landing page, DM tools, data, and canonical
+dashboard shell. The `site/` prototype is not served by Pages.
 
 ## Data status
 
-The included records are manually normalized **SRD-style samples for application testing**, not a complete SRD import. They are deliberately labeled `srd-sample`. The next data milestone is a licensed SRD 5.2.1 ingestion and validation pipeline.
+The records in `site/data/` are manually normalized **SRD-style samples for
+application testing**, not a complete SRD import. They are deliberately labeled
+`srd-sample`.
 
-See [`docs/data-model.md`](docs/data-model.md) for the record model, source separation rules, tags, runtime instances, and planned import flow.
+The vendored data in `docs/data/` mixes source books, editions, SRD/basic-rules
+flags, UA, and setting material. The character builder must apply the explicit
+campaign policy documented in
+[`CHARACTER_SHEET_BUILD.md`](docs/dashboard/CHARACTER_SHEET_BUILD.md); labels
+such as "PHB-only" are not sufficient.
+
+See [`docs/data-model.md`](docs/data-model.md) for the definition/instance
+boundary and persisted-state model.
+

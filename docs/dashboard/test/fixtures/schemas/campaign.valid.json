@@ -1,0 +1,50 @@
+{
+  "schemaVersion": "1.0.0",
+  "id": "campaign-shattered-isles",
+  "name": "The Shattered Isles",
+  "contentPolicy": {
+    "ruleVersion": "2024",
+    "allowedSources": [
+      "XPHB",
+      "XDMG"
+    ],
+    "allowUnearthedArcana": false,
+    "allowLegacy": false,
+    "allowCustom": true,
+    "requireSrd52": false,
+    "requireBasicRules2024": false
+  },
+  "playerSlots": [
+    {
+      "id": "slot-aria",
+      "label": "Aria"
+    },
+    {
+      "id": "slot-bren",
+      "label": "Bren"
+    }
+  ],
+  "characterAssignments": [
+    {
+      "slotId": "slot-aria",
+      "characterId": "character-seren"
+    }
+  ],
+  "customContent": [
+    {
+      "type": "background",
+      "name": "Isles Navigator",
+      "source": "HB"
+    }
+  ],
+  "dmHiddenRecords": [
+    {
+      "type": "item",
+      "name": "Deck of Many Things",
+      "source": "DMG"
+    }
+  ],
+  "notes": "Phase 0 contract fixture.",
+  "createdAt": "2026-07-24T20:00:00.000Z",
+  "updatedAt": "2026-07-24T20:00:00.000Z"
+}

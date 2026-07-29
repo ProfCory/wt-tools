@@ -1,0 +1,123 @@
+{
+  "schemaVersion": "1.0.0",
+  "id": "character-seren",
+  "campaignId": "campaign-shattered-isles",
+  "identity": {
+    "name": "Seren Vale",
+    "playerName": "Aria",
+    "pronouns": "they/them",
+    "alignment": "Neutral Good"
+  },
+  "abilities": {
+    "str": 8,
+    "dex": 14,
+    "con": 13,
+    "int": 16,
+    "wis": 12,
+    "cha": 10
+  },
+  "classes": [
+    {
+      "class": {
+        "type": "class",
+        "name": "Wizard",
+        "source": "XPHB"
+      },
+      "level": 3,
+      "subclass": {
+        "type": "subclass",
+        "name": "Evoker",
+        "source": "XPHB"
+      }
+    }
+  ],
+  "background": {
+    "type": "background",
+    "name": "Sage",
+    "source": "XPHB"
+  },
+  "species": {
+    "type": "race",
+    "name": "Human",
+    "source": "XPHB"
+  },
+  "proficiencies": {
+    "armor": [],
+    "weapons": [
+      "Simple Weapons"
+    ],
+    "tools": [],
+    "skills": [
+      "Arcana",
+      "Investigation"
+    ],
+    "savingThrows": [
+      "Intelligence",
+      "Wisdom"
+    ],
+    "languages": [
+      "Common",
+      "Elvish"
+    ]
+  },
+  "spellcasting": [
+    {
+      "class": {
+        "type": "class",
+        "name": "Wizard",
+        "source": "XPHB"
+      },
+      "ability": "int",
+      "knownSpellRefs": [],
+      "preparedSpellRefs": [
+        {
+          "type": "spell",
+          "name": "Magic Missile",
+          "source": "XPHB"
+        }
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "id": "resource-arcane-recovery",
+      "name": "Arcane Recovery",
+      "current": 1,
+      "maximum": 1,
+      "reset": "longRest"
+    }
+  ],
+  "inventory": [
+    {
+      "id": "inventory-spellbook",
+      "definition": {
+        "type": "item",
+        "name": "Spellbook",
+        "source": "XPHB"
+      },
+      "quantity": 1,
+      "equipped": false,
+      "attuned": false
+    }
+  ],
+  "conditions": [],
+  "choiceIds": [
+    "choice-wizard-subclass"
+  ],
+  "advancementHistory": [
+    {
+      "level": 3,
+      "class": {
+        "type": "class",
+        "name": "Wizard",
+        "source": "XPHB"
+      },
+      "choiceIds": [
+        "choice-wizard-subclass"
+      ],
+      "recordedAt": "2026-07-24T20:00:00.000Z"
+    }
+  ],
+  "createdAt": "2026-07-24T20:00:00.000Z",
+  "updatedAt": "2026-07-24T20:00:00.000Z"
+}

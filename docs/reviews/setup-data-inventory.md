@@ -3,9 +3,14 @@ title: WT Tools + 5etools Mirror Setup & Data Inventory Audit
 type: admin-audit
 date: 2026-07-23
 auditor: github-admin-agent
+status: superseded
+superseded_date: 2026-07-24
+superseded_by: ../dashboard/CHARACTER_SHEET_BUILD.md
 ---
 
 # WT Tools + 5etools Mirror — Setup & Data Inventory Audit
+
+> **Superseded:** This audit is retained as a historical 2026-07-23 snapshot. Its Pages-source contradiction has been resolved: `docs/dashboard/` is the canonical application and `main` / `docs` is the publish source. Use [`../dashboard/CHARACTER_SHEET_BUILD.md`](../dashboard/CHARACTER_SHEET_BUILD.md) for the current resolver, state schemas, choice engine, WebRTC contract, and implementation plan.
 
 Scope: verify the vendored 5etools static-site mirror (`docs/`) and the WT Tools
 dashboard build 0.1 (`site/`) still load and function, export a data inventory,
