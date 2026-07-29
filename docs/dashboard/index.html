@@ -23,6 +23,35 @@
 			<p>Hosting a game? Start a session and share the link with your players.</p>
 			<button id="btn-host" type="button">Start Hosting</button>
 			<p class="hint">Players: use the link a DM shares with you to join automatically.</p>
+			<p class="hint">No code yet? You can build and export a character now, then bring it into a session later.</p>
+			<button id="btn-standalone-builder" type="button">Build a Character (no code)</button>
+		</section>
+
+		<section id="standalone-panel" hidden>
+			<h2>Character Builder</h2>
+			<p class="hint">Saved to this browser. Export a character to a file so you can bring it into a real session later.</p>
+			<button id="btn-standalone-back" type="button">← Back</button>
+
+			<div id="standalone-list-wrap">
+				<h3>Saved characters</h3>
+				<ul id="standalone-list" class="slot-list"></ul>
+				<button id="btn-standalone-new" type="button">+ New Character</button>
+			</div>
+
+			<div id="standalone-builder-wrap" hidden>
+				<h3 id="standalone-builder-heading">New Character</h3>
+				<form id="standalone-builder-form"></form>
+				<div class="room-link-row">
+					<button id="btn-standalone-save" type="button">Save &amp; Export</button>
+					<button id="btn-standalone-cancel" type="button">Cancel</button>
+				</div>
+			</div>
+
+			<div id="standalone-sheet-wrap" hidden>
+				<h3>Character Sheet</h3>
+				<div id="standalone-sheet-view"></div>
+				<button id="btn-standalone-done" type="button">Back to saved characters</button>
+			</div>
 		</section>
 
 		<section id="dm-panel" hidden>
