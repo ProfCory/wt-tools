@@ -176,7 +176,7 @@
 			});
 		}
 		compendium
-			.getBestiary("mm")
+			.getBestiary("xmm")
 			.then((monsters) => {
 				bestiaryManager.load(monsters);
 				renderDmBestiary();

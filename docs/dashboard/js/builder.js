@@ -71,15 +71,19 @@
 			abilitiesFieldset.appendChild(field(ab.toUpperCase(), input));
 		}
 
-		// Bonus helper: several unenforced ways to bump scores (2014 species
-		// bonus, or a 2/1 or 1/1/1 flexible spread like Tasha's/2024
-		// backgrounds). Nothing here validates against the others -- pick
-		// one, hit Apply, sort out any overlap yourself.
+		// Bonus helper: several unenforced ways to bump scores. 2024 species
+		// don't grant ability bonuses (backgrounds do), so "background" reads
+		// the selected background's real 2/1-or-1/1/1 weighted choice data;
+		// "species" is a legacy/optional-rule fallback for tables still
+		// using 2014-style fixed racial bonuses. Nothing here validates
+		// against the others -- pick one, hit Apply, sort out any overlap
+		// yourself.
 		const asiMethodSelect = el("select", { id: "f-asi-method" }, [
 			el("option", { value: "none", text: "— none —" }),
-			el("option", { value: "species", text: "Species bonus (2014)" }),
-			el("option", { value: "flex21", text: "Flexible +2/+1 (Tasha's / background)" }),
-			el("option", { value: "flex111", text: "Flexible +1/+1/+1 (Tasha's / background)" }),
+			el("option", { value: "background", text: "Background bonus (2024)" }),
+			el("option", { value: "flex21", text: "Flexible +2/+1 (any abilities)" }),
+			el("option", { value: "flex111", text: "Flexible +1/+1/+1 (any abilities)" }),
+			el("option", { value: "species", text: "Species bonus (legacy 2014 rule)" }),
 		]);
 		const asiControls = el("div", { id: "f-asi-controls" });
 		const asiApplyBtn = el("button", { type: "button", text: "Apply to scores above" });
@@ -92,7 +96,7 @@
 
 		const armorSelect = el("select", { id: "f-armor" });
 		armorSelect.appendChild(el("option", { value: "", text: "None" }));
-		for (const a of armors.filter((i) => i.type !== "S")) {
+		for (const a of armors.filter((i) => C.baseType(i) !== "S")) {
 			armorSelect.appendChild(el("option", { value: a.name, text: `${a.name} (AC ${a.ac})` }));
 		}
 		const shieldCheckbox = el("input", { type: "checkbox", id: "f-shield" });
@@ -212,6 +216,44 @@
 					const cb = el("input", { type: "checkbox", value: ab, "data-role": "flex111" });
 					asiControls.appendChild(el("label", { class: "spell-option" }, [cb, el("span", { text: ` ${ab.toUpperCase()}` })]));
 				}
+			} else if (method === "background") {
+				const background = backgrounds.find((b) => b.name === bgSelect.value);
+				const choices = (background?.ability || [])
+					.map((entry) => entry.choose?.weighted)
+					.filter(Boolean);
+				if (!choices.length) {
+					asiControls.appendChild(el("p", { text: "This background has no structured ability bonus in the data." }));
+					return;
+				}
+				const spreadSelect = el("select", { "data-role": "bg-spread" });
+				choices.forEach((c, i) => {
+					spreadSelect.appendChild(el("option", { value: String(i), text: `+${c.weights.join("/+")}` }));
+				});
+				asiControls.appendChild(field("Spread", spreadSelect));
+				const pickersWrap = el("div", { "data-role": "bg-pickers" });
+				asiControls.appendChild(pickersWrap);
+
+				function renderPickers() {
+					pickersWrap.innerHTML = "";
+					const chosen = choices[Number(spreadSelect.value)];
+					const from = chosen.from.map((ab) => ab.toLowerCase());
+					if (new Set(chosen.weights).size === 1) {
+						asiControls.querySelector("p.bg-hint")?.remove();
+						pickersWrap.appendChild(el("p", { class: "bg-hint", text: `Pick ${chosen.weights.length} abilities to get +${chosen.weights[0]} each, from this background's list.` }));
+						for (const ab of from) {
+							const cb = el("input", { type: "checkbox", value: ab, "data-role": "bg-pick-equal" });
+							pickersWrap.appendChild(el("label", { class: "spell-option" }, [cb, el("span", { text: ` ${ab.toUpperCase()}` })]));
+						}
+					} else {
+						chosen.weights.forEach((w, tier) => {
+							const sel = el("select", { "data-role": `bg-pick-${tier}` });
+							for (const ab of from) sel.appendChild(el("option", { value: ab, text: ab.toUpperCase() }));
+							pickersWrap.appendChild(field(`+${w} to`, sel));
+						});
+					}
+				}
+				spreadSelect.addEventListener("change", renderPickers);
+				renderPickers();
 			}
 		}
 
@@ -235,6 +277,22 @@
 				for (const cb of asiControls.querySelectorAll('[data-role="flex111"]:checked')) {
 					deltas[cb.value] = (deltas[cb.value] || 0) + 1;
 				}
+			} else if (method === "background") {
+				const background = backgrounds.find((b) => b.name === bgSelect.value);
+				const choices = (background?.ability || []).map((entry) => entry.choose?.weighted).filter(Boolean);
+				const spreadIndex = Number(asiControls.querySelector('[data-role="bg-spread"]')?.value || 0);
+				const chosen = choices[spreadIndex];
+				if (!chosen) return;
+				if (new Set(chosen.weights).size === 1) {
+					for (const cb of asiControls.querySelectorAll('[data-role="bg-pick-equal"]:checked')) {
+						deltas[cb.value] = (deltas[cb.value] || 0) + chosen.weights[0];
+					}
+				} else {
+					chosen.weights.forEach((w, tier) => {
+						const ab = asiControls.querySelector(`[data-role="bg-pick-${tier}"]`)?.value;
+						if (ab) deltas[ab] = (deltas[ab] || 0) + w;
+					});
+				}
 			}
 			for (const [ab, delta] of Object.entries(deltas)) {
 				abilityInputs[ab].value = String((parseInt(abilityInputs[ab].value, 10) || 10) + delta);
@@ -250,7 +308,7 @@
 			const prof = C.proficiencyBonus(level);
 			const hp = currentClassData ? C.maxHp(currentClassData.cls.hd.faces, level, conMod) : null;
 			const armorItem = armors.find((a) => a.name === armorSelect.value) || null;
-			const shieldItem = shieldCheckbox.checked ? armors.find((a) => a.type === "S") : null;
+			const shieldItem = shieldCheckbox.checked ? armors.find((a) => C.baseType(a) === "S") : null;
 			const ac = C.armorClass(dexMod, armorItem, shieldItem);
 
 			statsPreview.innerHTML = "";
@@ -280,7 +338,7 @@
 				return;
 			}
 			const className = currentClassData.cls.name;
-			const spells = await compendium.listSpellsForClass(className);
+			const spells = await compendium.listSpellsForClass(className, currentClassData.cls.source);
 			if (token !== requestToken) return; // a newer class/level change superseded this fetch
 			spellsWrap.hidden = false;
 			spellsList.innerHTML = "";
@@ -339,7 +397,10 @@
 			renderRacePreview();
 			if (asiMethodSelect.value === "species") renderAsiControls();
 		});
-		bgSelect.addEventListener("change", renderBackgroundPreview);
+		bgSelect.addEventListener("change", () => {
+			renderBackgroundPreview();
+			if (asiMethodSelect.value === "background") renderAsiControls();
+		});
 		asiMethodSelect.addEventListener("change", renderAsiControls);
 		asiApplyBtn.addEventListener("click", applyAsiBonus);
 		renderAsiControls();
@@ -377,7 +438,7 @@
 			const race = races.find((r) => r.name === raceSelect.value);
 			const background = backgrounds.find((b) => b.name === bgSelect.value);
 			const armorItem = armors.find((a) => a.name === armorSelect.value) || null;
-			const shieldItem = shieldCheckbox.checked ? armors.find((a) => a.type === "S") : null;
+			const shieldItem = shieldCheckbox.checked ? armors.find((a) => C.baseType(a) === "S") : null;
 			const features = renderFeatures();
 			const conMod = C.abilityModifier(scores.con);
 			const dexMod = C.abilityModifier(scores.dex);
@@ -401,7 +462,7 @@
 				schema_version: "0.1",
 				character_id: initial?.character_id || `char_${Math.random().toString(36).slice(2, 10)}`,
 				name: nameInput.value.trim() || "Unnamed Character",
-				ruleset: "5e-2014",
+				ruleset: "5e-2024",
 				choices: {
 					species_id: race ? C.makeId("race", race.name, race.source) : null,
 					background_id: background ? C.makeId("background", background.name, background.source) : null,
